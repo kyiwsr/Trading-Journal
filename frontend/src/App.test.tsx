@@ -1,13 +1,10 @@
-import { render, screen } from '@testing-library/react'
-import { MemoryRouter } from 'react-router-dom'
+import { screen } from '@testing-library/react'
 
-import { AppRoutes } from './App'
+import { renderApp } from './test/renderApp'
 
-test('renders the placeholder home page', () => {
-  render(
-    <MemoryRouter initialEntries={['/']}>
-      <AppRoutes />
-    </MemoryRouter>,
-  )
-  expect(screen.getByRole('heading', { name: /trading journal/i })).toBeInTheDocument()
+test('sends a signed-out visitor to the login form', async () => {
+  renderApp('/', { '/auth/me': { status: 401, body: { detail: 'Not authenticated' } } })
+  expect(await screen.findByRole('heading', { name: 'ApexLog' })).toBeInTheDocument()
+  expect(screen.getByLabelText('Email')).toBeInTheDocument()
+  expect(screen.getByLabelText('Password')).toBeInTheDocument()
 })

@@ -1,0 +1,163 @@
+import type { Account, Dashboard, Setup, TradeDetail, TradeList, TradeListItem } from '../api/types'
+
+export const account: Account = {
+  id: 1,
+  name: 'Test account',
+  label: '#T-1',
+  broker_name: null,
+  route: null,
+  starting_balance: '150000.00',
+  currency: 'USD',
+  fee_profile_id: null,
+  archived_at: null,
+  created_at: '2026-01-01T00:00:00Z',
+}
+
+export const setups: Setup[] = [
+  { id: 4, name: 'Sweep scalp', subtitle: 'Liquidity sweep', description: null, archived_at: null, created_at: '2026-01-01T00:00:00Z', criteria: [] },
+  { id: 5, name: 'Opening fade', subtitle: null, description: null, archived_at: null, created_at: '2026-01-01T00:00:00Z', criteria: [] },
+]
+
+export const trade71: TradeDetail = {
+  id: 71,
+  account_id: 1,
+  instrument: { id: 1, symbol: 'NQ', name: 'E-mini Nasdaq', tick_size: '0.25000000', tick_value: '5.00000000' },
+  setup: { id: 4, name: 'Sweep scalp', subtitle: 'Liquidity sweep' },
+  direction: 'long',
+  session: 'NY open',
+  tags: ['5m MSS', 'Runner'],
+  opened_at: '2026-09-08T09:35:12Z',
+  closed_at: '2026-09-08T10:14:08Z',
+  stop_price: '20372.75000000',
+  target_price: '20397.75000000',
+  quantity: '2.00000000',
+  avg_entry: '20379.00000000',
+  avg_exit: '20394.12500000',
+  points: '15.12500000',
+  risk_amount: '250.00',
+  gross_pnl: '605.00',
+  fees_total: '14.64',
+  slippage_ticks: '0',
+  slippage_cost: '0.00',
+  net_pnl: '590.36',
+  r_multiple: '2.36',
+  execution_score: 85,
+  score_band: 'elite',
+  pre_trade_focus: 'Calm, waited for the sweep.',
+  environment: null,
+  debrief_notes: 'Clean execution. Scaled in early.',
+  screenshot_path: null,
+  screenshot_url: null,
+  fills: [
+    { id: 1, fill_type: 'entry', price: '20380.25', quantity: '1', filled_at: '2026-09-08T09:35:12Z', note: 'Initial probe', realized_points: null, realized_pnl: null },
+    { id: 2, fill_type: 'entry', price: '20377.75', quantity: '1', filled_at: '2026-09-08T09:38:40Z', note: null, realized_points: null, realized_pnl: null },
+    { id: 3, fill_type: 'exit', price: '20391.00', quantity: '1', filled_at: '2026-09-08T09:52:10Z', note: 'TP1', realized_points: '12.00', realized_pnl: '240.00' },
+    { id: 4, fill_type: 'exit', price: '20397.25', quantity: '1', filled_at: '2026-09-08T10:14:08Z', note: 'Runner', realized_points: '18.25', realized_pnl: '365.00' },
+  ],
+  fees: [
+    { name: 'Exchange fee', amount: '6.40' },
+    { name: 'Commission', amount: '8.00' },
+    { name: 'Regulatory fee', amount: '0.24' },
+  ],
+  criteria: [
+    { criterion_id: 1, label: 'Liquidity sweep confirmed', weight: '25.00', checked: true, note: 'Swept at 09:32' },
+    { criterion_id: 2, label: 'Market structure shift', weight: '25.00', checked: true, note: null },
+    { criterion_id: 3, label: 'Stop placed before entry', weight: '20.00', checked: true, note: null },
+    { criterion_id: 4, label: 'Waited for the 50% retest', weight: '15.00', checked: false, note: 'Entered 3 ticks early' },
+    { criterion_id: 5, label: 'Scaled out at internal liquidity', weight: '15.00', checked: true, note: null },
+  ],
+  xp_points: 85,
+  prev_trade_id: 70,
+  next_trade_id: null,
+  created_at: '2026-09-08T10:20:00Z',
+}
+
+export function listItem(overrides: Partial<TradeListItem> = {}): TradeListItem {
+  return {
+    id: 71,
+    account_id: 1,
+    opened_at: '2026-09-08T09:35:12Z',
+    closed_at: '2026-09-08T10:14:08Z',
+    session: 'NY open',
+    symbol: 'NQ',
+    instrument_name: 'E-mini Nasdaq',
+    direction: 'long',
+    setup: { id: 4, name: 'Sweep scalp', subtitle: 'Liquidity sweep' },
+    entry_fills: 2,
+    exit_fills: 2,
+    quantity: '2',
+    avg_entry: '20379.00',
+    avg_exit: '20394.125',
+    gross_pnl: '605.00',
+    fees_total: '14.64',
+    net_pnl: '590.36',
+    result: 'win',
+    r_multiple: '2.36',
+    execution_score: 85,
+    score_band: 'elite',
+    tags: [],
+    has_screenshot: false,
+    ...overrides,
+  }
+}
+
+export const tradeList: TradeList = {
+  items: [
+    listItem(),
+    listItem({ id: 70, net_pnl: '-250.00', gross_pnl: '-225.00', result: 'loss', r_multiple: '-1.00', execution_score: 52, score_band: 'rule_breach', direction: 'short', symbol: 'ES' }),
+  ],
+  total: 88,
+  page: 1,
+  page_size: 50,
+}
+
+export const dashboard: Dashboard = {
+  range: 'ALL',
+  account: 'all',
+  currency: 'USD',
+  starting_balance: '150000.00',
+  summary: {
+    trade_count: 88,
+    wins: 56,
+    losses: 32,
+    breakevens: 0,
+    net_pnl: '14280.50',
+    gross_pnl: '15692.50',
+    fees_total: '1412.00',
+    gross_profits: '30000.00',
+    gross_losses: '15719.50',
+    profit_factor: '2.78',
+    win_rate: '63.6',
+    expectancy: '0.65',
+    total_r: '57.10',
+    avg_execution_score: '83.6',
+    return_pct: '9.52',
+  },
+  equity: {
+    baseline: '150000.00',
+    points: [
+      { closed_at: '2026-09-01T10:00:00Z', equity: '150525.00', trade_id: 1, net_pnl: '525.00', result: 'win' },
+      { closed_at: '2026-09-02T10:00:00Z', equity: '150275.00', trade_id: 2, net_pnl: '-250.00', result: 'loss' },
+    ],
+    peak: '150525.00',
+    current: '150275.00',
+    drawdown_amount: '250.00',
+    drawdown_pct: '0.17',
+    max_drawdown_pct: '0.17',
+  },
+  discipline: {
+    buckets: [
+      { band: 'elite', trade_count: 42, win_rate: '81.0', net_pnl: '13350.00', avg_r: '1.27' },
+      { band: 'solid', trade_count: 24, win_rate: '58.3', net_pnl: '3450.00', avg_r: '0.58' },
+      { band: 'sub_optimal', trade_count: 12, win_rate: '41.7', net_pnl: '130.50', avg_r: '0.04' },
+      { band: 'rule_breach', trade_count: 10, win_rate: '30.0', net_pnl: '-2650.00', avg_r: '-1.06' },
+    ],
+    saved_capital: '2650.00',
+  },
+  setups: [
+    { setup_id: 4, name: 'Sweep scalp', trade_count: 34, win_rate: '76.5', net_pnl: '7400.00', expectancy: '0.87', avg_execution_score: '92.1', rank: 'elite', low_sample: false },
+    { setup_id: 5, name: 'Opening fade', trade_count: 12, win_rate: '35.7', net_pnl: '-2630.00', expectancy: '-0.75', avg_execution_score: '58.2', rank: 'negative_edge', low_sample: true },
+  ],
+  recent_trades: [listItem()],
+  xp: { total_xp: 8420, level: 1, xp_in_level: 8420, xp_per_level: 10000, win_streak: 4 },
+}
