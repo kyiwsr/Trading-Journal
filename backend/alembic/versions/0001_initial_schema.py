@@ -93,7 +93,7 @@ def upgrade() -> None:
         sa.Column("symbol", sa.String(32), nullable=False),
         sa.Column("name", sa.String(120), nullable=True),
         sa.Column("tick_size", PRICE, nullable=False),
-        sa.Column("tick_value", MONEY, nullable=False),
+        sa.Column("tick_value", PRICE, nullable=False),
         sa.Column("archived_at", sa.DateTime(timezone=True), nullable=True),
         _created_at(),
         sa.CheckConstraint("tick_size > 0", name=op.f("ck_instruments_tick_size_positive")),
