@@ -43,3 +43,8 @@ npm run dev        # http://localhost:5173 ; components at /kitchen-sink
 npm test
 npm run build
 ```
+
+In dev, Vite proxies `/api` to the backend on port 8000, so the login cookie stays same-site. Start the
+backend (`uvicorn app.main:app --port 8000` from `backend/`), seed the demo journal with
+`python -m scripts.seed_demo`, then sign in with the user from `scripts.seed_user`.
+For a deployed frontend, set `VITE_API_BASE_URL` to the API's URL at build time.

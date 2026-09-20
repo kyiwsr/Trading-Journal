@@ -16,7 +16,6 @@
   transition: box-shadow 80ms, transform 80ms;
 }
 .btn:focus-visible {
-  outline: none;
   box-shadow: var(--shadow-focus);
 }
 .btn:active:not(:disabled) {
@@ -24,12 +23,15 @@
   box-shadow: 0 0 0 var(--navy);
 }
 .btn:disabled {
-  opacity: 0.5;
+  color: var(--muted);
+  background: var(--tint-slate);
+  border-color: var(--muted);
+  box-shadow: none;
   cursor: not-allowed;
 }
 .btn-primary {
   background: var(--orange);
-  color: #fff;
+  color: var(--ink);
   box-shadow: var(--shadow-2);
 }
 .btn-primary:hover:not(:disabled) {
@@ -76,8 +78,7 @@
   border: var(--border);
   border-radius: var(--radius);
 }
-.input:focus {
-  outline: none;
+.input:focus-visible {
   box-shadow: var(--shadow-focus);
 }
 
@@ -108,12 +109,11 @@
   content: '';
   width: 5px;
   height: 9px;
-  border: solid #fff;
+  border: solid var(--ink);
   border-width: 0 2px 2px 0;
   transform: rotate(45deg) translate(-1px, -1px);
 }
 .checkbox input:focus-visible {
-  outline: none;
   box-shadow: var(--shadow-focus);
 }
 
@@ -132,7 +132,7 @@
   color: var(--navy);
 }
 .badge-win {
-  color: var(--green);
+  color: var(--green-text);
   border-color: var(--green);
 }
 .badge-loss {
@@ -140,9 +140,18 @@
   border-color: var(--crimson);
   background: var(--tint-hazard);
 }
+.badge-solid {
+  color: var(--navy);
+  background: var(--tint-slate);
+}
+.badge-sub {
+  color: #9b4600;
+  border-color: #9b4600;
+  background: var(--tint-quest);
+}
 .badge-streak {
   background: var(--orange);
-  color: #fff;
+  color: var(--ink);
 }
 
 /* XP bar */

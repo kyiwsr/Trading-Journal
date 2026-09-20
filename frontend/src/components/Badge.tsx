@@ -1,7 +1,7 @@
 import type { HTMLAttributes } from 'react'
 
 type Props = HTMLAttributes<HTMLSpanElement> & {
-  tone?: 'neutral' | 'win' | 'loss' | 'streak'
+  tone?: 'neutral' | 'win' | 'loss' | 'streak' | 'solid' | 'sub'
 }
 
 export function Badge({ tone = 'neutral', className = '', ...rest }: Props) {
