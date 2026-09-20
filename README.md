@@ -27,6 +27,13 @@ CREATE DATABASE journal_test OWNER journal;
 
 Then `cd backend && .venv\Scripts\alembic upgrade head`. DB tests skip when Postgres is unreachable.
 
+Create the login once from `backend/`, with `SEED_EMAIL` and `SEED_PASSWORD` set in the environment
+(add `--reset` to replace an existing password):
+
+```
+.venv\Scripts\python -m scripts.seed_user
+```
+
 ## Frontend
 
 ```
