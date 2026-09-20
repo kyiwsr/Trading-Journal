@@ -42,6 +42,23 @@ def _own_row(db: Session, model, row_id: int, user: User, field: str):
     return row
 
 
+def get_owned_trade(db: Session, trade_id: int, user: User) -> Trade:
+    """Trades belong to a user through their account; other users' trades answer 404 like missing ones."""
+    trade = db.scalar(
+        select(Trade).join(Account, Account.id == Trade.account_id).where(Trade.id == trade_id, Account.user_id == user.id)
+    )
+    if trade is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Trade not found")
+    return trade
+
+
+def delete_trade(db: Session, trade: Trade) -> None:
+    for event in db.scalars(select(XpEvent).where(XpEvent.trade_id == trade.id)):
+        db.delete(event)
+    db.delete(trade)
+    crud.commit(db)
+
+
 def _check_screenshot_path(user: User, path: str | None) -> None:
     if path is None:
         return

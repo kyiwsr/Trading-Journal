@@ -80,3 +80,19 @@ def trade71(world, **overrides):
     }
     body.update(overrides)
     return body
+
+
+class FakeStorage:
+    """Reaches nothing: URLs are derived from the path so tests can assert on them."""
+
+    def signed_read_url(self, path):
+        return f"https://storage.test/read/{path}"
+
+
+@pytest.fixture
+def fake_storage(client):
+    from app.main import app
+    from app.storage import get_storage
+
+    app.dependency_overrides[get_storage] = FakeStorage
+    yield
