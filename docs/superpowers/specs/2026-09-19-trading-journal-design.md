@@ -83,7 +83,7 @@ trades
   pnl (computed & stored),
   r_multiple (computed & stored),
   execution_score (computed & stored, 0-100, nullable),
-  notes, screenshot_url
+  notes, screenshot_path
 
 trade_criteria_checks      -- which checklist items were followed, per trade
   id, trade_id, criterion_id, checked (bool)
