@@ -1,0 +1,159 @@
+/* Button */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  padding: 0.5rem 1rem;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border: var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: box-shadow 80ms, transform 80ms;
+}
+.btn:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+}
+.btn:active:not(:disabled) {
+  transform: translate(var(--press-shift), var(--press-shift));
+  box-shadow: 0 0 0 var(--navy);
+}
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.btn-primary {
+  background: var(--orange);
+  color: #fff;
+  box-shadow: var(--shadow-2);
+}
+.btn-primary:hover:not(:disabled) {
+  box-shadow: var(--shadow-2-hover);
+}
+.btn-secondary {
+  background: var(--canvas);
+  color: var(--navy);
+  box-shadow: var(--shadow-1);
+}
+.btn-destructive {
+  background: var(--crimson);
+  color: #fff;
+  box-shadow: var(--shadow-2);
+}
+
+/* Card */
+.card {
+  padding: var(--space-md);
+  background: var(--canvas);
+  border: var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-1);
+}
+.card-tint {
+  background: var(--tint-slate);
+}
+.card-quest {
+  background: var(--tint-quest);
+}
+.card-penalty {
+  background: var(--tint-hazard);
+  border-color: var(--crimson);
+}
+
+/* Input */
+.input {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--ink);
+  background: var(--canvas);
+  border: var(--border);
+  border-radius: var(--radius);
+}
+.input:focus {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+}
+
+/* Checkbox */
+.checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  cursor: pointer;
+}
+.checkbox input {
+  appearance: none;
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  background: var(--canvas);
+  border: var(--border);
+  border-radius: 2px;
+  display: grid;
+  place-content: center;
+  cursor: pointer;
+}
+.checkbox input:checked {
+  background: var(--orange);
+}
+.checkbox input:checked::after {
+  content: '';
+  width: 5px;
+  height: 9px;
+  border: solid #fff;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg) translate(-1px, -1px);
+}
+.checkbox input:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+}
+
+/* Badge */
+.badge {
+  display: inline-block;
+  padding: 0.125rem 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: 2px solid var(--navy);
+  border-radius: var(--radius);
+  background: var(--canvas);
+  color: var(--navy);
+}
+.badge-win {
+  color: var(--green);
+  border-color: var(--green);
+}
+.badge-loss {
+  color: var(--crimson);
+  border-color: var(--crimson);
+  background: var(--tint-hazard);
+}
+.badge-streak {
+  background: var(--orange);
+  color: #fff;
+}
+
+/* XP bar */
+.xpbar {
+  height: 16px;
+  background: var(--canvas);
+  border: var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.xpbar-fill {
+  height: 100%;
+  background: repeating-linear-gradient(-45deg, var(--orange) 0 8px, #ff9a3d 8px 16px);
+}

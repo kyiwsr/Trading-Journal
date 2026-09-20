@@ -4,6 +4,8 @@ import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 
 import { AppRoutes } from './App'
+import './components/components.css'
+import './tokens.css'
 
 const queryClient = new QueryClient()
 
