@@ -85,6 +85,15 @@ def trade71(world, **overrides):
 class FakeStorage:
     """Reaches nothing: URLs are derived from the path so tests can assert on them."""
 
+    def __init__(self):
+        self.uploads = []
+
+    def signed_upload(self, path, content_type):
+        from app.storage import SignedUpload
+
+        self.uploads.append((path, content_type))
+        return SignedUpload(f"https://storage.test/upload/{path}?token=t", 7200)
+
     def signed_read_url(self, path):
         return f"https://storage.test/read/{path}"
 
@@ -94,5 +103,6 @@ def fake_storage(client):
     from app.main import app
     from app.storage import get_storage
 
-    app.dependency_overrides[get_storage] = FakeStorage
-    yield
+    storage = FakeStorage()
+    app.dependency_overrides[get_storage] = lambda: storage
+    return storage

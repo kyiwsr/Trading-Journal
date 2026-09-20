@@ -25,6 +25,12 @@ class Settings(BaseSettings):
     cookie_samesite: Literal["lax", "strict", "none"] = "lax"
     cookie_domain: str | None = None
 
+    supabase_url: str | None = None
+    supabase_service_key: str | None = None
+    supabase_bucket: str = "screenshots"
+    upload_max_bytes: int = 5 * 1024 * 1024
+    signed_read_ttl_seconds: int = 3600
+
     @property
     def allowed_origins(self) -> list[str]:
         return [o.strip().rstrip("/") for o in self.allowed_origin.split(",") if o.strip()]
