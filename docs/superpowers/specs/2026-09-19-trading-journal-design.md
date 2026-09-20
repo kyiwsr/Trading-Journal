@@ -21,32 +21,37 @@ screenshots per trade, "required criteria" score capping.
 ## 2. Architecture
 
 ```
-┌─────────────┐      HTTPS/JSON       ┌──────────────┐      SQL      ┌────────────┐
-│   React SPA │ ───────────────────>  │  FastAPI     │ ────────────> │ PostgreSQL │
-│  (Vercel)   │  <───────────────────  │  (Railway)   │ <──────────── │ (Railway)  │
-└─────────────┘                       └──────┬───────┘                └────────────┘
-                                              │ signed upload URL
-                                              ▼
-                                       ┌──────────────┐
-                                       │ Object store │
-                                       │ (Cloudflare  │
-                                       │  R2)         │
-                                       └──────────────┘
+┌─────────────┐      HTTPS/JSON       ┌──────────────┐      SQL      ┌──────────────────┐
+│   React SPA │ ───────────────────>  │  FastAPI     │ ────────────> │ Supabase         │
+│  (Vercel)   │  <───────────────────  │  (Render)    │ <──────────── │  - PostgreSQL    │
+└──────┬──────┘                       └──────────────┘               │  - Storage       │
+       │        signed upload URL (issued by API)                    └──────────────────┘
+       └────────────────────────────────────────────────────────────────────^
 ```
 
-- **Frontend**: React + Vite SPA, deployed to Vercel. Recharts for the
-  equity curve and stat charts, TanStack Query for API data fetching
-  and caching.
-- **Backend**: FastAPI (Python), deployed to Railway (or Render).
-  JSON REST API, no server-rendering — this is a private dashboard.
-- **Database**: PostgreSQL, managed instance on the same host as the
-  API (Railway/Render both offer this).
-- **File storage**: Cloudflare R2 (S3-compatible) for trade
-  screenshots. The API issues short-lived pre-signed upload URLs so
-  images go browser → R2 directly, never proxied through the API.
-- **Auth**: single seeded user account, JWT in an httpOnly cookie.
-  Every table is rooted to `user_id` (directly or via account/setup)
-  so adding real signup later is additive, not a migration.
+- **Frontend**: React + Vite SPA, deployed to Vercel (free Hobby tier).
+  Recharts for the equity curve and stat charts, TanStack Query for
+  API data fetching and caching.
+- **Backend**: FastAPI (Python), deployed to Render (free web
+  service). JSON REST API, no server-rendering. Free instances sleep
+  after ~15 min idle, so the first request can take 30-60 s (see §7).
+- **Database**: PostgreSQL on Supabase (free tier). FastAPI connects
+  with SQLAlchemy using Supabase's **session pooler** connection
+  string (IPv4-compatible; the direct connection is IPv6-only).
+  Alembic migrations run against the same string.
+- **File storage**: Supabase Storage (free tier, ~1 GB) for trade
+  screenshots. The API issues short-lived signed upload URLs so images
+  go browser -> Supabase directly, never proxied through the API. The
+  database stores only the object path.
+- **Auth**: our own login — single seeded user, JWT in an httpOnly
+  cookie, verified by FastAPI. Supabase Auth is intentionally not
+  used, so the API has no dependency on it. Every table is rooted to
+  `user_id` (directly or via account/setup) so adding real signup
+  later is additive, not a migration.
+- **Access control**: the browser never talks to Supabase's REST/data
+  API with a public key; only FastAPI holds the service credentials
+  (env vars on Render). Row-level security stays enabled with no
+  public policies as a safety net.
 
 ## 3. Data Model
 
@@ -136,10 +141,30 @@ execution_score = round(
 - **Frontend**: component tests for the trade-entry form (validation,
   fill math), light smoke coverage on dashboard rendering.
 
-## 7. Deployment
+## 7. Deployment & Cost
 
-- Frontend: Vercel, auto-deploy from `main`.
-- Backend + Postgres: Railway (or Render), auto-deploy from `main`.
-- File storage: Cloudflare R2 bucket, credentials via environment
-  variables on the backend only (never exposed to the frontend beyond
-  short-lived pre-signed URLs).
+Target: **$0/month** (domain optional, ~$10-15/year).
+
+- Frontend: Vercel Hobby, auto-deploy from `main`. (Hobby is
+  non-commercial; upgrade to Pro if this ever charges customers.)
+- Backend: Render free web service, auto-deploy from `main`. Secrets
+  (DB URL, Supabase service key, JWT secret) live in Render env vars.
+- Database + screenshots: Supabase free project.
+
+Free-tier constraints and mitigations:
+- **Render cold start (30-60 s after ~15 min idle):** the frontend
+  shows a "waking up the server" state on the first request instead of
+  a bare error. Optional: an external uptime pinger (e.g. UptimeRobot,
+  free) hitting a `/health` endpoint every 5 min keeps it awake.
+- **Supabase pauses free projects after ~1 week of inactivity:**
+  daily use avoids this; a long break needs a manual resume in the
+  Supabase dashboard.
+- **No managed backups on the free tier:** a scheduled `pg_dump`
+  (e.g. weekly GitHub Actions job writing to a private location) is
+  part of the v1 scope, since trade history is the whole product.
+- **Upgrade path:** if the cold starts become annoying, moving the API
+  to a $5/mo host (Railway/Render paid) changes only the deploy
+  target — no code changes.
+
+Verify current free-tier limits on each provider's pricing page
+before go-live; they change.
