@@ -142,3 +142,36 @@ class TradeDetailOut(BaseModel):
     prev_trade_id: int | None
     next_trade_id: int | None
     created_at: datetime
+
+
+class TradeListItem(BaseModel):
+    id: int
+    account_id: int
+    opened_at: datetime
+    closed_at: datetime
+    session: str | None
+    symbol: str
+    instrument_name: str | None
+    direction: Direction
+    setup: SetupBrief | None
+    entry_fills: int
+    exit_fills: int
+    quantity: Decimal
+    avg_entry: Decimal
+    avg_exit: Decimal
+    gross_pnl: Decimal
+    fees_total: Decimal
+    net_pnl: Decimal
+    result: Literal["win", "loss", "breakeven"]
+    r_multiple: Decimal | None
+    execution_score: int | None
+    score_band: str | None
+    tags: list[str]
+    has_screenshot: bool
+
+
+class TradeListOut(BaseModel):
+    items: list[TradeListItem]
+    total: int
+    page: int
+    page_size: int
