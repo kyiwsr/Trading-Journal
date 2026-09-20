@@ -91,3 +91,51 @@ def make_client(api_db: sessionmaker[Session]):
 def login(client: TestClient, email: str, password: str = "correct horse battery") -> None:
     response = client.post("/auth/login", json={"email": email, "password": password})
     assert response.status_code == 200, response.text
+
+
+@pytest.fixture
+def client(make_user, make_client) -> TestClient:
+    make_user("trader@example.com")
+    logged_in = make_client()
+    login(logged_in, "trader@example.com")
+    return logged_in
+
+
+@pytest.fixture
+def other_client(client, make_user, make_client) -> TestClient:
+    make_user("other@example.com")
+    logged_in = make_client()
+    login(logged_in, "other@example.com")
+    return logged_in
+
+
+@pytest.fixture
+def add_trade(api_db: sessionmaker[Session]):
+    """Inserts a minimal closed trade so 'referenced' rules can be exercised."""
+    from datetime import datetime, timezone
+    from decimal import Decimal
+
+    from app.models import Trade
+
+    def _add(account_id: int, instrument_id: int, setup_id: int | None = None) -> int:
+        opened = datetime(2026, 9, 8, 9, 35, tzinfo=timezone.utc)
+        with api_db() as session:
+            trade = Trade(
+                account_id=account_id,
+                instrument_id=instrument_id,
+                setup_id=setup_id,
+                direction="long",
+                opened_at=opened,
+                closed_at=opened,
+                quantity=Decimal("1"),
+                avg_entry=Decimal("100"),
+                avg_exit=Decimal("101"),
+                gross_pnl=Decimal("4"),
+                fees_total=Decimal("0"),
+                net_pnl=Decimal("4"),
+            )
+            session.add(trade)
+            session.commit()
+            return trade.id
+
+    return _add

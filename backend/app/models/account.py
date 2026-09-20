@@ -71,6 +71,6 @@ class Instrument(Base):
     symbol: Mapped[str] = mapped_column(String(32))
     name: Mapped[str | None] = mapped_column(String(120))
     tick_size: Mapped[Decimal] = mapped_column(PRICE)
-    tick_value: Mapped[Decimal] = mapped_column(MONEY)
+    tick_value: Mapped[Decimal] = mapped_column(PRICE)
     archived_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     created_at: Mapped[datetime] = created_at_column()
