@@ -75,11 +75,26 @@ Verify (fixture: NQ, tick 0.25, tick value 5.00; entries 20380.25 and
 avg entry `20379.00`, avg exit `20394.125`, gross `605.00`,
 risk `250.00`, net `590.36` after fees, R `2.36`. Also cover a short
 trade, a loss, no stop (R is null), and unequal fill sizes.
+Scale-in cases (average-cost, not FIFO):
+- Buy 1 @ 20,000.00, buy 1 @ 20,010.00, sell 2 @ 20,020.00 in one fill
+  -> avg entry `20,005.00`, `15.00` pts, gross `600.00`; the same trade
+  entered as two separate sell fills gives the identical gross.
+- Unequal sizes (buy 1 @ 20,000, buy 3 @ 20,008, sell 4 @ 20,020) ->
+  avg entry `20,006.00` (quantity-weighted).
+- Per-exit realized points and P&L measured against the average entry
+  (the ledger's TP1 row: exit 20,391.00 vs avg entry 20,379.00 ->
+  `+12.00` pts, `+$240.00` for 1 contract).
+- Risk is measured from the average entry to the single stop, so the
+  scale-in trade above with a stop at 19,990 has risk `600.00`.
 
 **T1.2 `fees.py`.** Apply a fee profile's components to fills with
 `per_fill` and `per_contract` bases.
 Verify: 4 fills with Exchange 1.60, Commission 2.00, Regulatory 0.06
 per fill -> `6.40`, `8.00`, `0.24`, total `14.64`.
+The fee count depends on how fills are entered: at Exchange 1.60 per
+fill, the scale-in trade above costs `4.80` when the exit is one sell
+fill of 2 (3 fills) and `6.40` when it is two sell fills of 1 (4
+fills); with basis `per_contract` both give `6.40`.
 
 **T1.3 `scoring.py`.** `execution_score`, band, compliance flag.
 Verify: the mockup's weights 25/25/20/15/15 (total 100) with the
