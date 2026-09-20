@@ -80,7 +80,7 @@ def test_trade_round_trips_with_children(db_session):
 
 def test_trade_rejects_bad_direction(db_session):
     ids = _seed(db_session)
-    assert _rejected(db_session, _trade(ids, direction="sideways"))
+    assert _rejected(db_session, _trade(ids, direction="flat"))
 
 
 def test_trade_rejects_non_positive_quantity(db_session):
