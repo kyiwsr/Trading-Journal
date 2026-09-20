@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
 from app.deps import require_allowed_origin
-from app.routers import accounts, auth, fee_profiles, instruments, setups
+from app.routers import accounts, auth, fee_profiles, instruments, setups, trades
 
 app = FastAPI(title="Trading Journal API", dependencies=[Depends(require_allowed_origin)])
 
@@ -20,6 +20,7 @@ app.include_router(accounts.router)
 app.include_router(instruments.router)
 app.include_router(fee_profiles.router)
 app.include_router(setups.router)
+app.include_router(trades.router)
 
 
 @app.get("/health")
