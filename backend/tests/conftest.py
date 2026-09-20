@@ -139,3 +139,15 @@ def add_trade(api_db: sessionmaker[Session]):
             return trade.id
 
     return _add
+
+
+@pytest.fixture
+def add_check(api_db: sessionmaker[Session]):
+    from app.models import TradeCriterionCheck
+
+    def _add(trade_id: int, criterion_id: int, checked: bool = True) -> None:
+        with api_db() as session:
+            session.add(TradeCriterionCheck(trade_id=trade_id, criterion_id=criterion_id, checked=checked))
+            session.commit()
+
+    return _add

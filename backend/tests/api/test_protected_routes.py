@@ -21,10 +21,18 @@ PROTECTED = [
     ("PATCH", "/fee-profiles/1"),
     ("POST", "/fee-profiles/1/archive"),
     ("DELETE", "/fee-profiles/1"),
+    ("GET", "/setups"),
+    ("POST", "/setups"),
+    ("GET", "/setups/1"),
+    ("PATCH", "/setups/1"),
+    ("PUT", "/setups/1/criteria"),
+    ("POST", "/setups/1/archive"),
+    ("POST", "/setups/1/unarchive"),
+    ("DELETE", "/setups/1"),
 ]
 
 
 @pytest.mark.parametrize(("method", "path"), PROTECTED)
 def test_route_requires_login(make_client, method, path):
-    response = make_client().request(method, path, json={} if method in ("POST", "PATCH") else None)
+    response = make_client().request(method, path, json={} if method in ("POST", "PATCH", "PUT") else None)
     assert response.status_code == 401, f"{method} {path} answered {response.status_code}"
