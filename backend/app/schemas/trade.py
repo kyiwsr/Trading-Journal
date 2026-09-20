@@ -172,8 +172,27 @@ class TradeListItem(BaseModel):
     has_screenshot: bool
 
 
+class TradeSummaryOut(BaseModel):
+    """Totals for every trade matching the filters, not just the returned page."""
+
+    trades: int
+    wins: int
+    losses: int
+    breakeven: int
+    net_pnl: Decimal
+    fees_total: Decimal
+    win_rate: Decimal | None
+    profit_factor: Decimal | None
+    avg_score: Decimal | None
+    scored_count: int
+    compliant_count: int
+    elite_count: int
+    avg_hold_seconds: int | None
+
+
 class TradeListOut(BaseModel):
     items: list[TradeListItem]
+    summary: TradeSummaryOut
     total: int
     page: int
     page_size: int

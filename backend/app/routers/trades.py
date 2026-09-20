@@ -18,6 +18,7 @@ from app.trade_queries import (
     list_trades,
     range_start,
     resolve_account,
+    trade_summary,
     trades_csv,
 )
 from app.trade_write import build_detail, delete_trade, get_owned_trade, save_trade
@@ -72,7 +73,8 @@ def list_ledger(
     user: User = Depends(get_current_user),
 ) -> TradeListOut:
     items, total = list_trades(db, user, filters, sort_by, order, page, page_size)
-    return TradeListOut(items=items, total=total, page=page, page_size=page_size)
+    summary = trade_summary(db, user, filters)
+    return TradeListOut(items=items, summary=summary, total=total, page=page, page_size=page_size)
 
 
 # Declared before /{trade_id} so "export.csv" is not read as an id.

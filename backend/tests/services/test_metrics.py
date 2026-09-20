@@ -1,3 +1,4 @@
+from dataclasses import replace
 from datetime import datetime, timedelta
 from decimal import Decimal as D
 
@@ -8,6 +9,7 @@ from app.services.metrics import (
     TradeRow,
     discipline_report,
     equity_curve,
+    ledger_summary,
     setup_table,
     summarize,
 )
@@ -289,3 +291,64 @@ class TestSetupTable:
         row = setup_table(trades)[0]
         assert row.expectancy == D("0.00")
         assert row.rank is SetupRank.NEGATIVE_EDGE
+
+
+def held(seconds: int, row: TradeRow) -> TradeRow:
+    return replace(row, opened_at=row.closed_at - timedelta(seconds=seconds))
+
+
+class TestLedgerSummary:
+    # Hand-computed: net 260, fees 25, wins 3 of 5, profit factor 310/50, scores 90/60/85/82, holds 420 s on average.
+    FILTERED = [
+        held(600, trade("100", 0, fees="5", score=90)),
+        held(300, trade("-50", 1, fees="5", score=60)),
+        held(100, trade("0", 2, fees="5")),
+        held(900, trade("200", 3, fees="5", score=85)),
+        held(200, trade("10", 4, fees="5", score=82)),
+    ]
+
+    def test_counts_and_money_cover_every_trade_in_the_set(self):
+        s = ledger_summary(self.FILTERED, compliance_cutoff=80)
+
+        assert (s.trade_count, s.wins, s.losses, s.breakevens) == (5, 3, 1, 1)
+        assert (s.net_pnl, s.fees_total) == (D("260"), D("25"))
+
+    def test_rates_match_the_dashboard_conventions(self):
+        s = ledger_summary(self.FILTERED, compliance_cutoff=80)
+
+        assert s.win_rate == D("60.0")
+        assert s.profit_factor == D("6.20")
+        assert s.avg_execution_score == D("79.3")
+
+    def test_score_counts_use_the_cutoff_and_the_fixed_elite_band(self):
+        s = ledger_summary(self.FILTERED, compliance_cutoff=80)
+
+        assert (s.scored_count, s.compliant_count, s.elite_count) == (4, 3, 2)
+
+    def test_a_stricter_cutoff_changes_compliance_but_not_elite(self):
+        s = ledger_summary(self.FILTERED, compliance_cutoff=90)
+
+        assert (s.compliant_count, s.elite_count) == (1, 2)
+
+    def test_average_hold_is_in_whole_seconds(self):
+        assert ledger_summary(self.FILTERED, compliance_cutoff=80).avg_hold_seconds == 420
+
+    def test_rows_without_an_open_time_are_left_out_of_the_hold_average(self):
+        rows = [held(600, trade("10")), trade("10", 1)]
+
+        assert ledger_summary(rows, compliance_cutoff=80).avg_hold_seconds == 600
+
+    def test_no_trades_gives_zeros_and_nones(self):
+        s = ledger_summary([], compliance_cutoff=80)
+
+        assert (s.trade_count, s.net_pnl, s.fees_total) == (0, D("0"), D("0"))
+        assert (s.win_rate, s.profit_factor, s.avg_execution_score, s.avg_hold_seconds) == (None, None, None, None)
+        assert (s.scored_count, s.compliant_count, s.elite_count) == (0, 0, 0)
+
+    def test_no_losing_trade_leaves_profit_factor_undefined(self):
+        assert ledger_summary([held(60, trade("10"))], compliance_cutoff=80).profit_factor is None
+
+    def test_unscored_trades_are_not_averaged_as_zero(self):
+        s = ledger_summary([held(60, trade("10")), held(60, trade("-5"))], compliance_cutoff=80)
+
+        assert (s.avg_execution_score, s.scored_count) == (None, 0)

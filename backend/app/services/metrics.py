@@ -6,7 +6,7 @@ from typing import Sequence
 
 from app.services.constants import LOW_SAMPLE_BELOW_TRADES, SETUP_ELITE_MIN_AVG_SCORE
 from app.services.rounding import round_half_up
-from app.services.scoring import Band, score_band
+from app.services.scoring import Band, is_compliant, score_band
 
 ZERO = Decimal(0)
 
@@ -21,6 +21,7 @@ class TradeRow:
     execution_score: int | None = None
     setup_id: int | None = None
     setup_name: str | None = None
+    opened_at: datetime | None = None
 
 
 @dataclass(frozen=True)
@@ -40,6 +41,23 @@ class Summary:
     total_r: Decimal
     avg_execution_score: Decimal | None
     return_pct: Decimal | None
+
+
+@dataclass(frozen=True)
+class LedgerSummary:
+    trade_count: int
+    wins: int
+    losses: int
+    breakevens: int
+    net_pnl: Decimal
+    fees_total: Decimal
+    win_rate: Decimal | None
+    profit_factor: Decimal | None
+    avg_execution_score: Decimal | None
+    scored_count: int
+    compliant_count: int
+    elite_count: int
+    avg_hold_seconds: int | None
 
 
 @dataclass(frozen=True)
@@ -148,6 +166,28 @@ def summarize(trades: Sequence[TradeRow], starting_balance: Decimal) -> Summary:
             if starting_balance > 0
             else None
         ),
+    )
+
+
+def ledger_summary(trades: Sequence[TradeRow], compliance_cutoff: int) -> LedgerSummary:
+    base = summarize(trades, ZERO)
+    scores = [t.execution_score for t in trades if t.execution_score is not None]
+    holds = [Decimal((t.closed_at - t.opened_at).total_seconds()) for t in trades if t.opened_at is not None]
+    avg_hold = _mean(holds)
+    return LedgerSummary(
+        trade_count=base.trade_count,
+        wins=base.wins,
+        losses=base.losses,
+        breakevens=base.breakevens,
+        net_pnl=base.net_pnl,
+        fees_total=base.fees_total,
+        win_rate=base.win_rate,
+        profit_factor=base.profit_factor,
+        avg_execution_score=base.avg_execution_score,
+        scored_count=len(scores),
+        compliant_count=sum(1 for score in scores if is_compliant(score, compliance_cutoff)),
+        elite_count=sum(1 for score in scores if score_band(score) is Band.ELITE),
+        avg_hold_seconds=None if avg_hold is None else int(round_half_up(avg_hold, 0)),
     )
 
 

@@ -9,8 +9,8 @@ from sqlalchemy.orm import Session
 
 from app.deps import get_owned
 from app.models import Account, Instrument, Setup, Trade, TradeFill, User
-from app.schemas.trade import SetupBrief, TradeListItem
-from app.services import scoring
+from app.schemas.trade import SetupBrief, TradeListItem, TradeSummaryOut
+from app.services import metrics, scoring
 
 RangeName = Literal["30D", "90D", "YTD", "ALL"]
 SortField = Literal["closed_at", "opened_at", "net_pnl", "r_multiple", "execution_score"]
@@ -184,6 +184,40 @@ def _item(row, compliance_cutoff: int) -> TradeListItem:
         compliant=scoring.compliance(trade.execution_score, compliance_cutoff),
         tags=list(trade.tags or []),
         has_screenshot=trade.screenshot_path is not None,
+    )
+
+
+def trade_summary(db: Session, user: User, filters: TradeFilters) -> TradeSummaryOut:
+    """Totals over every matching trade, computed with the same service the dashboard uses."""
+    stmt = _joined(
+        select(
+            Trade.opened_at,
+            Trade.closed_at,
+            Trade.gross_pnl,
+            Trade.fees_total,
+            Trade.net_pnl,
+            Trade.r_multiple,
+            Trade.execution_score,
+        ),
+        user,
+        filters,
+    )
+    rows = [metrics.TradeRow(**row._asdict()) for row in db.execute(stmt)]
+    s = metrics.ledger_summary(rows, user.compliance_cutoff)
+    return TradeSummaryOut(
+        trades=s.trade_count,
+        wins=s.wins,
+        losses=s.losses,
+        breakeven=s.breakevens,
+        net_pnl=s.net_pnl,
+        fees_total=s.fees_total,
+        win_rate=s.win_rate,
+        profit_factor=s.profit_factor,
+        avg_score=s.avg_execution_score,
+        scored_count=s.scored_count,
+        compliant_count=s.compliant_count,
+        elite_count=s.elite_count,
+        avg_hold_seconds=s.avg_hold_seconds,
     )
 
 
