@@ -29,6 +29,8 @@ PROTECTED = [
     ("POST", "/setups/1/archive"),
     ("POST", "/setups/1/unarchive"),
     ("DELETE", "/setups/1"),
+    ("GET", "/settings"),
+    ("PUT", "/settings"),
 ]
 
 

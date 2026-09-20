@@ -156,7 +156,7 @@ def result_of(net_pnl) -> str:
     return "win" if net_pnl > 0 else "loss" if net_pnl < 0 else "breakeven"
 
 
-def _item(row) -> TradeListItem:
+def _item(row, compliance_cutoff: int) -> TradeListItem:
     trade: Trade = row.Trade
     band = scoring.score_band(trade.execution_score)
     return TradeListItem(
@@ -181,6 +181,7 @@ def _item(row) -> TradeListItem:
         r_multiple=trade.r_multiple,
         execution_score=trade.execution_score,
         score_band=band.value if band else None,
+        compliant=scoring.compliance(trade.execution_score, compliance_cutoff),
         tags=list(trade.tags or []),
         has_screenshot=trade.screenshot_path is not None,
     )
@@ -198,13 +199,13 @@ def list_trades(
 ) -> tuple[list[TradeListItem], int]:
     total = db.scalar(_joined(select(func.count(Trade.id)), user, filters))
     stmt = _ordered(_ledger_rows(user, filters), sort_by, order).limit(page_size).offset((page - 1) * page_size)
-    return [_item(row) for row in db.execute(stmt)], total
+    return [_item(row, user.compliance_cutoff) for row in db.execute(stmt)], total
 
 
 def all_trades(db: Session, user: User, filters: TradeFilters, sort_by: str, order: str) -> list[tuple[str, TradeListItem]]:
     """Every matching trade, each with its account name, for the export."""
     rows = db.execute(_ordered(_ledger_rows(user, filters), sort_by, order))
-    return [(row.account_name, _item(row)) for row in rows]
+    return [(row.account_name, _item(row, user.compliance_cutoff)) for row in rows]
 
 
 def _text_cell(value: str | None) -> str:

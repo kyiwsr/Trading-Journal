@@ -170,3 +170,22 @@ def test_used_setup_and_account_cannot_be_deleted(db_session):
             db_session.expire_all()
         else:
             pytest.fail(f"{key} with trades was deleted")
+
+
+def test_user_cutoff_defaults_to_80(db_session):
+    user = User(email="cutoff@example.com", password_hash="x")
+    db_session.add(user)
+    db_session.flush()
+    db_session.refresh(user)
+
+    assert user.compliance_cutoff == 80
+
+
+@pytest.mark.parametrize("cutoff", [-1, 101])
+def test_user_rejects_cutoff_outside_0_to_100(db_session, cutoff):
+    assert _rejected(db_session, User(email="cutoff@example.com", password_hash="x", compliance_cutoff=cutoff))
+
+
+@pytest.mark.parametrize("cutoff", [0, 100])
+def test_user_accepts_cutoff_edges(db_session, cutoff):
+    assert not _rejected(db_session, User(email="cutoff@example.com", password_hash="x", compliance_cutoff=cutoff))

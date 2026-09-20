@@ -130,6 +130,7 @@ class TradeDetailOut(BaseModel):
     r_multiple: Decimal | None
     execution_score: int | None
     score_band: str | None
+    compliant: bool | None
     pre_trade_focus: str | None
     environment: str | None
     debrief_notes: str | None
@@ -166,6 +167,7 @@ class TradeListItem(BaseModel):
     r_multiple: Decimal | None
     execution_score: int | None
     score_band: str | None
+    compliant: bool | None
     tags: list[str]
     has_screenshot: bool
 

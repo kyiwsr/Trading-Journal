@@ -47,3 +47,8 @@ def score_band(score: int | None) -> Band | None:
 
 def is_compliant(score: int | None, cutoff: int = DEFAULT_COMPLIANCE_CUTOFF) -> bool:
     return score is not None and score >= cutoff
+
+
+def compliance(score: int | None, cutoff: int) -> bool | None:
+    """None for an unscored trade, which is neither compliant nor in breach."""
+    return None if score is None else score >= cutoff

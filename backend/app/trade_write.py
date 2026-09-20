@@ -251,6 +251,7 @@ def build_detail(db: Session, trade: Trade, user: User, storage: Storage) -> Tra
         r_multiple=trade.r_multiple,
         execution_score=trade.execution_score,
         score_band=band.value if (band := scoring.score_band(trade.execution_score)) else None,
+        compliant=scoring.compliance(trade.execution_score, user.compliance_cutoff),
         pre_trade_focus=trade.pre_trade_focus,
         environment=trade.environment,
         debrief_notes=trade.debrief_notes,

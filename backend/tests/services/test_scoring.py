@@ -2,7 +2,7 @@ from decimal import Decimal as D
 
 import pytest
 
-from app.services.scoring import Band, CriterionResult, execution_score, is_compliant, score_band
+from app.services.scoring import Band, CriterionResult, compliance, execution_score, is_compliant, score_band
 
 
 def results(*pairs: tuple[str, bool]) -> list[CriterionResult]:
@@ -68,3 +68,12 @@ class TestIsCompliant:
 
     def test_unscored_trade_is_not_compliant(self):
         assert not is_compliant(None)
+
+
+class TestCompliance:
+    def test_scored_trade_is_judged_against_the_cutoff(self):
+        assert compliance(85, cutoff=85) is True
+        assert compliance(84, cutoff=85) is False
+
+    def test_unscored_trade_has_no_verdict(self):
+        assert compliance(None, cutoff=80) is None
