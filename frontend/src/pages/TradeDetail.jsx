@@ -1,9 +1,8 @@
-import { useState, type ReactNode } from 'react'
+import { useState } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
 
 import { ApiError } from '../api/client'
 import { useAccounts, useTrade } from '../api/queries'
-import type { CriterionCheck, Fill, TradeDetail as TradeDetailData } from '../api/types'
 import {
   Amount,
   Badge,
@@ -49,9 +48,7 @@ export default function TradeDetail() {
   return <TradeView data={data} currency={currency} accountLabel={account ? `${account.name}${account.label ? ` ${account.label}` : ''}` : null} route={account?.route ?? null} search={search} />
 }
 
-type ViewProps = { data: TradeDetailData; currency: string | null; accountLabel: string | null; route: string | null; search: string }
-
-function TradeView({ data, currency, accountLabel, route, search }: ViewProps) {
+function TradeView({ data, currency, accountLabel, route, search }) {
   const decimals = priceDecimals(data.instrument.tick_size)
   const result = Number(data.net_pnl) > 0 ? 'win' : Number(data.net_pnl) < 0 ? 'loss' : 'breakeven'
   const side = data.direction === 'long' ? 'Long' : 'Short'
@@ -129,7 +126,7 @@ function TradeView({ data, currency, accountLabel, route, search }: ViewProps) {
   )
 }
 
-function TradeLink({ id, search, label }: { id: number | null; search: string; label: string }) {
+function TradeLink({ id, search, label }) {
   if (id === null) return <Button disabled>{label}</Button>
   return (
     <Link className="btn" to={{ pathname: `/trades/${id}`, search }}>
@@ -138,7 +135,7 @@ function TradeLink({ id, search, label }: { id: number | null; search: string; l
   )
 }
 
-function Fact({ label, children }: { label: string; children: ReactNode }) {
+function Fact({ label, children }) {
   return (
     <div className="fact">
       <dt>{label}</dt>
@@ -147,7 +144,7 @@ function Fact({ label, children }: { label: string; children: ReactNode }) {
   )
 }
 
-function OverviewPanel({ data, currency, decimals }: { data: TradeDetailData; currency: string | null; decimals: number }) {
+function OverviewPanel({ data, currency, decimals }) {
   const entry = Number(data.avg_entry)
   const stopDistance = data.stop_price === null ? null : Math.abs(entry - Number(data.stop_price))
   const targetDistance = data.target_price === null ? null : Math.abs(Number(data.target_price) - entry)
@@ -194,14 +191,14 @@ function OverviewPanel({ data, currency, decimals }: { data: TradeDetailData; cu
   )
 }
 
-function stageLabel(fill: Fill, fills: Fill[]): string {
+function stageLabel(fill, fills) {
   const sameType = fills.filter((f) => f.fill_type === fill.fill_type)
   const position = sameType.indexOf(fill) + 1
   if (fill.fill_type === 'entry') return position === 1 ? 'Entry' : 'Scale-in'
   return sameType.length === 1 ? 'Exit' : `Exit ${position}`
 }
 
-function LedgerPanel({ data, currency, decimals }: { data: TradeDetailData; currency: string | null; decimals: number }) {
+function LedgerPanel({ data, currency, decimals }) {
   const buyEntry = data.direction === 'long'
   return (
     <Panel
@@ -268,8 +265,8 @@ function LedgerPanel({ data, currency, decimals }: { data: TradeDetailData; curr
   )
 }
 
-function FeesPanel({ data, currency }: { data: TradeDetailData; currency: string | null }) {
-  const neg = (value: string) => -Math.abs(Number(value))
+function FeesPanel({ data, currency }) {
+  const neg = (value) => -Math.abs(Number(value))
   return (
     <Panel title="Fees and slippage" note={data.fee_profile_name ? `Tariff: ${data.fee_profile_name}` : undefined}>
       <dl className="facts facts-rows">
@@ -300,7 +297,7 @@ function FeesPanel({ data, currency }: { data: TradeDetailData; currency: string
   )
 }
 
-function NotesPanel({ data }: { data: TradeDetailData }) {
+function NotesPanel({ data }) {
   const blocks = [
     { label: 'Pre-trade focus', text: data.pre_trade_focus },
     { label: 'Environment', text: data.environment },
@@ -320,7 +317,7 @@ function NotesPanel({ data }: { data: TradeDetailData }) {
   )
 }
 
-function ScreenshotPanel({ data }: { data: TradeDetailData }) {
+function ScreenshotPanel({ data }) {
   const [failed, setFailed] = useState(false)
   return (
     <Panel title="Chart screenshot">
@@ -340,7 +337,7 @@ function ScreenshotPanel({ data }: { data: TradeDetailData }) {
   )
 }
 
-function ChecklistRow({ item }: { item: CriterionCheck }) {
+function ChecklistRow({ item }) {
   const pts = quantity(item.weight)
   return (
     <li className={`check ${item.checked ? 'check-ok' : 'check-miss'}`}>
@@ -353,7 +350,7 @@ function ChecklistRow({ item }: { item: CriterionCheck }) {
   )
 }
 
-function ChecklistPanel({ data }: { data: TradeDetailData }) {
+function ChecklistPanel({ data }) {
   const { cutoff } = useScoring()
   const total = data.criteria.reduce((sum, item) => sum + Number(item.weight), 0)
   const earned = data.criteria.filter((item) => item.checked).reduce((sum, item) => sum + Number(item.weight), 0)

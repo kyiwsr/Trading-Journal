@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 
 import { useDashboard, useSetups } from '../api/queries'
-import type { SetupRank } from '../api/types'
 import {
   Amount,
   Badge,
@@ -18,7 +17,7 @@ import { RANK_LABEL } from '../lib/labels'
 import { weightTotal } from '../lib/setupForm'
 import { readScope, scopeSearch } from '../lib/urlState'
 
-const RANK_TONE: Record<SetupRank, 'win' | 'solid' | 'loss'> = { elite: 'win', solid: 'solid', negative_edge: 'loss' }
+const RANK_TONE = { elite: 'win', solid: 'solid', negative_edge: 'loss' }
 
 export default function Setups() {
   const [params] = useSearchParams()

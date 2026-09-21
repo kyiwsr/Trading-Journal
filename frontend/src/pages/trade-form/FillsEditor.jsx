@@ -1,17 +1,10 @@
 import { Button, Field, Input } from '../../components'
-import { blankRow, type FillRow, type FormErrors } from '../../lib/tradeForm'
+import { blankRow } from '../../lib/tradeForm'
 
-type GroupProps = {
-  kind: 'entry' | 'exit'
-  rows: FillRow[]
-  errors: FormErrors
-  onChange: (rows: FillRow[]) => void
-}
+const NOUN = { entry: 'Entry', exit: 'Exit' }
 
-const NOUN = { entry: 'Entry', exit: 'Exit' } as const
-
-function FillGroup({ kind, rows, errors, onChange }: GroupProps) {
-  const update = (index: number, patch: Partial<FillRow>) =>
+function FillGroup({ kind, rows, errors, onChange }) {
+  const update = (index, patch) =>
     onChange(rows.map((row, i) => (i === index ? { ...row, ...patch } : row)))
 
   return (
@@ -81,15 +74,7 @@ function FillGroup({ kind, rows, errors, onChange }: GroupProps) {
   )
 }
 
-type Props = {
-  entries: FillRow[]
-  exits: FillRow[]
-  errors: FormErrors
-  onEntries: (rows: FillRow[]) => void
-  onExits: (rows: FillRow[]) => void
-}
-
-export function FillsEditor({ entries, exits, errors, onEntries, onExits }: Props) {
+export function FillsEditor({ entries, exits, errors, onEntries, onExits }) {
   return (
     <div className="fills">
       <FillGroup kind="entry" rows={entries} errors={errors} onChange={onEntries} />

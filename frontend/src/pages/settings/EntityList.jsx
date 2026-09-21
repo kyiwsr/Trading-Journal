@@ -1,8 +1,7 @@
-import type { ReactNode } from 'react'
 
 import { Badge } from '../../components'
 
-export function EntityList({ label, children }: { label: string; children: ReactNode }) {
+export function EntityList({ label, children }) {
   return (
     <ul className="entity-list" aria-label={label}>
       {children}
@@ -10,9 +9,7 @@ export function EntityList({ label, children }: { label: string; children: React
   )
 }
 
-type RowProps = { title: string; archived: boolean; meta?: ReactNode; actions: ReactNode }
-
-export function EntityRow({ title, archived, meta, actions }: RowProps) {
+export function EntityRow({ title, archived, meta, actions }) {
   return (
     <li className={archived ? 'entity entity-archived' : 'entity'}>
       <div className="entity-main">

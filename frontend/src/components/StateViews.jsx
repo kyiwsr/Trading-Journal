@@ -1,9 +1,8 @@
-import type { ReactNode } from 'react'
 
 import { ApiError } from '../api/client'
 import { Button } from './Button'
 
-export function LoadingState({ what }: { what: string }) {
+export function LoadingState({ what }) {
   return (
     <div className="state" role="status">
       <p className="state-title">Loading {what}</p>
@@ -11,7 +10,7 @@ export function LoadingState({ what }: { what: string }) {
   )
 }
 
-export function ErrorState({ what, error, onRetry }: { what: string; error: unknown; onRetry?: () => void }) {
+export function ErrorState({ what, error, onRetry }) {
   const detail = error instanceof ApiError ? error.message : 'Something went wrong.'
   return (
     <div className="state state-error" role="alert">
@@ -22,7 +21,7 @@ export function ErrorState({ what, error, onRetry }: { what: string; error: unkn
   )
 }
 
-export function EmptyState({ title, children }: { title: string; children?: ReactNode }) {
+export function EmptyState({ title, children }) {
   return (
     <div className="state">
       <p className="state-title">{title}</p>

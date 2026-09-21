@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest'
 
-import type { Setup } from '../api/types'
 import {
   blankCriterion,
   criteriaPayload,
@@ -9,10 +8,9 @@ import {
   setupFormFromApi,
   validateSetupForm,
   weightTotal,
-  type SetupFormState,
 } from './setupForm'
 
-const saved: Setup = {
+const saved = {
   id: 4,
   name: 'celup kaki',
   subtitle: 'Liquidity Sweep Scalp',
@@ -25,7 +23,7 @@ const saved: Setup = {
   ],
 }
 
-function form(rows: { label: string; weight: string }[]): SetupFormState {
+function form(rows) {
   return {
     ...emptySetupForm(),
     name: 'FVG retest',

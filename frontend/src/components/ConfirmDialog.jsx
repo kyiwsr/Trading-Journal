@@ -1,21 +1,10 @@
-import { useEffect, useId, useRef, type ReactNode } from 'react'
+import { useEffect, useId, useRef } from 'react'
 
 import { Button } from './Button'
 
-type Props = {
-  open: boolean
-  title: string
-  confirmLabel: string
-  cancelLabel: string
-  destructive?: boolean
-  onConfirm: () => void
-  onCancel: () => void
-  children: ReactNode
-}
-
 // The native dialog gives the focus trap and the Escape key for free.
-export function ConfirmDialog({ open, title, confirmLabel, cancelLabel, destructive, onConfirm, onCancel, children }: Props) {
-  const ref = useRef<HTMLDialogElement>(null)
+export function ConfirmDialog({ open, title, confirmLabel, cancelLabel, destructive, onConfirm, onCancel, children }) {
+  const ref = useRef(null)
   const titleId = useId()
 
   useEffect(() => {

@@ -1,6 +1,6 @@
 # Trading Journal
 
-Personal trading journal: React (Vite, TypeScript) frontend, FastAPI backend, PostgreSQL.
+Personal trading journal: React (Vite) frontend, FastAPI backend, PostgreSQL.
 Spec: `docs/superpowers/specs/`, plan: `docs/superpowers/plans/`, design exports: `design/stitch/`.
 
 ## Backend

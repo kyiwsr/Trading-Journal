@@ -11,12 +11,10 @@ import {
   roundHalfUp,
   scoreBand,
   totalFees,
-  type FeeComponent,
-  type FillInput,
 } from './tradeMath'
 
-const d = (value: string) => new Decimal(value)
-const fill = (type: 'entry' | 'exit', price: string, quantity: string): FillInput => ({
+const d = (value) => new Decimal(value)
+const fill = (type, price, quantity) => ({
   type,
   price: d(price),
   quantity: d(quantity),
@@ -24,14 +22,14 @@ const fill = (type: 'entry' | 'exit', price: string, quantity: string): FillInpu
 
 const NQ = { tickSize: d('0.25'), tickValue: d('5') }
 
-const trade71: FillInput[] = [
+const trade71 = [
   fill('entry', '20380.25', '1'),
   fill('entry', '20377.75', '1'),
   fill('exit', '20391.00', '1'),
   fill('exit', '20397.25', '1'),
 ]
 
-const tariff: FeeComponent[] = [
+const tariff = [
   { name: 'Exchange fee', amount: d('1.60'), basis: 'per_fill' },
   { name: 'Broker commission', amount: d('2.00'), basis: 'per_fill' },
   { name: 'Regulatory fee', amount: d('0.06'), basis: 'per_fill' },
@@ -123,8 +121,8 @@ describe('computeTrade, scale-in with one exit', () => {
   })
 
   it('counts fees per fill and per contract differently', () => {
-    const perFill: FeeComponent[] = [{ name: 'Exchange fee', amount: d('1.60'), basis: 'per_fill' }]
-    const perContract: FeeComponent[] = [{ name: 'Exchange fee', amount: d('1.60'), basis: 'per_contract' }]
+    const perFill = [{ name: 'Exchange fee', amount: d('1.60'), basis: 'per_fill' }]
+    const perContract = [{ name: 'Exchange fee', amount: d('1.60'), basis: 'per_contract' }]
     expect(totalFees(applyFees(perFill, oneExit)).toFixed(2)).toBe('4.80')
     expect(totalFees(applyFees(perFill, twoExits)).toFixed(2)).toBe('6.40')
     expect(totalFees(applyFees(perContract, oneExit)).toFixed(2)).toBe('6.40')
@@ -191,7 +189,7 @@ describe('computeTrade, other shapes', () => {
 })
 
 describe('executionScore', () => {
-  const item = (weight: string, checked: boolean) => ({ weight: d(weight), checked })
+  const item = (weight, checked) => ({ weight: d(weight), checked })
 
   it('scores the mockup checklist at 85', () => {
     const items = [item('25', true), item('25', true), item('20', true), item('15', false), item('15', true)]

@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest'
 
-import type { Account, FeeProfile, Instrument } from '../api/types'
 import {
   accountFormFrom,
   accountPayload,
@@ -50,7 +49,7 @@ describe('account form', () => {
   })
 
   it('loads a saved account without padded zeros', () => {
-    const saved: Account = {
+    const saved = {
       id: 1,
       name: 'A',
       label: null,
@@ -82,7 +81,7 @@ describe('instrument form', () => {
 
   it('upper-cases the symbol in the payload and reads saved padding away', () => {
     expect(instrumentPayload(valid)).toEqual({ symbol: 'NQ', name: null, tick_size: '0.25', tick_value: '5' })
-    const saved: Instrument = { id: 1, symbol: 'NQ', name: 'E-mini', tick_size: '0.25000000', tick_value: '5.00000000', archived_at: null, created_at: '' }
+    const saved = { id: 1, symbol: 'NQ', name: 'E-mini', tick_size: '0.25000000', tick_value: '5.00000000', archived_at: null, created_at: '' }
     expect(instrumentFormFrom(saved)).toMatchObject({ tickSize: '0.25', tickValue: '5' })
   })
 })
@@ -92,8 +91,8 @@ describe('fee profile form', () => {
     ...emptyFeeProfileForm(),
     name: 'Prop tariff',
     components: [
-      { key: 'a', name: 'Exchange fee', amount: '1.60', basis: 'per_fill' as const },
-      { key: 'b', name: 'Commission', amount: '2.5', basis: 'per_contract' as const },
+      { key: 'a', name: 'Exchange fee', amount: '1.60', basis: 'per_fill' },
+      { key: 'b', name: 'Commission', amount: '2.5', basis: 'per_contract' },
     ],
   }
 
@@ -130,7 +129,7 @@ describe('fee profile form', () => {
         { name: 'Commission', amount: '2.5', basis: 'per_contract' },
       ],
     })
-    const saved: FeeProfile = {
+    const saved = {
       id: 1,
       name: 'P',
       notes: 'n',

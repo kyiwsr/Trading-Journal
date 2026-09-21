@@ -1,10 +1,6 @@
-import type { HTMLAttributes } from 'react'
 
-type Props = HTMLAttributes<HTMLSpanElement> & {
-  tone?: 'neutral' | 'win' | 'loss' | 'streak' | 'solid' | 'sub'
-}
 
-export function Badge({ tone = 'neutral', className = '', ...rest }: Props) {
+export function Badge({ tone = 'neutral', className = '', ...rest }) {
   const toneClass = tone === 'neutral' ? '' : `badge-${tone}`
   return <span className={`badge ${toneClass} ${className}`.trim()} {...rest} />
 }

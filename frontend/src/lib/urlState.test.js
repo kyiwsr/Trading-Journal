@@ -10,7 +10,7 @@ import {
   tradesQuery,
 } from './urlState'
 
-const params = (search: string) => new URLSearchParams(search)
+const params = (search) => new URLSearchParams(search)
 
 describe('readScope', () => {
   it('defaults to all accounts and the full history', () => {

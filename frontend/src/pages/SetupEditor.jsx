@@ -1,9 +1,8 @@
-import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 
 import { ApiError } from '../api/client'
 import { useCreateSetup, useSetup, useSetupArchive, useUpdateSetup } from '../api/queries'
-import type { Setup } from '../api/types'
 import { Button, Card, ErrorState, Field, Input, LoadingState, Panel, Textarea } from '../components'
 import {
   blankCriterion,
@@ -14,9 +13,7 @@ import {
   textOrNull,
   validateSetupForm,
   weightTotal,
-  type SetupFormState,
 } from '../lib/setupForm'
-import type { FormErrors } from '../lib/tradeForm'
 import { readScope, scopeSearch } from '../lib/urlState'
 import { useLeaveGuard } from '../lib/useLeaveGuard'
 
@@ -47,16 +44,16 @@ export default function SetupEditor() {
   return <SetupEditorBody key={setupId ?? 'new'} setup={setup.data ?? null} search={search} />
 }
 
-const criterionKey = (index: number, field: 'label' | 'weight') => `criteria.${index}.${field}`
+const criterionKey = (index, field) => `criteria.${index}.${field}`
 
-function SetupEditorBody({ setup, search }: { setup: Setup | null; search: string }) {
+function SetupEditorBody({ setup, search }) {
   const navigate = useNavigate()
   const isEdit = setup !== null
   const create = useCreateSetup()
   const update = useUpdateSetup(setup?.id ?? 0)
   const archive = useSetupArchive()
 
-  const [initial] = useState<SetupFormState>(() => (setup ? setupFormFromApi(setup) : emptySetupForm()))
+  const [initial] = useState(() => (setup ? setupFormFromApi(setup) : emptySetupForm()))
   const [form, setForm] = useState(initial)
   const baseline = useMemo(() => JSON.stringify(initial), [initial])
   const dirty = JSON.stringify(form) !== baseline
@@ -64,10 +61,10 @@ function SetupEditorBody({ setup, search }: { setup: Setup | null; search: strin
 
   const [attempted, setAttempted] = useState(false)
   const [submitCount, setSubmitCount] = useState(0)
-  const [apiProblems, setApiProblems] = useState<string[]>([])
-  const summaryRef = useRef<HTMLDivElement>(null)
+  const [apiProblems, setApiProblems] = useState([])
+  const summaryRef = useRef(null)
 
-  const errors: FormErrors = attempted ? validateSetupForm(form) : {}
+  const errors = attempted ? validateSetupForm(form) : {}
   const problems = [...Object.values(errors), ...apiProblems]
   const total = weightTotal(form.criteria)
   const busy = create.isPending || update.isPending || archive.isPending
@@ -76,21 +73,21 @@ function SetupEditorBody({ setup, search }: { setup: Setup | null; search: strin
     if (submitCount > 0) summaryRef.current?.focus()
   }, [submitCount])
 
-  const patch = (change: Partial<SetupFormState>) => setForm((current) => ({ ...current, ...change }))
-  const changeRow = (index: number, change: { label?: string; weight?: string }) =>
+  const patch = (change) => setForm((current) => ({ ...current, ...change }))
+  const changeRow = (index, change) =>
     patch({ criteria: form.criteria.map((row, i) => (i === index ? { ...row, ...change } : row)) })
 
-  const leaveTo = (pathname: string) => {
+  const leaveTo = (pathname) => {
     guard.allowLeave()
     navigate({ pathname, search })
   }
 
-  const fail = (error: unknown) => {
+  const fail = (error) => {
     setApiProblems([error instanceof ApiError ? error.message : 'The setup could not be saved. Try again.'])
     setSubmitCount((count) => count + 1)
   }
 
-  const submit = async (event: FormEvent) => {
+  const submit = async (event) => {
     event.preventDefault()
     setAttempted(true)
     setApiProblems([])
@@ -108,7 +105,7 @@ function SetupEditorBody({ setup, search }: { setup: Setup | null; search: strin
     }
   }
 
-  const toggleArchive = async (archived: boolean) => {
+  const toggleArchive = async (archived) => {
     if (!setup) return
     setApiProblems([])
     try {

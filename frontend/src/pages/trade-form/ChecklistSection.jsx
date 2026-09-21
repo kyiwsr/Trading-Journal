@@ -1,18 +1,9 @@
 import { Link } from 'react-router-dom'
 
-import type { Setup } from '../../api/types'
 import { Checkbox, EmptyState, Input, Panel } from '../../components'
 import { number } from '../../lib/format'
-import type { CheckState } from '../../lib/tradeForm'
 
-type Props = {
-  setup: Setup
-  checks: Record<number, CheckState>
-  search: string
-  onChange: (criterionId: number, patch: Partial<CheckState>) => void
-}
-
-export function ChecklistSection({ setup, checks, search, onChange }: Props) {
+export function ChecklistSection({ setup, checks, search, onChange }) {
   const criteria = [...setup.criteria].sort((a, b) => a.display_order - b.display_order)
 
   return (

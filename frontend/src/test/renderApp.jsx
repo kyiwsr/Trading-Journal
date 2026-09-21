@@ -6,18 +6,14 @@ import { vi } from 'vitest'
 import { AppRoutes } from '../App'
 import { createQueryClient } from '../queryClient'
 
-type Reply = { status?: number; body?: unknown }
-type Handler = Reply | ((url: URL, init?: RequestInit) => Reply)
-export type Routes = Record<string, Handler>
-
 const SIGNED_IN = { '/auth/me': { body: { id: 1, email: 'trader@example.com' } } }
 
 // Every request is answered from `routes`, keyed by path without the /api prefix.
-export function stubApi(routes: Routes) {
-  const calls: string[] = []
+export function stubApi(routes) {
+  const calls = []
   vi.stubGlobal(
     'fetch',
-    vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+    vi.fn(async (input, init) => {
       const url = new URL(String(input), 'http://localhost')
       calls.push(`${init?.method ?? 'GET'} ${url.pathname.replace(/^\/api/, '')}${url.search}`)
       const handler = routes[url.pathname.replace(/^\/api/, '')]
@@ -33,7 +29,7 @@ export function stubApi(routes: Routes) {
   return calls
 }
 
-export function renderApp(path: string, routes: Routes, { signedIn = false } = {}) {
+export function renderApp(path, routes, { signedIn = false } = {}) {
   const calls = stubApi(signedIn ? { ...SIGNED_IN, ...routes } : routes)
   const client = createQueryClient()
   client.setDefaultOptions({ queries: { retry: false, staleTime: 0 } })

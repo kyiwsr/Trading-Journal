@@ -15,7 +15,7 @@ const queryClient = createQueryClient()
 // A data router is what lets a form block navigation while it holds unsaved changes.
 const router = createBrowserRouter([{ path: '*', element: <AppRoutes /> }])
 
-createRoot(document.getElementById('root')!).render(
+createRoot(document.getElementById('root')).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <RouterProvider router={router} />

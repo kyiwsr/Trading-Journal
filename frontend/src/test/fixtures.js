@@ -1,6 +1,5 @@
-import type { Account, Dashboard, Setup, TradeDetail, TradeList, TradeListItem } from '../api/types'
 
-export const account: Account = {
+export const account = {
   id: 1,
   name: 'Test account',
   label: '#T-1',
@@ -13,12 +12,12 @@ export const account: Account = {
   created_at: '2026-01-01T00:00:00Z',
 }
 
-export const setups: Setup[] = [
+export const setups = [
   { id: 4, name: 'Sweep scalp', subtitle: 'Liquidity sweep', description: null, archived_at: null, created_at: '2026-01-01T00:00:00Z', criteria: [] },
   { id: 5, name: 'Opening fade', subtitle: null, description: null, archived_at: null, created_at: '2026-01-01T00:00:00Z', criteria: [] },
 ]
 
-export const trade71: TradeDetail = {
+export const trade71 = {
   id: 71,
   account_id: 1,
   instrument: { id: 1, symbol: 'NQ', name: 'E-mini Nasdaq', tick_size: '0.25000000', tick_value: '5.00000000' },
@@ -74,7 +73,7 @@ export const trade71: TradeDetail = {
   created_at: '2026-09-08T10:20:00Z',
 }
 
-export function listItem(overrides: Partial<TradeListItem> = {}): TradeListItem {
+export function listItem(overrides = {}) {
   return {
     id: 71,
     account_id: 1,
@@ -104,7 +103,7 @@ export function listItem(overrides: Partial<TradeListItem> = {}): TradeListItem 
   }
 }
 
-export const tradeList: TradeList = {
+export const tradeList = {
   summary: {
     trades: 88,
     wins: 56,
@@ -129,7 +128,7 @@ export const tradeList: TradeList = {
   page_size: 50,
 }
 
-export const dashboard: Dashboard = {
+export const dashboard = {
   range: 'ALL',
   account: 'all',
   currency: 'USD',

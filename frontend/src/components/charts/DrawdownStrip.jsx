@@ -1,11 +1,10 @@
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 
-import type { Equity } from '../../api/types'
-import { toDrawdownData, type DrawdownDatum } from '../../lib/chartData'
+import { toDrawdownData } from '../../lib/chartData'
 import { formatDateTime, percent } from '../../lib/format'
 import { CHART } from './colors'
 
-function DrawdownTooltip({ active, payload }: { active?: boolean; payload?: { payload: DrawdownDatum }[] }) {
+function DrawdownTooltip({ active, payload }) {
   const datum = payload?.[0]?.payload
   if (!active || !datum) return null
   return (
@@ -16,7 +15,7 @@ function DrawdownTooltip({ active, payload }: { active?: boolean; payload?: { pa
   )
 }
 
-export function DrawdownStrip({ equity }: { equity: Equity }) {
+export function DrawdownStrip({ equity }) {
   const data = toDrawdownData(equity.points, Number(equity.baseline))
   const floor = Math.min(-1, ...data.map((d) => d.drawdown))
 
@@ -28,7 +27,7 @@ export function DrawdownStrip({ equity }: { equity: Equity }) {
           <YAxis
             domain={[floor * 1.15, 0]}
             tick={{ fill: CHART.muted, fontSize: 11, fontFamily: 'Space Mono, monospace' }}
-            tickFormatter={(v: number) => `${v.toFixed(0)}%`}
+            tickFormatter={(v) => `${v.toFixed(0)}%`}
             stroke={CHART.navy}
             width={56}
             tickCount={3}

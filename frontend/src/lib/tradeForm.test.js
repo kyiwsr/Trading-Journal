@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
 import { ApiError } from '../api/client'
-import type { Setup, TradeDetail } from '../api/types'
 import { trade71 } from '../test/fixtures'
 import {
   buildPayload,
@@ -13,10 +12,9 @@ import {
   toLocalInput,
   trimZeros,
   validateForm,
-  type TradeFormState,
 } from './tradeForm'
 
-const setup: Setup = {
+const setup = {
   id: 4,
   name: 'Sweep scalp',
   subtitle: null,
@@ -29,7 +27,7 @@ const setup: Setup = {
   ],
 }
 
-function filled(): TradeFormState {
+function filled() {
   const form = emptyForm({ accountId: '1' })
   return {
     ...form,
@@ -160,11 +158,11 @@ describe('buildPayload', () => {
 
 describe('formFromTrade', () => {
   it('loads a saved trade back into form state', () => {
-    const savedSetup: Setup = {
+    const savedSetup = {
       ...setup,
       criteria: trade71.criteria.map((c, order) => ({ id: c.criterion_id, label: c.label, weight: c.weight, display_order: order })),
     }
-    const form = formFromTrade(trade71 as TradeDetail, savedSetup)
+    const form = formFromTrade(trade71, savedSetup)
     expect(form.accountId).toBe('1')
     expect(form.instrumentId).toBe('1')
     expect(form.setupId).toBe('4')
@@ -178,11 +176,11 @@ describe('formFromTrade', () => {
   })
 
   it('leaves criteria added after the trade was saved unchecked', () => {
-    const grown: Setup = {
+    const grown = {
       ...setup,
       criteria: [...setup.criteria, { id: 99, label: 'New rule', weight: '10', display_order: 2 }],
     }
-    expect(formFromTrade(trade71 as TradeDetail, grown).checks[99]).toEqual({ checked: false, note: '' })
+    expect(formFromTrade(trade71, grown).checks[99]).toEqual({ checked: false, note: '' })
   })
 })
 
@@ -219,7 +217,7 @@ describe('issuesToErrors', () => {
 
 describe('API decimals in exponent form', () => {
   it('reads a zero written as 0E-8 as empty slippage, so an unchanged trade validates and saves', () => {
-    const trade = { ...trade71, slippage_ticks: '0E-8' } as TradeDetail
+    const trade = { ...trade71, slippage_ticks: '0E-8' }
     const form = formFromTrade(trade, null)
     expect(form.slippageTicks).toBe('')
     expect(validateForm(form)).toEqual({})

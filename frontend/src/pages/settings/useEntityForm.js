@@ -1,27 +1,26 @@
-import { useState, type FormEvent } from 'react'
+import { useState } from 'react'
 
 import { ApiError } from '../../api/client'
-import type { FormErrors } from '../../lib/tradeForm'
 
 // Shared submit flow for the small settings forms: validate, save, then report API errors in one summary.
-export function useEntityForm<T>(
-  initial: T,
-  validate: (form: T) => FormErrors,
-  save: (form: T) => Promise<unknown>,
-  onDone: () => void,
+export function useEntityForm(
+  initial,
+  validate,
+  save,
+  onDone,
 ) {
   const [form, setForm] = useState(initial)
   const [attempted, setAttempted] = useState(false)
-  const [apiProblem, setApiProblem] = useState<string | null>(null)
+  const [apiProblem, setApiProblem] = useState(null)
   const [saving, setSaving] = useState(false)
   const [submitCount, setSubmitCount] = useState(0)
 
-  const errors: FormErrors = attempted ? validate(form) : {}
+  const errors = attempted ? validate(form) : {}
   const problems = [...Object.values(errors), ...(apiProblem ? [apiProblem] : [])]
 
-  const patch = (change: Partial<T>) => setForm((current) => ({ ...current, ...change }))
+  const patch = (change) => setForm((current) => ({ ...current, ...change }))
 
-  const submit = async (event: FormEvent) => {
+  const submit = async (event) => {
     event.preventDefault()
     setAttempted(true)
     setApiProblem(null)

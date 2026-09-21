@@ -8,7 +8,6 @@ import {
   useSaveFeeProfile,
 } from '../../api/queries'
 import { ApiError } from '../../api/client'
-import type { FeeBasis, FeeProfile, FeeTemplate } from '../../api/types'
 import { Button, Card, EmptyState, ErrorState, Field, Input, LoadingState, Panel, Select, Textarea } from '../../components'
 import {
   blankFeeRow,
@@ -16,18 +15,15 @@ import {
   feeProfileFormFrom,
   feeProfilePayload,
   validateFeeProfile,
-  type FeeProfileForm,
 } from '../../lib/settingsForms'
 import { trimZeros } from '../../lib/tradeForm'
 import { EditorShell } from './EditorShell'
 import { EntityList, EntityRow } from './EntityList'
 import { useEntityForm } from './useEntityForm'
 
-type Editing = 'new' | number | null
+const BASIS_LABEL = { per_fill: 'per fill', per_contract: 'per contract' }
 
-const BASIS_LABEL: Record<FeeBasis, string> = { per_fill: 'per fill', per_contract: 'per contract' }
-
-const summary = (components: { name: string; amount: string; basis: FeeBasis }[]) =>
+const summary = (components) =>
   components.map((component) => `${component.name} ${trimZeros(component.amount)} ${BASIS_LABEL[component.basis]}`).join(' · ')
 
 export default function FeeProfilesTab() {
@@ -35,15 +31,15 @@ export default function FeeProfilesTab() {
   const templates = useFeeTemplates()
   const archive = useFeeProfileArchive()
   const fromTemplate = useFeeProfileFromTemplate()
-  const [editing, setEditing] = useState<Editing>(null)
-  const [copyError, setCopyError] = useState<string | null>(null)
+  const [editing, setEditing] = useState(null)
+  const [copyError, setCopyError] = useState(null)
 
   if (profiles.isPending) return <LoadingState what="your fee profiles" />
   if (profiles.isError) return <ErrorState what="your fee profiles" error={profiles.error} onRetry={() => void profiles.refetch()} />
 
   const editingProfile = typeof editing === 'number' ? profiles.data.find((profile) => profile.id === editing) : undefined
 
-  const copy = async (template: FeeTemplate) => {
+  const copy = async (template) => {
     setCopyError(null)
     try {
       const created = await fromTemplate.mutateAsync({ template_id: template.id })
@@ -139,9 +135,9 @@ export default function FeeProfilesTab() {
   )
 }
 
-function FeeProfileEditor({ profile, onDone }: { profile: FeeProfile | null; onDone: () => void }) {
+function FeeProfileEditor({ profile, onDone }) {
   const save = useSaveFeeProfile(profile?.id)
-  const entity = useEntityForm<FeeProfileForm>(
+  const entity = useEntityForm(
     profile ? feeProfileFormFrom(profile) : emptyFeeProfileForm(),
     validateFeeProfile,
     (form) => save.mutateAsync(feeProfilePayload(form)),
@@ -149,7 +145,7 @@ function FeeProfileEditor({ profile, onDone }: { profile: FeeProfile | null; onD
   )
   const { form, patch, errors } = entity
 
-  const changeRow = (index: number, change: Partial<FeeProfileForm['components'][number]>) =>
+  const changeRow = (index, change) =>
     patch({ components: form.components.map((row, i) => (i === index ? { ...row, ...change } : row)) })
 
   return (
@@ -202,7 +198,7 @@ function FeeProfileEditor({ profile, onDone }: { profile: FeeProfile | null; onD
                   <Select
                     {...control}
                     value={row.basis}
-                    onChange={(event) => changeRow(index, { basis: event.target.value as FeeBasis })}
+                    onChange={(event) => changeRow(index, { basis: event.target.value })}
                   >
                     <option value="per_fill">Per fill</option>
                     <option value="per_contract">Per contract</option>

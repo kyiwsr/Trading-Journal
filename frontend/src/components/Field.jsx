@@ -1,17 +1,7 @@
-import { useId, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react'
-
-type ControlProps = { id: string; 'aria-describedby': string | undefined; 'aria-invalid': true | undefined }
-
-type Props = {
-  label: string
-  hint?: ReactNode
-  error?: string
-  className?: string
-  children: (control: ControlProps) => ReactNode
-}
+import { useId } from 'react'
 
 // Wires one label, hint and error message to the control it renders, so every input has an accessible name and description.
-export function Field({ label, hint, error, className = '', children }: Props) {
+export function Field({ label, hint, error, className = '', children }) {
   const id = useId()
   const hintId = `${id}-hint`
   const errorId = `${id}-error`
@@ -36,10 +26,10 @@ export function Field({ label, hint, error, className = '', children }: Props) {
   )
 }
 
-export function Select({ className = '', ...rest }: SelectHTMLAttributes<HTMLSelectElement>) {
+export function Select({ className = '', ...rest }) {
   return <select className={`input select-input ${className}`.trim()} {...rest} />
 }
 
-export function Textarea({ className = '', ...rest }: TextareaHTMLAttributes<HTMLTextAreaElement>) {
+export function Textarea({ className = '', ...rest }) {
   return <textarea className={`input textarea ${className}`.trim()} {...rest} />
 }

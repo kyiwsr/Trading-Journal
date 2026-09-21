@@ -1,11 +1,11 @@
-import { useEffect, useRef, type ReactNode } from 'react'
+import { useEffect, useRef } from 'react'
 import { useBlocker } from 'react-router-dom'
 
 import { ConfirmDialog } from '../components'
 
 // Blocks in-app navigation to another page, and closing the tab, while a form holds unsaved changes.
 // Call allowLeave() right before navigating away after a successful save.
-export function useLeaveGuard(dirty: boolean, subject: string): { allowLeave: () => void; dialog: ReactNode } {
+export function useLeaveGuard(dirty, subject) {
   const leaving = useRef(false)
   const dirtyRef = useRef(false)
 
@@ -21,7 +21,7 @@ export function useLeaveGuard(dirty: boolean, subject: string): { allowLeave: ()
 
   useEffect(() => {
     if (!dirty) return
-    const warn = (event: BeforeUnloadEvent) => event.preventDefault()
+    const warn = (event) => event.preventDefault()
     window.addEventListener('beforeunload', warn)
     return () => window.removeEventListener('beforeunload', warn)
   }, [dirty])

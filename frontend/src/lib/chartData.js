@@ -1,16 +1,6 @@
-import type { EquityPoint } from '../api/types'
 
-export type EquityDatum = {
-  tradeId: number
-  time: number
-  equity: number
-  netPnl: number
-  result: EquityPoint['result']
-}
 
-export type DrawdownDatum = { time: number; drawdown: number }
-
-export function toEquityData(points: EquityPoint[]): EquityDatum[] {
+export function toEquityData(points) {
   return points.map((p) => ({
     tradeId: p.trade_id,
     time: new Date(p.closed_at).getTime(),
@@ -21,7 +11,7 @@ export function toEquityData(points: EquityPoint[]): EquityDatum[] {
 }
 
 // Percent below the running peak; the starting balance counts as the first peak.
-export function toDrawdownData(points: EquityPoint[], baseline: number): DrawdownDatum[] {
+export function toDrawdownData(points, baseline) {
   let peak = baseline
   return points.map((p) => {
     const equity = Number(p.equity)
@@ -31,14 +21,14 @@ export function toDrawdownData(points: EquityPoint[], baseline: number): Drawdow
 }
 
 // Round bounds and ticks so the axis reads $150K, $160K rather than $159.3K.
-export function niceScale(low: number, high: number, target = 5): { min: number; max: number; ticks: number[] } {
+export function niceScale(low, high, target = 5) {
   const range = Math.max(high - low, 1)
   const rough = range / target
   const magnitude = 10 ** Math.floor(Math.log10(rough))
   const step = ([1, 2, 2.5, 5, 10].map((m) => m * magnitude).find((s) => s >= rough) ?? 10 * magnitude)
   const min = Math.floor(low / step) * step
   const max = Math.max(Math.ceil(high / step) * step, min + step)
-  const ticks: number[] = []
+  const ticks = []
   for (let value = min; value <= max + step / 2; value += step) ticks.push(Number(value.toFixed(6)))
   return { min: Number(min.toFixed(6)), max: Number(max.toFixed(6)), ticks }
 }

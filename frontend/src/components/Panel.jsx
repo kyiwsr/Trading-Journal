@@ -1,17 +1,8 @@
-import { useId, type ReactNode } from 'react'
+import { useId } from 'react'
 
 import { Card } from './Card'
 
-type Props = {
-  title: string
-  note?: ReactNode
-  actions?: ReactNode
-  tone?: 'default' | 'tint' | 'quest' | 'penalty'
-  className?: string
-  children: ReactNode
-}
-
-export function Panel({ title, note, actions, tone = 'default', className = '', children }: Props) {
+export function Panel({ title, note, actions, tone = 'default', className = '', children }) {
   const headingId = useId()
   return (
     <Card tone={tone} className={`panel ${className}`.trim()} role="region" aria-labelledby={headingId}>

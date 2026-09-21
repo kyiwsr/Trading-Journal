@@ -3,7 +3,6 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 
 import { buildUrl } from '../api/client'
 import { useAccounts, useSetups, useTrades } from '../api/queries'
-import type { Direction, Result, SortField, TradeListItem } from '../api/types'
 import {
   Amount,
   Badge,
@@ -35,18 +34,18 @@ import {
 } from '../lib/urlState'
 import { useScoring } from '../lib/useScoring'
 
-const SIDE_OPTIONS: { value: Direction | 'all'; label: string }[] = [
+const SIDE_OPTIONS = [
   { value: 'all', label: 'All' },
   { value: 'long', label: 'Long' },
   { value: 'short', label: 'Short' },
 ]
-const RESULT_OPTIONS: { value: Result | 'all'; label: string }[] = [
+const RESULT_OPTIONS = [
   { value: 'all', label: 'All' },
   { value: 'win', label: 'Wins' },
   { value: 'loss', label: 'Losses' },
   { value: 'breakeven', label: 'Breakeven' },
 ]
-const RANGE_PHRASE = { '30D': 'last 30 days', '90D': 'last 90 days', YTD: 'this year', ALL: 'all time' } as const
+const RANGE_PHRASE = { '30D': 'last 30 days', '90D': 'last 90 days', YTD: 'this year', ALL: 'all time' }
 
 export default function TradeLog() {
   const [params, setParams] = useSearchParams()
@@ -82,16 +81,16 @@ export default function TradeLog() {
     return () => clearTimeout(timer)
   }, [searchText, committed, params, setParams])
 
-  const patch = (change: Record<string, string | number | null>) => setParams(patchParams(params, change))
-  const sortBy = (field: SortField) =>
+  const patch = (change) => setParams(patchParams(params, change))
+  const sortBy = (field) =>
     patch({ sort_by: field, order: ledger.sort_by === field && ledger.order === 'desc' ? 'asc' : 'desc' })
 
-  const chipLabel = (key: (typeof chips)[number]['key'], value: string): string => {
+  const chipLabel = (key, value) => {
     if (key === 'account') return `Account: ${accounts.data?.find((a) => String(a.id) === value)?.name ?? value}`
     if (key === 'range') return `Range: ${RANGE_PHRASE[scope.range]}`
     if (key === 'setup') return `Setup: ${setups.data?.find((s) => String(s.id) === value)?.name ?? value}`
     if (key === 'side') return `Side: ${value}`
-    if (key === 'result') return `Result: ${RESULT_LABEL[value as Result]}`
+    if (key === 'result') return `Result: ${RESULT_LABEL[value]}`
     return `Search: ${value}`
   }
 
@@ -306,7 +305,7 @@ export default function TradeLog() {
   )
 }
 
-function LedgerRow({ trade, currency, search }: { trade: TradeListItem; currency: string | null; search: string }) {
+function LedgerRow({ trade, currency, search }) {
   return (
     <tr>
       <th scope="row" className="row-head">

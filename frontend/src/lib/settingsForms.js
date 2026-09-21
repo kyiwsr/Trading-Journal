@@ -1,14 +1,12 @@
-import type { Account, FeeBasis, FeeProfile, Instrument } from '../api/types'
-import type { AccountFields, FeeProfileFields, InstrumentFields } from '../api/queries'
 import { newRowKey } from './rowKey'
-import { trimZeros, type FormErrors } from './tradeForm'
+import { trimZeros } from './tradeForm'
 import { parseDecimal } from './tradeMath'
 
-const blank = (text: string) => text.trim() === ''
-const orNull = (text: string) => text.trim() || null
+const blank = (text) => text.trim() === ''
+const orNull = (text) => text.trim() || null
 
 // Limits mirror backend/app/schemas: Money is 0 or more with four decimals, prices are greater than 0 with eight.
-function moneyError(text: string, what: string): string | undefined {
+function moneyError(text, what) {
   if (blank(text)) return `Enter ${what}.`
   const value = parseDecimal(text)
   if (value === null) return 'Enter a plain number.'
@@ -18,7 +16,7 @@ function moneyError(text: string, what: string): string | undefined {
   return undefined
 }
 
-function positiveError(text: string, what: string): string | undefined {
+function positiveError(text, what) {
   if (blank(text)) return `Enter ${what}.`
   const value = parseDecimal(text)
   if (value === null) return 'Enter a plain number.'
@@ -27,17 +25,7 @@ function positiveError(text: string, what: string): string | undefined {
   return undefined
 }
 
-export type AccountForm = {
-  name: string
-  label: string
-  brokerName: string
-  route: string
-  startingBalance: string
-  currency: string
-  feeProfileId: string
-}
-
-export const emptyAccountForm = (): AccountForm => ({
+export const emptyAccountForm = () => ({
   name: '',
   label: '',
   brokerName: '',
@@ -47,7 +35,7 @@ export const emptyAccountForm = (): AccountForm => ({
   feeProfileId: '',
 })
 
-export const accountFormFrom = (account: Account): AccountForm => ({
+export const accountFormFrom = (account) => ({
   name: account.name,
   label: account.label ?? '',
   brokerName: account.broker_name ?? '',
@@ -57,8 +45,8 @@ export const accountFormFrom = (account: Account): AccountForm => ({
   feeProfileId: account.fee_profile_id === null ? '' : String(account.fee_profile_id),
 })
 
-export function validateAccount(form: AccountForm): FormErrors {
-  const errors: FormErrors = {}
+export function validateAccount(form) {
+  const errors = {}
   if (blank(form.name)) errors.name = 'Give the account a name.'
   else if (form.name.trim().length > 120) errors.name = 'Use at most 120 characters.'
   const balance = moneyError(form.startingBalance, 'the starting balance')
@@ -67,7 +55,7 @@ export function validateAccount(form: AccountForm): FormErrors {
   return errors
 }
 
-export const accountPayload = (form: AccountForm): AccountFields => ({
+export const accountPayload = (form) => ({
   name: form.name.trim(),
   label: orNull(form.label),
   broker_name: orNull(form.brokerName),
@@ -77,19 +65,17 @@ export const accountPayload = (form: AccountForm): AccountFields => ({
   fee_profile_id: form.feeProfileId ? Number(form.feeProfileId) : null,
 })
 
-export type InstrumentForm = { symbol: string; name: string; tickSize: string; tickValue: string }
+export const emptyInstrumentForm = () => ({ symbol: '', name: '', tickSize: '', tickValue: '' })
 
-export const emptyInstrumentForm = (): InstrumentForm => ({ symbol: '', name: '', tickSize: '', tickValue: '' })
-
-export const instrumentFormFrom = (instrument: Instrument): InstrumentForm => ({
+export const instrumentFormFrom = (instrument) => ({
   symbol: instrument.symbol,
   name: instrument.name ?? '',
   tickSize: trimZeros(instrument.tick_size),
   tickValue: trimZeros(instrument.tick_value),
 })
 
-export function validateInstrument(form: InstrumentForm): FormErrors {
-  const errors: FormErrors = {}
+export function validateInstrument(form) {
+  const errors = {}
   if (blank(form.symbol)) errors.symbol = 'Enter the symbol.'
   else if (form.symbol.trim().length > 32) errors.symbol = 'Use at most 32 characters.'
   const size = positiveError(form.tickSize, 'the tick size')
@@ -99,21 +85,18 @@ export function validateInstrument(form: InstrumentForm): FormErrors {
   return errors
 }
 
-export const instrumentPayload = (form: InstrumentForm): InstrumentFields => ({
+export const instrumentPayload = (form) => ({
   symbol: form.symbol.trim().toUpperCase(),
   name: orNull(form.name),
   tick_size: form.tickSize.trim(),
   tick_value: form.tickValue.trim(),
 })
 
-export type FeeRow = { key: string; name: string; amount: string; basis: FeeBasis }
-export type FeeProfileForm = { name: string; notes: string; components: FeeRow[] }
+export const blankFeeRow = () => ({ key: newRowKey(), name: '', amount: '', basis: 'per_fill' })
 
-export const blankFeeRow = (): FeeRow => ({ key: newRowKey(), name: '', amount: '', basis: 'per_fill' })
+export const emptyFeeProfileForm = () => ({ name: '', notes: '', components: [] })
 
-export const emptyFeeProfileForm = (): FeeProfileForm => ({ name: '', notes: '', components: [] })
-
-export const feeProfileFormFrom = (profile: FeeProfile): FeeProfileForm => ({
+export const feeProfileFormFrom = (profile) => ({
   name: profile.name,
   notes: profile.notes ?? '',
   components: profile.components.map((component) => ({
@@ -124,8 +107,8 @@ export const feeProfileFormFrom = (profile: FeeProfile): FeeProfileForm => ({
   })),
 })
 
-export function validateFeeProfile(form: FeeProfileForm): FormErrors {
-  const errors: FormErrors = {}
+export function validateFeeProfile(form) {
+  const errors = {}
   if (blank(form.name)) errors.name = 'Give the fee profile a name.'
   else if (form.name.trim().length > 120) errors.name = 'Use at most 120 characters.'
   form.components.forEach((row, index) => {
@@ -136,13 +119,13 @@ export function validateFeeProfile(form: FeeProfileForm): FormErrors {
   return errors
 }
 
-export const feeProfilePayload = (form: FeeProfileForm): FeeProfileFields => ({
+export const feeProfilePayload = (form) => ({
   name: form.name.trim(),
   notes: orNull(form.notes),
   components: form.components.map((row) => ({ name: row.name.trim(), amount: row.amount.trim(), basis: row.basis })),
 })
 
-export function validateCutoff(text: string): string | undefined {
+export function validateCutoff(text) {
   if (blank(text)) return 'Enter a whole number from 0 to 100.'
   if (!/^\d+$/.test(text.trim())) return 'Use a whole number from 0 to 100.'
   return Number(text) > 100 ? 'Use a whole number from 0 to 100.' : undefined

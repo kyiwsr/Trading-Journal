@@ -1,9 +1,8 @@
 import { describe, expect, it } from 'vitest'
 
-import type { EquityPoint } from '../api/types'
 import { niceScale, toDrawdownData, toEquityData } from './chartData'
 
-const point = (id: number, day: number, equity: string, result: EquityPoint['result']): EquityPoint => ({
+const point = (id, day, equity, result) => ({
   trade_id: id,
   closed_at: `2026-09-${String(day).padStart(2, '0')}T10:00:00Z`,
   equity,

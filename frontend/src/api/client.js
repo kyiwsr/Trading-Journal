@@ -2,13 +2,11 @@ import { trackRequest } from './waking'
 
 const BASE = (import.meta.env.VITE_API_BASE_URL ?? '/api').replace(/\/$/, '')
 
-export type ApiIssue = { loc: (string | number)[]; msg: string }
-
 export class ApiError extends Error {
-  status: number
-  issues: ApiIssue[]
+  status
+  issues
 
-  constructor(status: number, message: string, issues: ApiIssue[] = []) {
+  constructor(status, message, issues = []) {
     super(message)
     this.name = 'ApiError'
     this.status = status
@@ -16,9 +14,7 @@ export class ApiError extends Error {
   }
 }
 
-export type Query = Record<string, string | number | null | undefined>
-
-export function buildUrl(path: string, query?: Query): string {
+export function buildUrl(path, query) {
   const params = new URLSearchParams()
   for (const [key, value] of Object.entries(query ?? {})) {
     if (value !== undefined && value !== null && value !== '') params.set(key, String(value))
@@ -30,12 +26,12 @@ export function buildUrl(path: string, query?: Query): string {
 // Pydantic prefixes validator failures with this; the user needs only the sentence after it.
 const VALUE_ERROR_PREFIX = /^Value error, /
 
-async function readDetail(res: Response): Promise<{ message: string; issues: ApiIssue[] }> {
+async function readDetail(res) {
   try {
     const body = await res.json()
     if (typeof body?.detail === 'string') return { message: body.detail, issues: [] }
     if (Array.isArray(body?.detail) && body.detail[0]?.msg) {
-      const issues: ApiIssue[] = body.detail.map((item: { loc?: (string | number)[]; msg: unknown }) => ({
+      const issues = body.detail.map((item) => ({
         loc: Array.isArray(item.loc) ? item.loc : [],
         msg: String(item.msg).replace(VALUE_ERROR_PREFIX, ''),
       }))
@@ -47,12 +43,10 @@ async function readDetail(res: Response): Promise<{ message: string; issues: Api
   return { message: res.statusText || `Request failed (${res.status})`, issues: [] }
 }
 
-type Options = { method?: string; body?: unknown; query?: Query; signal?: AbortSignal }
-
-export async function api<T>(path: string, { method = 'GET', body, query, signal }: Options = {}): Promise<T> {
+export async function api(path, { method = 'GET', body, query, signal } = {}) {
   const done = trackRequest()
   try {
-    let res: Response
+    let res
     try {
       res = await fetch(buildUrl(path, query), {
         method,
@@ -69,8 +63,8 @@ export async function api<T>(path: string, { method = 'GET', body, query, signal
       const { message, issues } = await readDetail(res)
       throw new ApiError(res.status, message, issues)
     }
-    if (res.status === 204) return undefined as T
-    return (await res.json()) as T
+    if (res.status === 204) return undefined
+    return await res.json()
   } finally {
     done()
   }

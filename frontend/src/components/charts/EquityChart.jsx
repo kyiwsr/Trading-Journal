@@ -1,16 +1,13 @@
 import { CartesianGrid, Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 
-import type { Equity } from '../../api/types'
-import { niceScale, toEquityData, type EquityDatum } from '../../lib/chartData'
+import { niceScale, toEquityData } from '../../lib/chartData'
 import { compactMoney, formatDateTime, money } from '../../lib/format'
 import { CHART } from './colors'
 
 const MAX_MARKERS = 150
 
-type DotProps = { cx?: number; cy?: number; payload?: EquityDatum }
-
 // Win is a circle, loss a diamond, breakeven a square: the result reads without color.
-function ResultMarker({ cx, cy, payload }: DotProps) {
+function ResultMarker({ cx, cy, payload }) {
   if (cx === undefined || cy === undefined || !payload) return <g />
   const ring = { stroke: CHART.canvas, strokeWidth: 2 }
   if (payload.result === 'win') return <circle cx={cx} cy={cy} r={5} fill={CHART.green} {...ring} />
@@ -20,7 +17,7 @@ function ResultMarker({ cx, cy, payload }: DotProps) {
   return <rect x={cx - 4} y={cy - 4} width={8} height={8} fill={CHART.navy} {...ring} />
 }
 
-function EquityTooltip({ active, payload, currency }: { active?: boolean; payload?: { payload: EquityDatum }[]; currency: string | null }) {
+function EquityTooltip({ active, payload, currency }) {
   const datum = payload?.[0]?.payload
   if (!active || !datum) return null
   return (
@@ -35,7 +32,7 @@ function EquityTooltip({ active, payload, currency }: { active?: boolean; payloa
 
 const AXIS_TICK = { fill: CHART.muted, fontSize: 11, fontFamily: 'Space Mono, monospace' }
 
-export function EquityChart({ equity, currency }: { equity: Equity; currency: string | null }) {
+export function EquityChart({ equity, currency }) {
   const data = toEquityData(equity.points)
   const baseline = Number(equity.baseline)
   const peak = Number(equity.peak)
@@ -55,7 +52,7 @@ export function EquityChart({ equity, currency }: { equity: Equity; currency: st
             scale="time"
             domain={['dataMin', 'dataMax']}
             tick={AXIS_TICK}
-            tickFormatter={(t: number) => new Date(t).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+            tickFormatter={(t) => new Date(t).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
             stroke={CHART.navy}
             minTickGap={48}
           />
@@ -64,7 +61,7 @@ export function EquityChart({ equity, currency }: { equity: Equity; currency: st
             ticks={scale.ticks}
             interval={0}
             tick={AXIS_TICK}
-            tickFormatter={(v: number) => compactMoney(v, currency)}
+            tickFormatter={(v) => compactMoney(v, currency)}
             stroke={CHART.navy}
             width={56}
           />

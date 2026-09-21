@@ -1,19 +1,17 @@
-import type { Band, Result, Settings, SetupRank } from '../api/types'
 
-export type Bands = Settings['bands']
 
 // Used until GET /settings answers, and if it fails. The API is the source of truth.
-export const DEFAULT_BANDS: Bands = { elite_min: 85, solid_min: 70, sub_optimal_min: 60 }
+export const DEFAULT_BANDS = { elite_min: 85, solid_min: 70, sub_optimal_min: 60 }
 export const DEFAULT_COMPLIANCE_CUTOFF = 80
 
-export const BAND_LABEL: Record<Band, string> = {
+export const BAND_LABEL = {
   elite: 'Elite',
   solid: 'Solid',
   sub_optimal: 'Sub-optimal',
   rule_breach: 'Rule breach',
 }
 
-export function scoreBandList(bands: Bands = DEFAULT_BANDS): { band: Band; label: string; range: string }[] {
+export function scoreBandList(bands = DEFAULT_BANDS) {
   return [
     { band: 'elite', label: BAND_LABEL.elite, range: `${bands.elite_min}% to 100%` },
     { band: 'solid', label: BAND_LABEL.solid, range: `${bands.solid_min}% to ${bands.elite_min - 1}%` },
@@ -22,10 +20,10 @@ export function scoreBandList(bands: Bands = DEFAULT_BANDS): { band: Band; label
   ]
 }
 
-export const RANK_LABEL: Record<SetupRank, string> = {
+export const RANK_LABEL = {
   elite: 'Elite',
   solid: 'Solid',
   negative_edge: 'Negative edge',
 }
 
-export const RESULT_LABEL: Record<Result, string> = { win: 'Win', loss: 'Loss', breakeven: 'Breakeven' }
+export const RESULT_LABEL = { win: 'Win', loss: 'Loss', breakeven: 'Breakeven' }

@@ -1,8 +1,7 @@
-import { useState, type FormEvent } from 'react'
+import { useState } from 'react'
 
 import { ApiError } from '../../api/client'
 import { useSaveSettings, useSettings } from '../../api/queries'
-import type { Settings } from '../../api/types'
 import { Button, ErrorState, Field, Input, LoadingState, Panel } from '../../components'
 import { scoreBandList } from '../../lib/labels'
 import { validateCutoff } from '../../lib/settingsForms'
@@ -14,16 +13,16 @@ export default function PreferencesTab() {
   return <PreferencesForm settings={settings.data} />
 }
 
-function PreferencesForm({ settings }: { settings: Settings }) {
+function PreferencesForm({ settings }) {
   const save = useSaveSettings()
   const [cutoff, setCutoff] = useState(String(settings.compliance_cutoff))
   const [attempted, setAttempted] = useState(false)
   const [saved, setSaved] = useState(false)
-  const [failure, setFailure] = useState<string | null>(null)
+  const [failure, setFailure] = useState(null)
 
   const error = attempted ? validateCutoff(cutoff) : undefined
 
-  const submit = async (event: FormEvent) => {
+  const submit = async (event) => {
     event.preventDefault()
     setAttempted(true)
     setSaved(false)

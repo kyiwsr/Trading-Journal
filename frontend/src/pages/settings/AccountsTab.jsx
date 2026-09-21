@@ -1,7 +1,6 @@
 import { useState } from 'react'
 
 import { useAccountArchive, useAccounts, useFeeProfiles, useSaveAccount } from '../../api/queries'
-import type { Account, FeeProfile } from '../../api/types'
 import { Button, EmptyState, ErrorState, Field, Input, LoadingState, Panel, Select } from '../../components'
 import { money } from '../../lib/format'
 import {
@@ -9,19 +8,16 @@ import {
   accountPayload,
   emptyAccountForm,
   validateAccount,
-  type AccountForm,
 } from '../../lib/settingsForms'
 import { EditorShell } from './EditorShell'
 import { EntityList, EntityRow } from './EntityList'
 import { useEntityForm } from './useEntityForm'
 
-type Editing = 'new' | number | null
-
 export default function AccountsTab() {
   const accounts = useAccounts(true)
   const profiles = useFeeProfiles(true)
   const archive = useAccountArchive()
-  const [editing, setEditing] = useState<Editing>(null)
+  const [editing, setEditing] = useState(null)
 
   if (accounts.isPending || profiles.isPending) return <LoadingState what="your accounts" />
   if (accounts.isError) return <ErrorState what="your accounts" error={accounts.error} onRetry={() => void accounts.refetch()} />
@@ -90,7 +86,7 @@ export default function AccountsTab() {
   )
 }
 
-function AccountMeta({ account, profiles }: { account: Account; profiles: FeeProfile[] }) {
+function AccountMeta({ account, profiles }) {
   const profile = profiles.find((item) => item.id === account.fee_profile_id)
   const source = [account.broker_name, account.route].filter(Boolean).join(' · ')
   return (
@@ -102,9 +98,9 @@ function AccountMeta({ account, profiles }: { account: Account; profiles: FeePro
   )
 }
 
-function AccountEditor({ account, profiles, onDone }: { account: Account | null; profiles: FeeProfile[]; onDone: () => void }) {
+function AccountEditor({ account, profiles, onDone }) {
   const save = useSaveAccount(account?.id)
-  const entity = useEntityForm<AccountForm>(
+  const entity = useEntityForm(
     account ? accountFormFrom(account) : emptyAccountForm(),
     validateAccount,
     (form) => save.mutateAsync(accountPayload(form)),

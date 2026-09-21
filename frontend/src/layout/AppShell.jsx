@@ -2,7 +2,6 @@ import { Suspense } from 'react'
 import { Link, NavLink, Outlet, useNavigate, useSearchParams } from 'react-router-dom'
 
 import { useAccounts, useDashboard, useLogout } from '../api/queries'
-import type { RangeName } from '../api/types'
 import { useWaking } from '../api/waking'
 import { Badge, Button, LoadingState, Segmented, XpBar } from '../components'
 import { number } from '../lib/format'
@@ -21,7 +20,7 @@ export function AppShell() {
   const search = scopeSearch(scope)
   const xp = dashboard.data?.xp
 
-  const setScope = (patch: { account?: string; range?: RangeName }) => setParams(patchParams(params, patch))
+  const setScope = (patch) => setParams(patchParams(params, patch))
 
   return (
     <div className="shell">

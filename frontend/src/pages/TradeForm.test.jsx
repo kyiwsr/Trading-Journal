@@ -2,11 +2,10 @@ import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
 
-import type { FeeProfile, Instrument, Settings, Setup } from '../api/types'
 import { account, dashboard, tradeList, trade71 } from '../test/fixtures'
-import { renderApp, type Routes } from '../test/renderApp'
+import { renderApp } from '../test/renderApp'
 
-const nq: Instrument = {
+const nq = {
   id: 1,
   symbol: 'NQ',
   name: 'E-mini Nasdaq',
@@ -16,7 +15,7 @@ const nq: Instrument = {
   created_at: '2026-01-01T00:00:00Z',
 }
 
-const perFillTariff: FeeProfile = {
+const perFillTariff = {
   id: 9,
   name: 'Example tariff',
   notes: null,
@@ -29,9 +28,9 @@ const perFillTariff: FeeProfile = {
   ],
 }
 
-const exchangeOnly: FeeProfile = { ...perFillTariff, components: [perFillTariff.components[0]] }
+const exchangeOnly = { ...perFillTariff, components: [perFillTariff.components[0]] }
 
-const sweepScalp: Setup = {
+const sweepScalp = {
   id: 4,
   name: 'Sweep scalp',
   subtitle: 'Liquidity sweep',
@@ -41,14 +40,14 @@ const sweepScalp: Setup = {
   criteria: trade71.criteria.map((c, order) => ({ id: c.criterion_id, label: c.label, weight: c.weight, display_order: order })),
 }
 
-const settings: Settings = {
+const settings = {
   compliance_cutoff: 80,
   bands: { elite_min: 85, solid_min: 70, sub_optimal_min: 60 },
   low_sample_threshold: 20,
   elite_setup_min: 90,
 }
 
-function routes(overrides: Routes = {}, tariff: FeeProfile = perFillTariff): Routes {
+function routes(overrides = {}, tariff = perFillTariff) {
   return {
     '/accounts': { body: [{ ...account, fee_profile_id: tariff.id }] },
     '/instruments': { body: [nq] },
@@ -62,9 +61,9 @@ function routes(overrides: Routes = {}, tariff: FeeProfile = perFillTariff): Rou
   }
 }
 
-const fill = (group: string) => within(screen.getByRole('group', { name: group }))
+const fill = (group) => within(screen.getByRole('group', { name: group }))
 
-function enterFill(group: string, values: { price: string; quantity: string; time: string; note?: string }) {
+function enterFill(group, values) {
   const row = fill(group)
   fireEvent.change(row.getByLabelText('Price'), { target: { value: values.price } })
   fireEvent.change(row.getByLabelText('Quantity'), { target: { value: values.quantity } })
@@ -72,7 +71,7 @@ function enterFill(group: string, values: { price: string; quantity: string; tim
   if (values.note) fireEvent.change(row.getByLabelText('Note'), { target: { value: values.note } })
 }
 
-async function openNewTrade(overrides?: Routes, tariff?: FeeProfile) {
+async function openNewTrade(overrides, tariff) {
   const view = renderApp('/trades/new', routes(overrides, tariff), { signedIn: true })
   await screen.findByRole('heading', { name: 'Log a trade' })
   await userEvent.selectOptions(screen.getByLabelText('Instrument'), '1')
@@ -115,7 +114,7 @@ describe('Log a trade', () => {
   })
 
   it('saves the payload the API expects and opens the saved trade', async () => {
-    let body: Record<string, unknown> = {}
+    let body = {}
     const { router } = await openNewTrade({
       '/trades': (_url, init) => {
         if (init?.method !== 'POST') return { body: tradeList }
@@ -136,9 +135,9 @@ describe('Log a trade', () => {
       stop_price: '20372.75',
       slippage_ticks: '0',
     })
-    expect((body.fills as unknown[]).length).toBe(4)
-    expect((body.criteria_checks as { checked: boolean }[]).filter((check) => check.checked)).toHaveLength(1)
-    expect((body.criteria_checks as unknown[]).length).toBe(5)
+    expect(body.fills.length).toBe(4)
+    expect(body.criteria_checks.filter((check) => check.checked)).toHaveLength(1)
+    expect(body.criteria_checks.length).toBe(5)
   })
 
   it('prices a scale-in with a single exit, and counts fees per fill', async () => {
@@ -211,7 +210,7 @@ describe('Log a trade', () => {
     })
     await enterTrade71()
     await userEvent.click(screen.getByRole('button', { name: 'Save trade' }))
-    expect(await within(fill('Entry 1').getByLabelText('Price').closest('.field') as HTMLElement).findByText(/greater than 0/)).toBeInTheDocument()
+    expect(await within(fill('Entry 1').getByLabelText('Price').closest('.field')).findByText(/greater than 0/)).toBeInTheDocument()
   })
 
   it('asks before discarding unsaved changes', async () => {
@@ -254,7 +253,7 @@ describe('Log a trade', () => {
 
 describe('Edit trade', () => {
   it('loads the saved trade and saves changes with PUT', async () => {
-    const methods: string[] = []
+    const methods = []
     const { router } = renderApp(
       '/trades/71/edit',
       routes({

@@ -1,5 +1,5 @@
 import Decimal from 'decimal.js'
-import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 
 import { ApiError } from '../api/client'
@@ -12,7 +12,6 @@ import {
   useSetups,
   useTrade,
 } from '../api/queries'
-import type { Account, FeeProfile, Instrument, Setup, TradeDetail } from '../api/types'
 import {
   Button,
   EmptyState,
@@ -32,10 +31,6 @@ import {
   formFromTrade,
   issuesToErrors,
   validateForm,
-  type CheckState,
-  type FillRow,
-  type FormErrors,
-  type TradeFormState,
 } from '../lib/tradeForm'
 import {
   applyFees,
@@ -46,7 +41,6 @@ import {
   parseDecimal,
   scoreBand,
   totalFees,
-  type FillInput,
 } from '../lib/tradeMath'
 import { readScope, scopeSearch } from '../lib/urlState'
 import { useLeaveGuard } from '../lib/useLeaveGuard'
@@ -58,9 +52,9 @@ import { ScreenshotField } from './trade-form/ScreenshotField'
 const SIDES = [
   { value: 'long', label: 'Long' },
   { value: 'short', label: 'Short' },
-] as const
+]
 
-const FIELD_LABELS: Record<string, string> = {
+const FIELD_LABELS = {
   account: 'Account',
   instrument: 'Instrument',
   setup: 'Setup',
@@ -72,13 +66,13 @@ const FIELD_LABELS: Record<string, string> = {
   fills: 'Fills',
 }
 
-function fieldLabel(key: string): string {
+function fieldLabel(key) {
   const fill = /^(entry|exit)\.(\d+)\.(price|quantity|time|note)$/.exec(key)
   if (fill) return `${fill[1] === 'entry' ? 'Entry' : 'Exit'} ${Number(fill[2]) + 1} ${fill[3]}`
   return FIELD_LABELS[key] ?? key
 }
 
-const accountName = (account: Account) => `${account.name}${account.label ? ` ${account.label}` : ''}`
+const accountName = (account) => `${account.name}${account.label ? ` ${account.label}` : ''}`
 
 export default function TradeForm() {
   const { id } = useParams()
@@ -161,17 +155,7 @@ export default function TradeForm() {
   )
 }
 
-type BodyProps = {
-  trade: TradeDetail | null
-  accounts: Account[]
-  instruments: Instrument[]
-  feeProfiles: FeeProfile[]
-  setups: Setup[]
-  defaultAccountId: string
-  search: string
-}
-
-function TradeFormBody({ trade, accounts, instruments, feeProfiles, setups, defaultAccountId, search }: BodyProps) {
+function TradeFormBody({ trade, accounts, instruments, feeProfiles, setups, defaultAccountId, search }) {
   const navigate = useNavigate()
   const isEdit = trade !== null
   const settings = useSettings()
@@ -180,17 +164,17 @@ function TradeFormBody({ trade, accounts, instruments, feeProfiles, setups, defa
   const [initial] = useState(() =>
     trade ? formFromTrade(trade, setups.find((setup) => setup.id === trade.setup?.id) ?? null) : emptyForm({ accountId: defaultAccountId }),
   )
-  const [form, setForm] = useState<TradeFormState>(initial)
+  const [form, setForm] = useState(initial)
   const baseline = useMemo(() => JSON.stringify(initial), [initial])
   const dirty = JSON.stringify(form) !== baseline
 
   const [attempted, setAttempted] = useState(false)
   const [submitCount, setSubmitCount] = useState(0)
-  const [apiErrors, setApiErrors] = useState<FormErrors>({})
-  const [apiSummary, setApiSummary] = useState<string[]>([])
-  const summaryRef = useRef<HTMLDivElement>(null)
+  const [apiErrors, setApiErrors] = useState({})
+  const [apiSummary, setApiSummary] = useState([])
+  const summaryRef = useRef(null)
 
-  const set = <K extends keyof TradeFormState>(key: K, value: TradeFormState[K]) =>
+  const set = (key, value) =>
     setForm((current) => ({ ...current, [key]: value }))
 
   const instrument = instruments.find((item) => String(item.id) === form.instrumentId) ?? null
@@ -211,8 +195,8 @@ function TradeFormBody({ trade, accounts, instruments, feeProfiles, setups, defa
   )
 
   const live = useMemo(() => {
-    const fills: FillInput[] = []
-    for (const [type, rows] of [['entry', form.entries], ['exit', form.exits]] as const) {
+    const fills = []
+    for (const [type, rows] of [['entry', form.entries], ['exit', form.exits]]) {
       for (const row of rows) {
         const price = parseDecimal(row.price)
         const quantity = parseDecimal(row.quantity)
@@ -256,7 +240,7 @@ function TradeFormBody({ trade, accounts, instruments, feeProfiles, setups, defa
   }, [form, instrument, profile, setup, thresholds])
 
   const clientErrors = useMemo(() => (attempted ? validateForm(form) : {}), [attempted, form])
-  const errors: FormErrors = { ...apiErrors, ...clientErrors }
+  const errors = { ...apiErrors, ...clientErrors }
   const problems = [
     ...Object.entries(errors).map(([key, message]) => `${fieldLabel(key)}: ${message}`),
     ...apiSummary,
@@ -268,10 +252,10 @@ function TradeFormBody({ trade, accounts, instruments, feeProfiles, setups, defa
 
   const guard = useLeaveGuard(dirty, 'trade')
 
-  const changeSetup = (setupId: string) => {
+  const changeSetup = (setupId) => {
     const next = setups.find((item) => String(item.id) === setupId)
     setForm((current) => {
-      const checks: Record<number, CheckState> = {}
+      const checks = {}
       for (const criterion of next?.criteria ?? []) {
         checks[criterion.id] = current.checks[criterion.id] ?? { checked: false, note: '' }
       }
@@ -279,7 +263,7 @@ function TradeFormBody({ trade, accounts, instruments, feeProfiles, setups, defa
     })
   }
 
-  const changeCheck = (criterionId: number, patch: Partial<CheckState>) =>
+  const changeCheck = (criterionId, patch) =>
     setForm((current) => ({
       ...current,
       checks: {
@@ -287,13 +271,13 @@ function TradeFormBody({ trade, accounts, instruments, feeProfiles, setups, defa
         [criterionId]: {
           checked: false,
           note: '',
-          ...(current.checks[criterionId] as Partial<CheckState> | undefined),
+          ...(current.checks[criterionId]),
           ...patch,
         },
       },
     }))
 
-  const submit = async (event: FormEvent) => {
+  const submit = async (event) => {
     event.preventDefault()
     setAttempted(true)
     setApiErrors({})
@@ -478,8 +462,8 @@ function TradeFormBody({ trade, accounts, instruments, feeProfiles, setups, defa
             entries={form.entries}
             exits={form.exits}
             errors={errors}
-            onEntries={(rows: FillRow[]) => set('entries', rows)}
-            onExits={(rows: FillRow[]) => set('exits', rows)}
+            onEntries={(rows) => set('entries', rows)}
+            onExits={(rows) => set('exits', rows)}
           />
         </Panel>
 

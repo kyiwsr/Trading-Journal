@@ -2,11 +2,10 @@ import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
 
-import type { Setup } from '../api/types'
 import { account, dashboard } from '../test/fixtures'
-import { renderApp, type Routes } from '../test/renderApp'
+import { renderApp } from '../test/renderApp'
 
-function makeSetup(overrides: Partial<Setup> = {}): Setup {
+function makeSetup(overrides = {}) {
   return {
     id: 4,
     name: 'celup kaki',
@@ -25,7 +24,7 @@ function makeSetup(overrides: Partial<Setup> = {}): Setup {
 const untraded = makeSetup({ id: 9, name: 'hulur kepala', subtitle: null, criteria: [] })
 const archived = makeSetup({ id: 10, name: 'Old idea', subtitle: null, archived_at: '2026-06-01T00:00:00Z', criteria: [] })
 
-function routes(overrides: Routes = {}): Routes {
+function routes(overrides = {}) {
   return {
     '/accounts': { body: [account] },
     '/dashboard': { body: dashboard },
@@ -43,12 +42,12 @@ describe('Skill Playbook list', () => {
     renderApp('/setups', routes(), { signedIn: true })
     const table = await screen.findByRole('table')
     const rows = within(table).getAllByRole('row')
-    const sweep = within(rows.find((row) => within(row).queryByText('celup kaki')) as HTMLElement)
+    const sweep = within(rows.find((row) => within(row).queryByText('celup kaki')))
     expect(sweep.getByText('Liquidity Sweep Scalp')).toBeInTheDocument()
     expect(sweep.getByText('2 (100 pts)')).toBeInTheDocument()
     expect(sweep.getByText('76.5%')).toBeInTheDocument()
 
-    const fresh = within(rows.find((row) => within(row).queryByText('hulur kepala')) as HTMLElement)
+    const fresh = within(rows.find((row) => within(row).queryByText('hulur kepala')))
     expect(fresh.getByText('No trades yet')).toBeInTheDocument()
     expect(within(table).queryByText('Old idea')).not.toBeInTheDocument()
   })
@@ -72,9 +71,9 @@ describe('Skill Playbook list', () => {
   })
 })
 
-const rule = (name: string) => within(screen.getByRole('group', { name }))
+const rule = (name) => within(screen.getByRole('group', { name }))
 
-async function addRule(name: string, label: string, points: string) {
+async function addRule(name, label, points) {
   await userEvent.click(screen.getByRole('button', { name: '+ Add rule' }))
   await userEvent.type(rule(name).getByLabelText('Rule'), label)
   await userEvent.type(rule(name).getByLabelText('Points'), points)
@@ -82,7 +81,7 @@ async function addRule(name: string, label: string, points: string) {
 
 describe('Setup editor', () => {
   it('creates a setup with an ordered checklist', async () => {
-    let body: Record<string, unknown> = {}
+    let body = {}
     const { router } = renderApp(
       '/setups/new',
       routes({
@@ -122,7 +121,7 @@ describe('Setup editor', () => {
   })
 
   it('moves rules up and down with the keyboard-reachable buttons', async () => {
-    let body: { criteria?: { label: string }[] } = {}
+    let body = {}
     renderApp(
       '/setups/new',
       routes({

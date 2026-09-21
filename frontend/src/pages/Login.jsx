@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { useState } from 'react'
 import { Navigate, useLocation, useNavigate } from 'react-router-dom'
 
 import { ApiError } from '../api/client'
@@ -12,11 +12,11 @@ export default function Login() {
   const me = useMe()
   const navigate = useNavigate()
   const location = useLocation()
-  const from = (location.state as { from?: string } | null)?.from ?? '/'
+  const from = location.state?.from ?? '/'
 
   if (me.data) return <Navigate to={from} replace />
 
-  const submit = (event: FormEvent) => {
+  const submit = (event) => {
     event.preventDefault()
     login.mutate({ email, password }, { onSuccess: () => navigate(from, { replace: true }) })
   }

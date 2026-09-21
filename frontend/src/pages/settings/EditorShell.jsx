@@ -1,20 +1,10 @@
-import { useEffect, useRef, type FormEvent, type ReactNode } from 'react'
+import { useEffect, useRef } from 'react'
 
 import { Button, Panel } from '../../components'
 
-type Props = {
-  title: string
-  problems: string[]
-  focusToken: number
-  saving: boolean
-  onSubmit: (event: FormEvent) => void
-  onCancel: () => void
-  children: ReactNode
-}
-
 // Frame for an inline add or edit form: a problem summary that takes focus after a failed save, and the two actions.
-export function EditorShell({ title, problems, focusToken, saving, onSubmit, onCancel, children }: Props) {
-  const summary = useRef<HTMLDivElement>(null)
+export function EditorShell({ title, problems, focusToken, saving, onSubmit, onCancel, children }) {
+  const summary = useRef(null)
 
   useEffect(() => {
     if (focusToken > 0) summary.current?.focus()

@@ -1,26 +1,19 @@
-import { useEffect, useState, type ChangeEvent } from 'react'
+import { useEffect, useState } from 'react'
 
 import { ApiError } from '../../api/client'
 import { screenshotProblem, SCREENSHOT_TYPES, uploadScreenshot } from '../../api/upload'
 import { Button, Field } from '../../components'
 
-type Props = {
-  path: string | null
-  savedPath: string | null
-  savedUrl: string | null
-  onChange: (path: string | null) => void
-}
-
-export function ScreenshotField({ path, savedPath, savedUrl, onChange }: Props) {
+export function ScreenshotField({ path, savedPath, savedUrl, onChange }) {
   const [uploading, setUploading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [preview, setPreview] = useState<string | null>(null)
+  const [error, setError] = useState(null)
+  const [preview, setPreview] = useState(null)
 
   useEffect(() => () => {
     if (preview) URL.revokeObjectURL(preview)
   }, [preview])
 
-  const choose = async (event: ChangeEvent<HTMLInputElement>) => {
+  const choose = async (event) => {
     const input = event.target
     const file = input.files?.[0]
     if (!file) return

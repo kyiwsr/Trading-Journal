@@ -1,13 +1,6 @@
-type Option<T extends string> = { value: T; label: string }
 
-type Props<T extends string> = {
-  label: string
-  options: Option<T>[]
-  value: T
-  onChange: (value: T) => void
-}
 
-export function Segmented<T extends string>({ label, options, value, onChange }: Props<T>) {
+export function Segmented({ label, options, value, onChange }) {
   return (
     <div className="segmented" role="group" aria-label={label}>
       {options.map((option) => (

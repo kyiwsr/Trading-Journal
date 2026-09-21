@@ -2,18 +2,17 @@ import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
 
-import type { Account, FeeProfile, FeeTemplate, Instrument, Settings } from '../api/types'
 import { account, dashboard } from '../test/fixtures'
-import { renderApp, type Routes } from '../test/renderApp'
+import { renderApp } from '../test/renderApp'
 
-const settings: Settings = {
+const settings = {
   compliance_cutoff: 80,
   bands: { elite_min: 85, solid_min: 70, sub_optimal_min: 60 },
   low_sample_threshold: 20,
   elite_setup_min: 90,
 }
 
-const template: FeeTemplate = {
+const template = {
   id: 'example-futures',
   name: 'Example: futures, three fee lines per fill',
   description: 'Exchange, commission and regulatory fee on every fill.',
@@ -23,7 +22,7 @@ const template: FeeTemplate = {
   ],
 }
 
-const profile: FeeProfile = {
+const profile = {
   id: 9,
   name: 'Example tariff',
   notes: null,
@@ -32,9 +31,9 @@ const profile: FeeProfile = {
   components: [{ id: 1, name: 'Exchange fee', amount: '1.6000', basis: 'per_fill' }],
 }
 
-const nq: Instrument = { id: 1, symbol: 'NQ', name: 'E-mini Nasdaq', tick_size: '0.25000000', tick_value: '5.00000000', archived_at: null, created_at: '' }
+const nq = { id: 1, symbol: 'NQ', name: 'E-mini Nasdaq', tick_size: '0.25000000', tick_value: '5.00000000', archived_at: null, created_at: '' }
 
-function routes(overrides: Routes = {}): Routes {
+function routes(overrides = {}) {
   return {
     '/accounts': { body: [{ ...account, fee_profile_id: 9 }] },
     '/instruments': { body: [nq] },
@@ -47,7 +46,7 @@ function routes(overrides: Routes = {}): Routes {
   }
 }
 
-function jsonBody(init?: RequestInit): Record<string, unknown> {
+function jsonBody(init) {
   return JSON.parse(String(init?.body))
 }
 
@@ -88,8 +87,8 @@ describe('Accounts tab', () => {
   })
 
   it('adds an account with its fee profile', async () => {
-    let posted: Record<string, unknown> = {}
-    let accounts: Account[] = []
+    let posted = {}
+    let accounts = []
     renderApp(
       '/settings/accounts',
       routes({
@@ -161,7 +160,7 @@ describe('Instruments tab', () => {
   })
 
   it('adds an instrument with an upper-case symbol', async () => {
-    let posted: Record<string, unknown> = {}
+    let posted = {}
     renderApp(
       '/settings/instruments',
       routes({
@@ -201,10 +200,10 @@ describe('Fee profiles tab', () => {
   })
 
   it('copies a template, then lets the amounts be edited and saved', async () => {
-    let copied: Record<string, unknown> = {}
-    let patched: Record<string, unknown> = {}
-    const created: FeeProfile = { ...profile, id: 12, name: template.name, components: template.components.map((c, i) => ({ id: i + 1, ...c })) }
-    let profiles: FeeProfile[] = [profile]
+    let copied = {}
+    let patched = {}
+    const created = { ...profile, id: 12, name: template.name, components: template.components.map((c, i) => ({ id: i + 1, ...c })) }
+    let profiles = [profile]
     renderApp(
       '/settings/fee-profiles',
       routes({
@@ -233,13 +232,13 @@ describe('Fee profiles tab', () => {
   })
 
   it('adds a fee line charged per contract', async () => {
-    let posted: { components?: { basis: string }[] } = {}
+    let posted = {}
     renderApp(
       '/settings/fee-profiles',
       routes({
         '/fee-profiles': (_url, init) => {
           if (init?.method !== 'POST') return { body: [] }
-          posted = jsonBody(init) as typeof posted
+          posted = jsonBody(init)
           return { status: 201, body: profile }
         },
       }),
@@ -259,7 +258,7 @@ describe('Fee profiles tab', () => {
 
 describe('Preferences tab', () => {
   it('saves the compliance cutoff', async () => {
-    let put: Record<string, unknown> = {}
+    let put = {}
     renderApp(
       '/settings/preferences',
       routes({

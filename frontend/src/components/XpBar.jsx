@@ -1,6 +1,5 @@
-type Props = { value: number; max: number; label?: string }
 
-export function XpBar({ value, max, label = 'Discipline XP' }: Props) {
+export function XpBar({ value, max, label = 'Discipline XP' }) {
   const pct = max > 0 ? Math.min(100, Math.max(0, (value / max) * 100)) : 0
   return (
     <div

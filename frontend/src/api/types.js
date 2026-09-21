@@ -1,288 +1,346 @@
-// The API serializes decimals as strings; convert at the edge of a component, never in state.
-export type Dec = string
+/**
+ * The API serializes decimals as strings; convert at the edge of a component, never in state.
+ * @typedef {string} Dec
+ */
 
-export type Direction = 'long' | 'short'
-export type Result = 'win' | 'loss' | 'breakeven'
-export type Band = 'elite' | 'solid' | 'sub_optimal' | 'rule_breach'
-export type SetupRank = 'elite' | 'solid' | 'negative_edge'
-export type RangeName = '30D' | '90D' | 'YTD' | 'ALL'
-export type SortField = 'closed_at' | 'opened_at' | 'net_pnl' | 'r_multiple' | 'execution_score'
-export type Order = 'asc' | 'desc'
+/**
+ * @typedef {'long' | 'short'} Direction
+ */
 
-export type User = { id: number; email: string }
+/**
+ * @typedef {'win' | 'loss' | 'breakeven'} Result
+ */
 
-export type Account = {
-  id: number
-  name: string
-  label: string | null
-  broker_name: string | null
-  route: string | null
-  starting_balance: Dec
-  currency: string
-  fee_profile_id: number | null
-  archived_at: string | null
-  created_at: string
-}
+/**
+ * @typedef {'elite' | 'solid' | 'sub_optimal' | 'rule_breach'} Band
+ */
 
-export type Criterion = { id: number; label: string; weight: Dec; display_order: number }
+/**
+ * @typedef {'elite' | 'solid' | 'negative_edge'} SetupRank
+ */
 
-export type Setup = {
-  id: number
-  name: string
-  subtitle: string | null
-  description: string | null
-  archived_at: string | null
-  created_at: string
-  criteria: Criterion[]
-}
+/**
+ * @typedef {'30D' | '90D' | 'YTD' | 'ALL'} RangeName
+ */
 
-export type SetupBrief = { id: number; name: string; subtitle: string | null }
+/**
+ * @typedef {'closed_at' | 'opened_at' | 'net_pnl' | 'r_multiple' | 'execution_score'} SortField
+ */
 
-export type TradeListItem = {
-  id: number
-  account_id: number
-  opened_at: string
-  closed_at: string
-  session: string | null
-  symbol: string
-  instrument_name: string | null
-  direction: Direction
-  setup: SetupBrief | null
-  entry_fills: number
-  exit_fills: number
-  quantity: Dec
-  avg_entry: Dec
-  avg_exit: Dec
-  gross_pnl: Dec
-  fees_total: Dec
-  net_pnl: Dec
-  result: Result
-  r_multiple: Dec | null
-  execution_score: number | null
-  score_band: Band | null
-  tags: string[]
-  has_screenshot: boolean
-  compliant: boolean | null
-}
+/**
+ * @typedef {'asc' | 'desc'} Order
+ */
 
-// Totals for every trade matching the filters, not just the current page.
-export type TradeSummary = {
-  trades: number
-  wins: number
-  losses: number
-  breakeven: number
-  net_pnl: Dec
-  fees_total: Dec
-  win_rate: Dec | null
-  profit_factor: Dec | null
-  avg_score: Dec | null
-  scored_count: number
-  compliant_count: number
-  elite_count: number
-  avg_hold_seconds: number | null
-}
+/**
+ * @typedef {{ id: number; email: string }} User
+ */
 
-export type TradeList = {
-  items: TradeListItem[]
-  summary: TradeSummary
-  total: number
-  page: number
-  page_size: number
-}
+/**
+ * @typedef {Object} Account
+ * @property {number} id
+ * @property {string} name
+ * @property {string | null} label
+ * @property {string | null} broker_name
+ * @property {string | null} route
+ * @property {Dec} starting_balance
+ * @property {string} currency
+ * @property {number | null} fee_profile_id
+ * @property {string | null} archived_at
+ * @property {string} created_at
+ */
 
-export type Settings = {
-  compliance_cutoff: number
-  bands: { elite_min: number; solid_min: number; sub_optimal_min: number }
-  low_sample_threshold: number
-  elite_setup_min: number
-}
+/**
+ * @typedef {{ id: number; label: string; weight: Dec; display_order: number }} Criterion
+ */
 
-export type Fill = {
-  id: number
-  fill_type: 'entry' | 'exit'
-  price: Dec
-  quantity: Dec
-  filled_at: string
-  note: string | null
-  realized_points: Dec | null
-  realized_pnl: Dec | null
-}
+/**
+ * @typedef {Object} Setup
+ * @property {number} id
+ * @property {string} name
+ * @property {string | null} subtitle
+ * @property {string | null} description
+ * @property {string | null} archived_at
+ * @property {string} created_at
+ * @property {Criterion[]} criteria
+ */
 
-export type CriterionCheck = {
-  criterion_id: number
-  label: string
-  weight: Dec
-  checked: boolean
-  note: string | null
-}
+/**
+ * @typedef {{ id: number; name: string; subtitle: string | null }} SetupBrief
+ */
 
-export type TradeDetail = {
-  id: number
-  account_id: number
-  instrument: { id: number; symbol: string; name: string | null; tick_size: Dec; tick_value: Dec }
-  setup: SetupBrief | null
-  direction: Direction
-  session: string | null
-  tags: string[]
-  opened_at: string
-  closed_at: string
-  stop_price: Dec | null
-  target_price: Dec | null
-  quantity: Dec
-  avg_entry: Dec
-  avg_exit: Dec
-  points: Dec
-  risk_amount: Dec | null
-  gross_pnl: Dec
-  fees_total: Dec
-  slippage_ticks: Dec
-  slippage_cost: Dec
-  net_pnl: Dec
-  r_multiple: Dec | null
-  execution_score: number | null
-  score_band: Band | null
-  pre_trade_focus: string | null
-  environment: string | null
-  debrief_notes: string | null
-  screenshot_path: string | null
-  screenshot_url: string | null
-  fills: Fill[]
-  fees: { name: string; amount: Dec }[]
-  criteria: CriterionCheck[]
-  compliant: boolean | null
-  fee_profile_name: string | null
-  xp_points: number | null
-  prev_trade_id: number | null
-  next_trade_id: number | null
-  created_at: string
-}
+/**
+ * @typedef {Object} TradeListItem
+ * @property {number} id
+ * @property {number} account_id
+ * @property {string} opened_at
+ * @property {string} closed_at
+ * @property {string | null} session
+ * @property {string} symbol
+ * @property {string | null} instrument_name
+ * @property {Direction} direction
+ * @property {SetupBrief | null} setup
+ * @property {number} entry_fills
+ * @property {number} exit_fills
+ * @property {Dec} quantity
+ * @property {Dec} avg_entry
+ * @property {Dec} avg_exit
+ * @property {Dec} gross_pnl
+ * @property {Dec} fees_total
+ * @property {Dec} net_pnl
+ * @property {Result} result
+ * @property {Dec | null} r_multiple
+ * @property {number | null} execution_score
+ * @property {Band | null} score_band
+ * @property {string[]} tags
+ * @property {boolean} has_screenshot
+ * @property {boolean | null} compliant
+ */
 
-export type Summary = {
-  trade_count: number
-  wins: number
-  losses: number
-  breakevens: number
-  net_pnl: Dec
-  gross_pnl: Dec
-  fees_total: Dec
-  gross_profits: Dec
-  gross_losses: Dec
-  profit_factor: Dec | null
-  win_rate: Dec | null
-  expectancy: Dec | null
-  total_r: Dec
-  avg_execution_score: Dec | null
-  return_pct: Dec | null
-}
+/**
+ * Totals for every trade matching the filters, not just the current page.
+ * @typedef {Object} TradeSummary
+ * @property {number} trades
+ * @property {number} wins
+ * @property {number} losses
+ * @property {number} breakeven
+ * @property {Dec} net_pnl
+ * @property {Dec} fees_total
+ * @property {Dec | null} win_rate
+ * @property {Dec | null} profit_factor
+ * @property {Dec | null} avg_score
+ * @property {number} scored_count
+ * @property {number} compliant_count
+ * @property {number} elite_count
+ * @property {number | null} avg_hold_seconds
+ */
 
-export type EquityPoint = {
-  closed_at: string
-  equity: Dec
-  trade_id: number
-  net_pnl: Dec
-  result: Result
-}
+/**
+ * @typedef {Object} TradeList
+ * @property {TradeListItem[]} items
+ * @property {TradeSummary} summary
+ * @property {number} total
+ * @property {number} page
+ * @property {number} page_size
+ */
 
-export type Equity = {
-  baseline: Dec
-  points: EquityPoint[]
-  peak: Dec
-  current: Dec
-  drawdown_amount: Dec
-  drawdown_pct: Dec
-  max_drawdown_pct: Dec
-}
+/**
+ * @typedef {Object} Settings
+ * @property {number} compliance_cutoff
+ * @property {{ elite_min: number; solid_min: number; sub_optimal_min: number }} bands
+ * @property {number} low_sample_threshold
+ * @property {number} elite_setup_min
+ */
 
-export type DisciplineBucket = {
-  band: Band
-  trade_count: number
-  win_rate: Dec | null
-  net_pnl: Dec
-  avg_r: Dec | null
-}
+/**
+ * @typedef {Object} Fill
+ * @property {number} id
+ * @property {'entry' | 'exit'} fill_type
+ * @property {Dec} price
+ * @property {Dec} quantity
+ * @property {string} filled_at
+ * @property {string | null} note
+ * @property {Dec | null} realized_points
+ * @property {Dec | null} realized_pnl
+ */
 
-export type SetupRow = {
-  setup_id: number
-  name: string | null
-  subtitle: string | null
-  trade_count: number
-  win_rate: Dec | null
-  net_pnl: Dec
-  expectancy: Dec | null
-  avg_execution_score: Dec | null
-  rank: SetupRank
-  low_sample: boolean
-}
+/**
+ * @typedef {Object} CriterionCheck
+ * @property {number} criterion_id
+ * @property {string} label
+ * @property {Dec} weight
+ * @property {boolean} checked
+ * @property {string | null} note
+ */
 
-export type Xp = {
-  total_xp: number
-  level: number
-  xp_in_level: number
-  xp_per_level: number
-  win_streak: number
-}
+/**
+ * @typedef {Object} TradeDetail
+ * @property {number} id
+ * @property {number} account_id
+ * @property {{ id: number; symbol: string; name: string | null; tick_size: Dec; tick_value: Dec }} instrument
+ * @property {SetupBrief | null} setup
+ * @property {Direction} direction
+ * @property {string | null} session
+ * @property {string[]} tags
+ * @property {string} opened_at
+ * @property {string} closed_at
+ * @property {Dec | null} stop_price
+ * @property {Dec | null} target_price
+ * @property {Dec} quantity
+ * @property {Dec} avg_entry
+ * @property {Dec} avg_exit
+ * @property {Dec} points
+ * @property {Dec | null} risk_amount
+ * @property {Dec} gross_pnl
+ * @property {Dec} fees_total
+ * @property {Dec} slippage_ticks
+ * @property {Dec} slippage_cost
+ * @property {Dec} net_pnl
+ * @property {Dec | null} r_multiple
+ * @property {number | null} execution_score
+ * @property {Band | null} score_band
+ * @property {string | null} pre_trade_focus
+ * @property {string | null} environment
+ * @property {string | null} debrief_notes
+ * @property {string | null} screenshot_path
+ * @property {string | null} screenshot_url
+ * @property {Fill[]} fills
+ * @property {{ name: string; amount: Dec }[]} fees
+ * @property {CriterionCheck[]} criteria
+ * @property {boolean | null} compliant
+ * @property {string | null} fee_profile_name
+ * @property {number | null} xp_points
+ * @property {number | null} prev_trade_id
+ * @property {number | null} next_trade_id
+ * @property {string} created_at
+ */
 
-export type Dashboard = {
-  range: string
-  account: string
-  currency: string | null
-  starting_balance: Dec
-  summary: Summary
-  equity: Equity
-  discipline: { buckets: DisciplineBucket[]; saved_capital: Dec }
-  setups: SetupRow[]
-  recent_trades: TradeListItem[]
-  xp: Xp
-}
+/**
+ * @typedef {Object} Summary
+ * @property {number} trade_count
+ * @property {number} wins
+ * @property {number} losses
+ * @property {number} breakevens
+ * @property {Dec} net_pnl
+ * @property {Dec} gross_pnl
+ * @property {Dec} fees_total
+ * @property {Dec} gross_profits
+ * @property {Dec} gross_losses
+ * @property {Dec | null} profit_factor
+ * @property {Dec | null} win_rate
+ * @property {Dec | null} expectancy
+ * @property {Dec} total_r
+ * @property {Dec | null} avg_execution_score
+ * @property {Dec | null} return_pct
+ */
 
-export type FeeBasis = 'per_fill' | 'per_contract'
+/**
+ * @typedef {Object} EquityPoint
+ * @property {string} closed_at
+ * @property {Dec} equity
+ * @property {number} trade_id
+ * @property {Dec} net_pnl
+ * @property {Result} result
+ */
 
-export type Instrument = {
-  id: number
-  symbol: string
-  name: string | null
-  tick_size: Dec
-  tick_value: Dec
-  archived_at: string | null
-  created_at: string
-}
+/**
+ * @typedef {Object} Equity
+ * @property {Dec} baseline
+ * @property {EquityPoint[]} points
+ * @property {Dec} peak
+ * @property {Dec} current
+ * @property {Dec} drawdown_amount
+ * @property {Dec} drawdown_pct
+ * @property {Dec} max_drawdown_pct
+ */
 
-export type FeeComponent = { id: number; name: string; amount: Dec; basis: FeeBasis }
+/**
+ * @typedef {Object} DisciplineBucket
+ * @property {Band} band
+ * @property {number} trade_count
+ * @property {Dec | null} win_rate
+ * @property {Dec} net_pnl
+ * @property {Dec | null} avg_r
+ */
 
-export type FeeProfile = {
-  id: number
-  name: string
-  notes: string | null
-  archived_at: string | null
-  created_at: string
-  components: FeeComponent[]
-}
+/**
+ * @typedef {Object} SetupRow
+ * @property {number} setup_id
+ * @property {string | null} name
+ * @property {string | null} subtitle
+ * @property {number} trade_count
+ * @property {Dec | null} win_rate
+ * @property {Dec} net_pnl
+ * @property {Dec | null} expectancy
+ * @property {Dec | null} avg_execution_score
+ * @property {SetupRank} rank
+ * @property {boolean} low_sample
+ */
 
-export type FeeTemplate = {
-  id: string
-  name: string
-  description: string
-  components: { name: string; amount: Dec; basis: FeeBasis }[]
-}
+/**
+ * @typedef {Object} Xp
+ * @property {number} total_xp
+ * @property {number} level
+ * @property {number} xp_in_level
+ * @property {number} xp_per_level
+ * @property {number} win_streak
+ */
 
-export type FeeComponentInput = { name: string; amount: string; basis: FeeBasis }
+/**
+ * @typedef {Object} Dashboard
+ * @property {string} range
+ * @property {string} account
+ * @property {string | null} currency
+ * @property {Dec} starting_balance
+ * @property {Summary} summary
+ * @property {Equity} equity
+ * @property {{ buckets: DisciplineBucket[]; saved_capital: Dec }} discipline
+ * @property {SetupRow[]} setups
+ * @property {TradeListItem[]} recent_trades
+ * @property {Xp} xp
+ */
 
-export type UploadTicket = { path: string; upload_url: string; expires_in: number }
+/**
+ * @typedef {'per_fill' | 'per_contract'} FeeBasis
+ */
 
-export type TradePayload = {
-  account_id: number
-  instrument_id: number
-  setup_id: number | null
-  direction: Direction
-  session: string | null
-  tags: string[]
-  stop_price: string | null
-  target_price: string | null
-  slippage_ticks: string
-  fills: { fill_type: 'entry' | 'exit'; price: string; quantity: string; filled_at: string; note: string | null }[]
-  criteria_checks: { criterion_id: number; checked: boolean; note: string | null }[]
-  pre_trade_focus: string | null
-  environment: string | null
-  debrief_notes: string | null
-  screenshot_path: string | null
-}
+/**
+ * @typedef {Object} Instrument
+ * @property {number} id
+ * @property {string} symbol
+ * @property {string | null} name
+ * @property {Dec} tick_size
+ * @property {Dec} tick_value
+ * @property {string | null} archived_at
+ * @property {string} created_at
+ */
+
+/**
+ * @typedef {{ id: number; name: string; amount: Dec; basis: FeeBasis }} FeeComponent
+ */
+
+/**
+ * @typedef {Object} FeeProfile
+ * @property {number} id
+ * @property {string} name
+ * @property {string | null} notes
+ * @property {string | null} archived_at
+ * @property {string} created_at
+ * @property {FeeComponent[]} components
+ */
+
+/**
+ * @typedef {Object} FeeTemplate
+ * @property {string} id
+ * @property {string} name
+ * @property {string} description
+ * @property {{ name: string; amount: Dec; basis: FeeBasis }[]} components
+ */
+
+/**
+ * @typedef {{ name: string; amount: string; basis: FeeBasis }} FeeComponentInput
+ */
+
+/**
+ * @typedef {{ path: string; upload_url: string; expires_in: number }} UploadTicket
+ */
+
+/**
+ * @typedef {Object} TradePayload
+ * @property {number} account_id
+ * @property {number} instrument_id
+ * @property {number | null} setup_id
+ * @property {Direction} direction
+ * @property {string | null} session
+ * @property {string[]} tags
+ * @property {string | null} stop_price
+ * @property {string | null} target_price
+ * @property {string} slippage_ticks
+ * @property {{ fill_type: 'entry' | 'exit'; price: string; quantity: string; filled_at: string; note: string | null }[]} fills
+ * @property {{ criterion_id: number; checked: boolean; note: string | null }[]} criteria_checks
+ * @property {string | null} pre_trade_focus
+ * @property {string | null} environment
+ * @property {string | null} debrief_notes
+ * @property {string | null} screenshot_path
+ */
+
+export {}

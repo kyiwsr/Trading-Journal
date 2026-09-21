@@ -1,26 +1,22 @@
 import { useState } from 'react'
 
 import { useInstrumentArchive, useInstruments, useSaveInstrument } from '../../api/queries'
-import type { Instrument } from '../../api/types'
 import { Button, EmptyState, ErrorState, Field, Input, LoadingState, Panel } from '../../components'
 import {
   emptyInstrumentForm,
   instrumentFormFrom,
   instrumentPayload,
   validateInstrument,
-  type InstrumentForm,
 } from '../../lib/settingsForms'
 import { trimZeros } from '../../lib/tradeForm'
 import { EditorShell } from './EditorShell'
 import { EntityList, EntityRow } from './EntityList'
 import { useEntityForm } from './useEntityForm'
 
-type Editing = 'new' | number | null
-
 export default function InstrumentsTab() {
   const instruments = useInstruments(true)
   const archive = useInstrumentArchive()
-  const [editing, setEditing] = useState<Editing>(null)
+  const [editing, setEditing] = useState(null)
 
   if (instruments.isPending) return <LoadingState what="your instruments" />
   if (instruments.isError) {
@@ -90,9 +86,9 @@ export default function InstrumentsTab() {
   )
 }
 
-function InstrumentEditor({ instrument, onDone }: { instrument: Instrument | null; onDone: () => void }) {
+function InstrumentEditor({ instrument, onDone }) {
   const save = useSaveInstrument(instrument?.id)
-  const entity = useEntityForm<InstrumentForm>(
+  const entity = useEntityForm(
     instrument ? instrumentFormFrom(instrument) : emptyInstrumentForm(),
     validateInstrument,
     (form) => save.mutateAsync(instrumentPayload(form)),

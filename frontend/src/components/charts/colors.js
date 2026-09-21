@@ -9,4 +9,4 @@ export const CHART = {
   orange: '#ff7700',
   hazard: '#fdf2f2',
   canvas: '#ffffff',
-} as const
+}

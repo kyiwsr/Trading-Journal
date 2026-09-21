@@ -1,21 +1,8 @@
-import type { Band } from '../../api/types'
 import { Amount, EmptyState, Panel, ScoreBadge } from '../../components'
 import { money, price, quantity, points } from '../../lib/format'
-import type { FeeLine, TradeResult } from '../../lib/tradeMath'
-
-type Props = {
-  result: TradeResult | null
-  feeLines: FeeLine[]
-  currency: string | null
-  decimals: number
-  score: number | null
-  band: Band | null
-  hasSetup: boolean
-  feeNote: string | null
-}
 
 // Figures come from lib/tradeMath, the same formulas and rounding as the API, so the saved trade shows these numbers.
-export function PreviewPanel({ result, feeLines, currency, decimals, score, band, hasSetup, feeNote }: Props) {
+export function PreviewPanel({ result, feeLines, currency, decimals, score, band, hasSetup, feeNote }) {
   return (
     <Panel title="Live result" tone="tint" className="preview" note="Calculated as you type. The saved trade uses the same figures.">
       {result === null ? (
@@ -60,7 +47,7 @@ export function PreviewPanel({ result, feeLines, currency, decimals, score, band
   )
 }
 
-function Row({ label, value }: { label: string; value: React.ReactNode }) {
+function Row({ label, value }) {
   return (
     <div className="fact">
       <dt>{label}</dt>

@@ -1,9 +1,8 @@
-import { useMemo, useState, type ReactNode } from 'react'
+import { useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 
 import { buildUrl } from '../api/client'
 import { useAccounts, useDashboard } from '../api/queries'
-import type { Dashboard as DashboardData, DisciplineBucket, SetupRank, SetupRow, TradeListItem } from '../api/types'
 import {
   Amount,
   Badge,
@@ -20,11 +19,11 @@ import { DrawdownStrip } from '../components/charts/DrawdownStrip'
 import { EquityChart } from '../components/charts/EquityChart'
 import { formatDateTime, money, number, percent, ratio, rMultiple } from '../lib/format'
 import { RANK_LABEL } from '../lib/labels'
-import { readScope, scopeSearch, type Scope } from '../lib/urlState'
+import { readScope, scopeSearch } from '../lib/urlState'
 import { useScoring } from '../lib/useScoring'
 
-const RANGE_PHRASE = { '30D': 'the last 30 days', '90D': 'the last 90 days', YTD: 'this year', ALL: 'all time' } as const
-const RANK_TONE: Record<SetupRank, 'win' | 'solid' | 'loss'> = { elite: 'win', solid: 'solid', negative_edge: 'loss' }
+const RANGE_PHRASE = { '30D': 'the last 30 days', '90D': 'the last 90 days', YTD: 'this year', ALL: 'all time' }
+const RANK_TONE = { elite: 'win', solid: 'solid', negative_edge: 'loss' }
 
 export default function Dashboard() {
   const [params] = useSearchParams()
@@ -45,7 +44,7 @@ export default function Dashboard() {
   return <DashboardView data={data} scope={scope} accountName={accountName} />
 }
 
-function EmptyDashboard({ scope, accountName }: { scope: Scope; accountName: string }) {
+function EmptyDashboard({ scope, accountName }) {
   const filtered = scope.range !== 'ALL' || scope.account !== 'all'
   return (
     <>
@@ -68,7 +67,7 @@ function EmptyDashboard({ scope, accountName }: { scope: Scope; accountName: str
   )
 }
 
-function DashboardView({ data, scope, accountName }: { data: DashboardData; scope: Scope; accountName: string }) {
+function DashboardView({ data, scope, accountName }) {
   const { summary, equity, discipline } = data
   const currency = data.currency
   const search = scopeSearch(scope)
@@ -186,7 +185,7 @@ function DashboardView({ data, scope, accountName }: { data: DashboardData; scop
   )
 }
 
-function Kpi({ label, value, detail, hint }: { label: string; value: ReactNode; detail?: string; hint?: string }) {
+function Kpi({ label, value, detail, hint }) {
   return (
     <Card className="kpi">
       <Stat label={label} value={value} detail={detail} hint={hint} />
@@ -194,7 +193,7 @@ function Kpi({ label, value, detail, hint }: { label: string; value: ReactNode; 
   )
 }
 
-function DisciplinePanel({ buckets, saved, currency, total }: { buckets: DisciplineBucket[]; saved: string; currency: string | null; total: number }) {
+function DisciplinePanel({ buckets, saved, currency, total }) {
   const { bandList } = useScoring()
   const byBand = new Map(buckets.map((bucket) => [bucket.band, bucket]))
   const savedAmount = Number(saved)
@@ -265,7 +264,7 @@ function ChartLegend() {
   )
 }
 
-function EquityTable({ equity, currency }: { equity: DashboardData['equity']; currency: string | null }) {
+function EquityTable({ equity, currency }) {
   return (
     <details className="chart-data">
       <summary>Show equity data as a table</summary>
@@ -303,7 +302,7 @@ function EquityTable({ equity, currency }: { equity: DashboardData['equity']; cu
   )
 }
 
-function RecentTrade({ trade, currency, search }: { trade: TradeListItem; currency: string | null; search: string }) {
+function RecentTrade({ trade, currency, search }) {
   return (
     <li className="recent-item">
       <Link to={{ pathname: `/trades/${trade.id}`, search }} className="recent-link">
@@ -326,18 +325,17 @@ function RecentTrade({ trade, currency, search }: { trade: TradeListItem; curren
   )
 }
 
-type SortKey = 'name' | 'trade_count' | 'win_rate' | 'net_pnl' | 'expectancy' | 'avg_execution_score' | 'rank'
-const RANK_ORDER: Record<SetupRank, number> = { elite: 0, solid: 1, negative_edge: 2 }
+const RANK_ORDER = { elite: 0, solid: 1, negative_edge: 2 }
 
-function sortValue(row: SetupRow, key: SortKey): number | string {
+function sortValue(row, key) {
   if (key === 'name') return (row.name ?? '').toLowerCase()
   if (key === 'rank') return RANK_ORDER[row.rank]
   const raw = row[key]
   return raw === null ? Number.NEGATIVE_INFINITY : Number(raw)
 }
 
-function SetupsTable({ rows, currency }: { rows: SetupRow[]; currency: string | null }) {
-  const [sort, setSort] = useState<{ key: SortKey; direction: 'asc' | 'desc' }>({ key: 'trade_count', direction: 'desc' })
+function SetupsTable({ rows, currency }) {
+  const [sort, setSort] = useState({ key: 'trade_count', direction: 'desc' })
   const sorted = useMemo(() => {
     const factor = sort.direction === 'asc' ? 1 : -1
     return [...rows].sort((a, b) => {
@@ -346,9 +344,9 @@ function SetupsTable({ rows, currency }: { rows: SetupRow[]; currency: string | 
       return (x < y ? -1 : x > y ? 1 : 0) * factor
     })
   }, [rows, sort])
-  const toggle = (key: SortKey) =>
+  const toggle = (key) =>
     setSort((current) => ({ key, direction: current.key === key && current.direction === 'desc' ? 'asc' : 'desc' }))
-  const header = (key: SortKey, label: string, numeric = true) => (
+  const header = (key, label, numeric = true) => (
     <SortHeader label={label} numeric={numeric} active={sort.key === key} direction={sort.direction} onSort={() => toggle(key)} />
   )
 

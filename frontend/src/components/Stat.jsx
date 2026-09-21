@@ -1,14 +1,6 @@
-import type { ReactNode } from 'react'
 
-type Props = {
-  label: string
-  value: ReactNode
-  detail?: ReactNode
-  hint?: ReactNode
-  featured?: boolean
-}
 
-export function Stat({ label, value, detail, hint, featured = false }: Props) {
+export function Stat({ label, value, detail, hint, featured = false }) {
   return (
     <div className={`stat ${featured ? 'stat-featured' : ''}`.trim()}>
       <div className="stat-label">{label}</div>

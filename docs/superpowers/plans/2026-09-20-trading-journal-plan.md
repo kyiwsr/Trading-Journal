@@ -7,9 +7,7 @@ Design: `design/stitch/` (3 exported screens) + Stitch project
 
 ## Assumptions (change any of these before starting)
 
-- Frontend is **React + Vite + TypeScript**. If you would rather use
-  plain JavaScript, only file extensions and a few type annotations
-  change.
+- Frontend is **React + Vite + plain JavaScript (JSX)**.
 - Python 3.11+, PostgreSQL 16 locally via Docker Compose (or a local
   Windows install; only `DATABASE_URL` changes).
 - Backend libs: FastAPI, uvicorn, SQLAlchemy 2, Alembic, psycopg 3,

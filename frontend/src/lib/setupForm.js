@@ -1,18 +1,8 @@
 import Decimal from 'decimal.js'
 
-import type { Setup } from '../api/types'
 import { newRowKey } from './rowKey'
-import { trimZeros, type FormErrors } from './tradeForm'
+import { trimZeros } from './tradeForm'
 import { parseDecimal } from './tradeMath'
-
-export type CriterionRow = { key: string; id?: number; label: string; weight: string }
-
-export type SetupFormState = {
-  name: string
-  subtitle: string
-  description: string
-  criteria: CriterionRow[]
-}
 
 // Limits mirror backend/app/schemas/setup.py: weight is greater than 0 with at most two decimals and ten digits.
 const MAX_WEIGHT_DECIMALS = 2
@@ -20,13 +10,13 @@ const MAX_WEIGHT = new Decimal('99999999.99')
 const MAX_NAME = 120
 const MAX_LABEL = 300
 
-export const blankCriterion = (): CriterionRow => ({ key: newRowKey(), label: '', weight: '' })
+export const blankCriterion = () => ({ key: newRowKey(), label: '', weight: '' })
 
-export function emptySetupForm(): SetupFormState {
+export function emptySetupForm() {
   return { name: '', subtitle: '', description: '', criteria: [] }
 }
 
-export function setupFormFromApi(setup: Setup): SetupFormState {
+export function setupFormFromApi(setup) {
   return {
     name: setup.name,
     subtitle: setup.subtitle ?? '',
@@ -42,14 +32,14 @@ export function setupFormFromApi(setup: Setup): SetupFormState {
   }
 }
 
-export function weightTotal(rows: { weight: string }[]): Decimal {
+export function weightTotal(rows) {
   return rows.reduce((sum, row) => {
     const weight = parseDecimal(row.weight)
     return weight?.greaterThan(0) ? sum.plus(weight) : sum
   }, new Decimal(0))
 }
 
-function weightError(text: string): string | undefined {
+function weightError(text) {
   if (text.trim() === '') return 'Enter the points this rule is worth.'
   const value = parseDecimal(text)
   if (value === null) return 'Enter a plain number, like 25.'
@@ -59,8 +49,8 @@ function weightError(text: string): string | undefined {
   return undefined
 }
 
-export function validateSetupForm(form: SetupFormState): FormErrors {
-  const errors: FormErrors = {}
+export function validateSetupForm(form) {
+  const errors = {}
   const name = form.name.trim()
   if (!name) errors.name = 'Give the setup a name.'
   else if (name.length > MAX_NAME) errors.name = `Use at most ${MAX_NAME} characters.`
@@ -75,7 +65,7 @@ export function validateSetupForm(form: SetupFormState): FormErrors {
   return errors
 }
 
-export function moveCriterion(rows: CriterionRow[], index: number, delta: -1 | 1): CriterionRow[] {
+export function moveCriterion(rows, index, delta) {
   const target = index + delta
   if (target < 0 || target >= rows.length) return rows
   const next = [...rows]
@@ -83,7 +73,7 @@ export function moveCriterion(rows: CriterionRow[], index: number, delta: -1 | 1
   return next
 }
 
-export function criteriaPayload(form: SetupFormState): { id?: number; label: string; weight: string }[] {
+export function criteriaPayload(form) {
   return form.criteria.map((row) => ({
     ...(row.id === undefined ? {} : { id: row.id }),
     label: row.label.trim(),
@@ -91,4 +81,4 @@ export function criteriaPayload(form: SetupFormState): { id?: number; label: str
   }))
 }
 
-export const textOrNull = (text: string) => text.trim() || null
+export const textOrNull = (text) => text.trim() || null
