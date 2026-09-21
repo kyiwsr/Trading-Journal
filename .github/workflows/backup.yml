@@ -25,7 +25,7 @@ jobs:
         run: |
           set -euo pipefail
           export PGURL="${DATABASE_URL/postgresql+psycopg:/postgresql:}"
-          docker run --rm -e PGURL postgres:18 sh -c 'pg_dump --dbname="$PGURL" --format=custom --no-owner --no-privileges' > journal.pgdump
+          docker run --rm -e PGURL postgres:18 sh -c 'pg_dump --dbname="$PGURL" --format=custom --schema=public --no-owner --no-privileges' > journal.pgdump
           docker run --rm -i postgres:18 pg_restore --list < journal.pgdump > contents.txt
           grep -q "TABLE DATA" contents.txt || { echo "::error::Dump contains no table data"; exit 1; }
           rm contents.txt
