@@ -1,0 +1,47 @@
+name: Database backup
+
+on:
+  schedule:
+    - cron: "17 3 * * 0"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  dump:
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+    steps:
+      - name: Check secrets
+        run: |
+          [ -n "$DATABASE_URL" ] || { echo "::error::Secret DATABASE_URL is not set"; exit 1; }
+          [ -n "$BACKUP_PASSPHRASE" ] || { echo "::error::Secret BACKUP_PASSPHRASE is not set"; exit 1; }
+
+      # pg_dump must be at least the server's major version; 18 reads older servers, so a Supabase upgrade is safe.
+      - name: Dump the database
+        run: |
+          set -euo pipefail
+          export PGURL="${DATABASE_URL/postgresql+psycopg:/postgresql:}"
+          docker run --rm -e PGURL postgres:18 sh -c 'pg_dump --dbname="$PGURL" --format=custom --no-owner --no-privileges' > journal.pgdump
+          docker run --rm -i postgres:18 pg_restore --list < journal.pgdump > contents.txt
+          grep -q "TABLE DATA" contents.txt || { echo "::error::Dump contains no table data"; exit 1; }
+          rm contents.txt
+
+      - name: Encrypt the dump
+        run: |
+          set -euo pipefail
+          name="journal-$(date -u +%Y%m%dT%H%MZ).pgdump.gpg"
+          printf '%s' "$BACKUP_PASSPHRASE" | gpg --batch --yes --pinentry-mode loopback --passphrase-fd 0 \
+            --symmetric --cipher-algo AES256 --output "$name" journal.pgdump
+          rm journal.pgdump
+          echo "BACKUP_FILE=$name" >> "$GITHUB_ENV"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: journal-backup
+          path: ${{ env.BACKUP_FILE }}
+          retention-days: 30
+          if-no-files-found: error
