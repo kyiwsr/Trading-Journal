@@ -6,6 +6,8 @@ import pytest
 from app.config import Settings
 from app.security import create_access_token, decode_access_token, hash_password, verify_password
 
+HTTPS_ORIGIN = "https://journal.example.com"
+
 
 def test_password_hash_verifies_only_the_right_password():
     hashed = hash_password("s3cret pass")
@@ -59,13 +61,19 @@ def test_production_refuses_the_default_or_short_secret():
         Settings(environment="production")
     with pytest.raises(ValueError, match="JWT_SECRET"):
         Settings(environment="production", jwt_secret="too-short")
-    Settings(environment="production", jwt_secret="x" * 32)
+    Settings(environment="production", jwt_secret="x" * 32, allowed_origin=HTTPS_ORIGIN)
 
 
 def test_samesite_none_requires_secure_cookie_in_production():
     with pytest.raises(ValueError, match="COOKIE_SECURE"):
         Settings(environment="production", jwt_secret="x" * 32, cookie_samesite="none", cookie_secure=False)
-    Settings(environment="production", jwt_secret="x" * 32, cookie_samesite="none", cookie_secure=True)
+    Settings(
+        environment="production",
+        jwt_secret="x" * 32,
+        allowed_origin=HTTPS_ORIGIN,
+        cookie_samesite="none",
+        cookie_secure=True,
+    )
 
 
 def test_allowed_origins_are_split_and_trimmed():

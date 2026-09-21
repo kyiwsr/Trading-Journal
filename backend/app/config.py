@@ -1,6 +1,6 @@
 from typing import Literal
 
-from pydantic import Field, model_validator
+from pydantic import Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 DEV_JWT_SECRET = "dev-only-secret-do-not-use-in-production"
@@ -40,13 +40,27 @@ class Settings(BaseSettings):
     def allowed_origins(self) -> list[str]:
         return [o.strip().rstrip("/") for o in self.allowed_origin.split(",") if o.strip()]
 
+    @field_validator("database_url", "test_database_url")
+    @classmethod
+    def _use_psycopg_driver(cls, url: str) -> str:
+        # Supabase and Render hand out postgres:// or postgresql://, which SQLAlchemy would load with psycopg2.
+        for scheme in ("postgres://", "postgresql://"):
+            if url.startswith(scheme):
+                return "postgresql+psycopg://" + url[len(scheme):]
+        return url
+
     @model_validator(mode="after")
     def _check_production(self) -> "Settings":
+        if bool(self.supabase_url) != bool(self.supabase_service_key):
+            raise ValueError("SUPABASE_URL and SUPABASE_SERVICE_KEY must be set together")
         if self.environment == "production":
             if self.jwt_secret == DEV_JWT_SECRET or len(self.jwt_secret) < 32:
                 raise ValueError("JWT_SECRET must be set to at least 32 characters in production")
             if self.cookie_samesite == "none" and not self.cookie_secure:
                 raise ValueError("COOKIE_SAMESITE=none requires COOKIE_SECURE=true")
+            origins = self.allowed_origins
+            if not origins or not all(o.startswith("https://") for o in origins):
+                raise ValueError("ALLOWED_ORIGIN must list only https:// origins in production")
         return self
 
 
