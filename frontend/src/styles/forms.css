@@ -385,3 +385,136 @@
     justify-self: start;
   }
 }
+
+/* Settings */
+.subnav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+.subnav a {
+  padding: 0.4rem 0.9rem;
+  color: var(--navy);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-decoration: none;
+  text-transform: uppercase;
+  border: var(--border);
+  border-radius: var(--radius);
+}
+.subnav a[aria-current='page'] {
+  color: #fff;
+  background: var(--navy);
+}
+.entity-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+.entity-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.entity {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm) var(--space-md);
+  padding: var(--space-md);
+  border: 2px solid var(--grid);
+  border-radius: var(--radius);
+}
+.entity-archived {
+  background: var(--page);
+}
+.entity-main {
+  flex: 1 1 18rem;
+  min-width: 0;
+}
+.entity-title {
+  margin: 0;
+  font-family: var(--font-head);
+  font-size: 16px;
+  font-weight: 600;
+}
+.entity-meta,
+.entity-meta p {
+  margin: var(--space-xs) 0 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+.entity-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+.template {
+  box-shadow: none;
+}
+.fee-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 0.8fr) minmax(0, 1fr) auto;
+  gap: var(--space-sm);
+  align-items: end;
+  width: 100%;
+}
+.fee-row .btn {
+  min-height: 42px;
+}
+.saved-note {
+  margin: 0;
+  font-weight: 600;
+  color: var(--green-text);
+}
+.band-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 900px) {
+  .fee-row:not(:first-of-type) .field-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 899px) {
+  .fee-row {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    padding-bottom: var(--space-md);
+    border-bottom: 1px solid var(--grid);
+  }
+  .fee-row .field:first-child,
+  .fee-row > .btn {
+    grid-column: 1 / -1;
+  }
+  .fee-row > .btn {
+    justify-self: start;
+  }
+}
+
+@media (max-width: 767px) {
+  .subnav a {
+    display: inline-flex;
+    align-items: center;
+    flex: 1 1 auto;
+    justify-content: center;
+    min-height: 44px;
+  }
+}

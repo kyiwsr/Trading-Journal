@@ -1,21 +1,26 @@
-import type { Band, Result, SetupRank } from '../api/types'
+import type { Band, Result, Settings, SetupRank } from '../api/types'
 
-// Mirrors backend/app/services/constants.py; the API does not expose these yet.
-export const SCORE_BANDS: { band: Band; label: string; range: string }[] = [
-  { band: 'elite', label: 'Elite', range: '85% to 100%' },
-  { band: 'solid', label: 'Solid', range: '70% to 84%' },
-  { band: 'sub_optimal', label: 'Sub-optimal', range: '60% to 69%' },
-  { band: 'rule_breach', label: 'Rule breach', range: 'Under 60%' },
-]
-export const COMPLIANCE_CUTOFF = 80
+export type Bands = Settings['bands']
 
-export const BAND_LABEL: Record<Band, string> = Object.fromEntries(
-  SCORE_BANDS.map((b) => [b.band, b.label]),
-) as Record<Band, string>
+// Used until GET /settings answers, and if it fails. The API is the source of truth.
+export const DEFAULT_BANDS: Bands = { elite_min: 85, solid_min: 70, sub_optimal_min: 60 }
+export const DEFAULT_COMPLIANCE_CUTOFF = 80
 
-export const BAND_RANGE: Record<Band, string> = Object.fromEntries(
-  SCORE_BANDS.map((b) => [b.band, b.range]),
-) as Record<Band, string>
+export const BAND_LABEL: Record<Band, string> = {
+  elite: 'Elite',
+  solid: 'Solid',
+  sub_optimal: 'Sub-optimal',
+  rule_breach: 'Rule breach',
+}
+
+export function scoreBandList(bands: Bands = DEFAULT_BANDS): { band: Band; label: string; range: string }[] {
+  return [
+    { band: 'elite', label: BAND_LABEL.elite, range: `${bands.elite_min}% to 100%` },
+    { band: 'solid', label: BAND_LABEL.solid, range: `${bands.solid_min}% to ${bands.elite_min - 1}%` },
+    { band: 'sub_optimal', label: BAND_LABEL.sub_optimal, range: `${bands.sub_optimal_min}% to ${bands.solid_min - 1}%` },
+    { band: 'rule_breach', label: BAND_LABEL.rule_breach, range: `Under ${bands.sub_optimal_min}%` },
+  ]
+}
 
 export const RANK_LABEL: Record<SetupRank, string> = {
   elite: 'Elite',
@@ -24,3 +29,7 @@ export const RANK_LABEL: Record<SetupRank, string> = {
 }
 
 export const RESULT_LABEL: Record<Result, string> = { win: 'Win', loss: 'Loss', breakeven: 'Breakeven' }
+
+// Kept until the ledger and dashboard read GET /settings.
+export const SCORE_BANDS = scoreBandList(DEFAULT_BANDS)
+export const COMPLIANCE_CUTOFF = DEFAULT_COMPLIANCE_CUTOFF
