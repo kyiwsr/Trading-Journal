@@ -3,6 +3,8 @@ services:
     name: trading-journal-api
     runtime: python
     plan: free
+    # Keep this next to the Supabase project's region.
+    region: singapore
     rootDir: backend
     buildCommand: pip install -r requirements.txt
     # The free plan has no pre-deploy step, so migrations run at every start. They are a no-op when up to date.
