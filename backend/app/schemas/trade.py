@@ -108,6 +108,7 @@ class CriterionCheckOut(BaseModel):
 class TradeDetailOut(BaseModel):
     id: int
     account_id: int
+    fee_profile_name: str | None
     instrument: InstrumentBrief
     setup: SetupBrief | None
     direction: Direction

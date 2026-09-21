@@ -276,3 +276,20 @@ def test_unknown_or_foreign_account_is_404(client, other_client, desk):
 
 def test_dashboard_needs_a_login(make_client):
     assert make_client().get("/dashboard").status_code == 401
+
+
+def test_setup_rows_carry_the_current_subtitle(client, desk):
+    subtitled = client.post(
+        "/setups",
+        json={"name": "FVG Retest", "subtitle": "Fair Value Gap (NQ / ES)", "criteria": [{"label": "Gap", "weight": "100"}]},
+    ).json()
+    _trade(client, desk, desk.a, date(2026, 9, 1), "20010.00", setup=subtitled, checked=(0,))
+    _trade(client, desk, desk.a, date(2026, 9, 2), "20010.00", setup=desk.celup, checked=(0,))
+
+    rows = {row["name"]: row for row in client.get("/dashboard").json()["setups"]}
+    assert rows["FVG Retest"]["subtitle"] == "Fair Value Gap (NQ / ES)"
+    assert rows["celup kaki"]["subtitle"] is None
+
+    client.patch(f"/setups/{subtitled['id']}", json={"subtitle": "Renamed"})
+    rows = {row["name"]: row for row in client.get("/dashboard").json()["setups"]}
+    assert rows["FVG Retest"]["subtitle"] == "Renamed"

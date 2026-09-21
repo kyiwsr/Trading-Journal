@@ -37,6 +37,12 @@ def _trade_rows(db: Session, accounts: list[Account]):
     return db.execute(stmt).all()
 
 
+def _subtitles(db: Session, setup_ids: list[int]) -> dict[int, str | None]:
+    if not setup_ids:
+        return {}
+    return dict(db.execute(select(Setup.id, Setup.subtitle).where(Setup.id.in_(setup_ids))).tuples().all())
+
+
 def _metric_row(trade: Trade, setup_name: str | None) -> metrics.TradeRow:
     return metrics.TradeRow(
         closed_at=trade.closed_at,
@@ -84,6 +90,8 @@ def build_dashboard(
     baseline = starting_balance + sum((t.net_pnl for t in before), Decimal(0))
 
     metric_rows = [_metric_row(t, name) for t, name in in_window]
+    setup_rows = metrics.setup_table(metric_rows)
+    subtitles = _subtitles(db, [row.setup_id for row in setup_rows])
     summary = metrics.summarize(metric_rows, baseline)
     curve = metrics.equity_curve(metric_rows, baseline)
     discipline = metrics.discipline_report(metric_rows)
@@ -142,6 +150,7 @@ def build_dashboard(
             SetupRowOut(
                 setup_id=row.setup_id,
                 name=row.name,
+                subtitle=subtitles.get(row.setup_id),
                 trade_count=row.trade_count,
                 win_rate=row.win_rate,
                 net_pnl=row.net_pnl,
@@ -150,7 +159,7 @@ def build_dashboard(
                 rank=row.rank.value,
                 low_sample=row.low_sample,
             )
-            for row in metrics.setup_table(metric_rows)
+            for row in setup_rows
         ],
         recent_trades=recent,
         xp=_xp_block(db, user),

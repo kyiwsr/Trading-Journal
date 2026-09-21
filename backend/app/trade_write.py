@@ -198,6 +198,8 @@ def _neighbour_id(db: Session, user: User, trade: Trade, older: bool) -> int | N
 def build_detail(db: Session, trade: Trade, user: User, storage: Storage) -> TradeDetailOut:
     instrument = db.get(Instrument, trade.instrument_id)
     setup = db.get(Setup, trade.setup_id) if trade.setup_id else None
+    account = db.get(Account, trade.account_id)
+    profile = db.get(FeeProfile, account.fee_profile_id) if account.fee_profile_id else None
     tick = trade_math.Instrument(instrument.tick_size, instrument.tick_value)
     labels = {c.id: c for c in setup.criteria} if setup else {}
 
@@ -223,6 +225,7 @@ def build_detail(db: Session, trade: Trade, user: User, storage: Storage) -> Tra
     return TradeDetailOut(
         id=trade.id,
         account_id=trade.account_id,
+        fee_profile_name=profile.name if profile else None,
         instrument=InstrumentBrief(
             id=instrument.id,
             symbol=instrument.symbol,

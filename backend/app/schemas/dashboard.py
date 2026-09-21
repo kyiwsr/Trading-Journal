@@ -59,6 +59,7 @@ class DisciplineOut(BaseModel):
 class SetupRowOut(BaseModel):
     setup_id: int
     name: str | None
+    subtitle: str | None
     trade_count: int
     win_rate: Decimal | None
     net_pnl: Decimal

@@ -189,3 +189,20 @@ def test_other_users_cannot_read_change_or_delete_a_trade(client, other_client, 
     assert other_client.put(url, json=trade71(world)).status_code == 404
     assert other_client.delete(url).status_code == 404
     assert client.get(url).json() == trade
+
+
+def test_detail_names_the_accounts_current_fee_profile(client, world):
+    created = _created(client, trade71(world))
+    assert created["fee_profile_name"] == "Example prop tariff"
+
+    client.patch(f"/fee-profiles/{world.profile['id']}", json={"name": "Renamed tariff"})
+    assert client.get(f"/trades/{created['id']}").json()["fee_profile_name"] == "Renamed tariff"
+
+
+def test_detail_has_no_fee_profile_name_when_the_account_has_none(client, world):
+    bare = client.post("/accounts", json={"name": "No tariff", "starting_balance": "5000"}).json()
+
+    created = _created(client, trade71(world, account_id=bare["id"]))
+
+    assert created["fee_profile_name"] is None
+    assert created["fees"] == []
