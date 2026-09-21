@@ -50,7 +50,7 @@ serves `/health` -> `{"status":"ok"}`.
 Verify: `alembic upgrade head` runs cleanly against the container;
 a test fixture creates and tears down a test schema.
 
-**T0.3 Frontend skeleton.** `npm create vite` (React + TS), router,
+**T0.3 Frontend skeleton.** `npm create vite` (React, plain JavaScript), router,
 TanStack Query provider, Vitest configured.
 Verify: `npm run dev` renders a placeholder; `npm test` runs.
 
