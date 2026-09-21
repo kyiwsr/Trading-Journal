@@ -108,9 +108,14 @@ export default function TradeLog() {
             {trades.data ? `${number(total)} ${total === 1 ? 'trade' : 'trades'} match the filters` : 'Trade ledger'}
           </p>
         </div>
-        <a className="btn" href={buildUrl('/trades/export.csv', csvQuery)} download>
-          Export CSV
-        </a>
+        <div className="page-actions">
+          <a className="btn" href={buildUrl('/trades/export.csv', csvQuery)} download>
+            Export CSV
+          </a>
+          <Link className="btn btn-primary" to={{ pathname: '/trades/new', search: scopeSearch(scope) }}>
+            Log Trade
+          </Link>
+        </div>
       </div>
 
       {summary.data && summary.data.summary.trade_count > 0 ? (
@@ -208,7 +213,10 @@ export default function TradeLog() {
             {chips.length > 0 ? (
               <p>Remove a filter above, or clear them all.</p>
             ) : (
-              <p>Trades you log appear here, newest first.</p>
+              <p>
+                Trades you log appear here, newest first.{' '}
+                <Link to={{ pathname: '/trades/new', search: scopeSearch(scope) }}>Log your first trade</Link>.
+              </p>
             )}
           </EmptyState>
         </Panel>

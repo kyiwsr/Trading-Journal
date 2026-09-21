@@ -66,6 +66,8 @@ export const trade71: TradeDetail = {
     { criterion_id: 4, label: 'Waited for the 50% retest', weight: '15.00', checked: false, note: 'Entered 3 ticks early' },
     { criterion_id: 5, label: 'Scaled out at internal liquidity', weight: '15.00', checked: true, note: null },
   ],
+  compliant: true,
+  fee_profile_name: 'Example tariff',
   xp_points: 85,
   prev_trade_id: 70,
   next_trade_id: null,
@@ -97,14 +99,30 @@ export function listItem(overrides: Partial<TradeListItem> = {}): TradeListItem 
     score_band: 'elite',
     tags: [],
     has_screenshot: false,
+    compliant: true,
     ...overrides,
   }
 }
 
 export const tradeList: TradeList = {
+  summary: {
+    trades: 88,
+    wins: 56,
+    losses: 32,
+    breakeven: 0,
+    net_pnl: '14280.50',
+    fees_total: '1412.00',
+    win_rate: '63.6',
+    profit_factor: '2.78',
+    avg_score: '83.6',
+    scored_count: 88,
+    compliant_count: 60,
+    elite_count: 42,
+    avg_hold_seconds: 868,
+  },
   items: [
     listItem(),
-    listItem({ id: 70, net_pnl: '-250.00', gross_pnl: '-225.00', result: 'loss', r_multiple: '-1.00', execution_score: 52, score_band: 'rule_breach', direction: 'short', symbol: 'ES' }),
+    listItem({ id: 70, net_pnl: '-250.00', gross_pnl: '-225.00', result: 'loss', r_multiple: '-1.00', execution_score: 52, score_band: 'rule_breach', compliant: false, direction: 'short', symbol: 'ES' }),
   ],
   total: 88,
   page: 1,
@@ -155,8 +173,8 @@ export const dashboard: Dashboard = {
     saved_capital: '2650.00',
   },
   setups: [
-    { setup_id: 4, name: 'Sweep scalp', trade_count: 34, win_rate: '76.5', net_pnl: '7400.00', expectancy: '0.87', avg_execution_score: '92.1', rank: 'elite', low_sample: false },
-    { setup_id: 5, name: 'Opening fade', trade_count: 12, win_rate: '35.7', net_pnl: '-2630.00', expectancy: '-0.75', avg_execution_score: '58.2', rank: 'negative_edge', low_sample: true },
+    { setup_id: 4, name: 'Sweep scalp', subtitle: 'Liquidity sweep', trade_count: 34, win_rate: '76.5', net_pnl: '7400.00', expectancy: '0.87', avg_execution_score: '92.1', rank: 'elite', low_sample: false },
+    { setup_id: 5, name: 'Opening fade', subtitle: null, trade_count: 12, win_rate: '35.7', net_pnl: '-2630.00', expectancy: '-0.75', avg_execution_score: '58.2', rank: 'negative_edge', low_sample: true },
   ],
   recent_trades: [listItem()],
   xp: { total_xp: 8420, level: 1, xp_in_level: 8420, xp_per_level: 10000, win_streak: 4 },

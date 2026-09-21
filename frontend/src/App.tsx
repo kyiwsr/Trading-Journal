@@ -7,6 +7,7 @@ import ComingSoon from './pages/ComingSoon'
 import KitchenSink from './pages/KitchenSink'
 import Login from './pages/Login'
 import TradeDetail from './pages/TradeDetail'
+import TradeForm from './pages/TradeForm'
 import TradeLog from './pages/TradeLog'
 
 // The dashboard carries the charting library, so it loads on demand.
@@ -21,11 +22,9 @@ export function AppRoutes() {
         <Route element={<AppShell />}>
           <Route index element={<Dashboard />} />
           <Route path="trades" element={<TradeLog />} />
-          <Route
-            path="trades/new"
-            element={<ComingSoon title="Log a trade">The trade entry form is not built yet.</ComingSoon>}
-          />
+          <Route path="trades/new" element={<TradeForm />} />
           <Route path="trades/:id" element={<TradeDetail />} />
+          <Route path="trades/:id/edit" element={<TradeForm />} />
           <Route
             path="playbook"
             element={<ComingSoon title="Skill Playbook">The setup and checklist editor is not built yet.</ComingSoon>}

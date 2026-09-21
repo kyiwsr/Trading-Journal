@@ -62,9 +62,40 @@ export type TradeListItem = {
   score_band: Band | null
   tags: string[]
   has_screenshot: boolean
+  compliant: boolean | null
 }
 
-export type TradeList = { items: TradeListItem[]; total: number; page: number; page_size: number }
+// Totals for every trade matching the filters, not just the current page.
+export type TradeSummary = {
+  trades: number
+  wins: number
+  losses: number
+  breakeven: number
+  net_pnl: Dec
+  fees_total: Dec
+  win_rate: Dec | null
+  profit_factor: Dec | null
+  avg_score: Dec | null
+  scored_count: number
+  compliant_count: number
+  elite_count: number
+  avg_hold_seconds: number | null
+}
+
+export type TradeList = {
+  items: TradeListItem[]
+  summary: TradeSummary
+  total: number
+  page: number
+  page_size: number
+}
+
+export type Settings = {
+  compliance_cutoff: number
+  bands: { elite_min: number; solid_min: number; sub_optimal_min: number }
+  low_sample_threshold: number
+  elite_setup_min: number
+}
 
 export type Fill = {
   id: number
@@ -118,6 +149,8 @@ export type TradeDetail = {
   fills: Fill[]
   fees: { name: string; amount: Dec }[]
   criteria: CriterionCheck[]
+  compliant: boolean | null
+  fee_profile_name: string | null
   xp_points: number | null
   prev_trade_id: number | null
   next_trade_id: number | null
@@ -171,6 +204,7 @@ export type DisciplineBucket = {
 export type SetupRow = {
   setup_id: number
   name: string | null
+  subtitle: string | null
   trade_count: number
   win_rate: Dec | null
   net_pnl: Dec
@@ -199,4 +233,56 @@ export type Dashboard = {
   setups: SetupRow[]
   recent_trades: TradeListItem[]
   xp: Xp
+}
+
+export type FeeBasis = 'per_fill' | 'per_contract'
+
+export type Instrument = {
+  id: number
+  symbol: string
+  name: string | null
+  tick_size: Dec
+  tick_value: Dec
+  archived_at: string | null
+  created_at: string
+}
+
+export type FeeComponent = { id: number; name: string; amount: Dec; basis: FeeBasis }
+
+export type FeeProfile = {
+  id: number
+  name: string
+  notes: string | null
+  archived_at: string | null
+  created_at: string
+  components: FeeComponent[]
+}
+
+export type FeeTemplate = {
+  id: string
+  name: string
+  description: string
+  components: { name: string; amount: Dec; basis: FeeBasis }[]
+}
+
+export type FeeComponentInput = { name: string; amount: string; basis: FeeBasis }
+
+export type UploadTicket = { path: string; upload_url: string; expires_in: number }
+
+export type TradePayload = {
+  account_id: number
+  instrument_id: number
+  setup_id: number | null
+  direction: Direction
+  session: string | null
+  tags: string[]
+  stop_price: string | null
+  target_price: string | null
+  slippage_ticks: string
+  fills: { fill_type: 'entry' | 'exit'; price: string; quantity: string; filled_at: string; note: string | null }[]
+  criteria_checks: { criterion_id: number; checked: boolean; note: string | null }[]
+  pre_trade_focus: string | null
+  environment: string | null
+  debrief_notes: string | null
+  screenshot_path: string | null
 }

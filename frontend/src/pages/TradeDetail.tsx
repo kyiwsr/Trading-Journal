@@ -69,6 +69,9 @@ function TradeView({ data, currency, accountLabel, route, search }: ViewProps) {
         <div className="pager-pages">
           <TradeLink id={data.prev_trade_id} search={search} label="Older trade" />
           <TradeLink id={data.next_trade_id} search={search} label="Newer trade" />
+          <Link className="btn btn-primary" to={{ pathname: `/trades/${data.id}/edit`, search }}>
+            Edit trade
+          </Link>
         </div>
       </div>
 

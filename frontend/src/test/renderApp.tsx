@@ -1,6 +1,6 @@
 import { QueryClientProvider } from '@tanstack/react-query'
 import { render } from '@testing-library/react'
-import { MemoryRouter } from 'react-router-dom'
+import { createMemoryRouter, RouterProvider } from 'react-router-dom'
 import { vi } from 'vitest'
 
 import { AppRoutes } from '../App'
@@ -37,12 +37,11 @@ export function renderApp(path: string, routes: Routes, { signedIn = false } = {
   const calls = stubApi(signedIn ? { ...SIGNED_IN, ...routes } : routes)
   const client = createQueryClient()
   client.setDefaultOptions({ queries: { retry: false, staleTime: 0 } })
+  const router = createMemoryRouter([{ path: '*', element: <AppRoutes /> }], { initialEntries: [path] })
   const view = render(
     <QueryClientProvider client={client}>
-      <MemoryRouter initialEntries={[path]}>
-        <AppRoutes />
-      </MemoryRouter>
+      <RouterProvider router={router} />
     </QueryClientProvider>,
   )
-  return { ...view, calls }
+  return { ...view, calls, router }
 }

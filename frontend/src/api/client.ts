@@ -2,13 +2,17 @@ import { trackRequest } from './waking'
 
 const BASE = (import.meta.env.VITE_API_BASE_URL ?? '/api').replace(/\/$/, '')
 
+export type ApiIssue = { loc: (string | number)[]; msg: string }
+
 export class ApiError extends Error {
   status: number
+  issues: ApiIssue[]
 
-  constructor(status: number, message: string) {
+  constructor(status: number, message: string, issues: ApiIssue[] = []) {
     super(message)
     this.name = 'ApiError'
     this.status = status
+    this.issues = issues
   }
 }
 
@@ -23,15 +27,24 @@ export function buildUrl(path: string, query?: Query): string {
   return `${BASE}${path}${qs ? `?${qs}` : ''}`
 }
 
-async function readDetail(res: Response): Promise<string> {
+// Pydantic prefixes validator failures with this; the user needs only the sentence after it.
+const VALUE_ERROR_PREFIX = /^Value error, /
+
+async function readDetail(res: Response): Promise<{ message: string; issues: ApiIssue[] }> {
   try {
     const body = await res.json()
-    if (typeof body?.detail === 'string') return body.detail
-    if (Array.isArray(body?.detail) && body.detail[0]?.msg) return String(body.detail[0].msg)
+    if (typeof body?.detail === 'string') return { message: body.detail, issues: [] }
+    if (Array.isArray(body?.detail) && body.detail[0]?.msg) {
+      const issues: ApiIssue[] = body.detail.map((item: { loc?: (string | number)[]; msg: unknown }) => ({
+        loc: Array.isArray(item.loc) ? item.loc : [],
+        msg: String(item.msg).replace(VALUE_ERROR_PREFIX, ''),
+      }))
+      return { message: issues[0].msg, issues }
+    }
   } catch {
     // Body was not JSON; fall through to the status text.
   }
-  return res.statusText || `Request failed (${res.status})`
+  return { message: res.statusText || `Request failed (${res.status})`, issues: [] }
 }
 
 type Options = { method?: string; body?: unknown; query?: Query; signal?: AbortSignal }
@@ -52,7 +65,10 @@ export async function api<T>(path: string, { method = 'GET', body, query, signal
       if (error instanceof DOMException && error.name === 'AbortError') throw error
       throw new ApiError(0, 'Cannot reach the server. Check your connection and try again.')
     }
-    if (!res.ok) throw new ApiError(res.status, await readDetail(res))
+    if (!res.ok) {
+      const { message, issues } = await readDetail(res)
+      throw new ApiError(res.status, message, issues)
+    }
     if (res.status === 204) return undefined as T
     return (await res.json()) as T
   } finally {
