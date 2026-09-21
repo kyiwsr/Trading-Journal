@@ -1,6 +1,6 @@
 import Decimal from 'decimal.js'
 import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
-import { Link, useBlocker, useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 
 import { ApiError } from '../api/client'
 import {
@@ -15,7 +15,6 @@ import {
 import type { Account, FeeProfile, Instrument, Setup, TradeDetail } from '../api/types'
 import {
   Button,
-  ConfirmDialog,
   EmptyState,
   ErrorState,
   Field,
@@ -49,6 +48,7 @@ import {
   type FillInput,
 } from '../lib/tradeMath'
 import { readScope, scopeSearch } from '../lib/urlState'
+import { useLeaveGuard } from '../lib/useLeaveGuard'
 import { ChecklistSection } from './trade-form/ChecklistSection'
 import { FillsEditor } from './trade-form/FillsEditor'
 import { PreviewPanel } from './trade-form/PreviewPanel'
@@ -265,21 +265,7 @@ function TradeFormBody({ trade, accounts, instruments, feeProfiles, setups, defa
     if (submitCount > 0) summaryRef.current?.focus()
   }, [submitCount])
 
-  const leaving = useRef(false)
-  const dirtyRef = useRef(false)
-  useEffect(() => {
-    dirtyRef.current = dirty
-  }, [dirty])
-  const blocker = useBlocker(
-    ({ currentLocation, nextLocation }) =>
-      dirtyRef.current && !leaving.current && currentLocation.pathname !== nextLocation.pathname,
-  )
-  useEffect(() => {
-    if (!dirty) return
-    const warn = (event: BeforeUnloadEvent) => event.preventDefault()
-    window.addEventListener('beforeunload', warn)
-    return () => window.removeEventListener('beforeunload', warn)
-  }, [dirty])
+  const guard = useLeaveGuard(dirty, 'trade')
 
   const changeSetup = (setupId: string) => {
     const next = setups.find((item) => String(item.id) === setupId)
@@ -317,7 +303,7 @@ function TradeFormBody({ trade, accounts, instruments, feeProfiles, setups, defa
     }
     try {
       const saved = await save.mutateAsync(buildPayload(form, setup))
-      leaving.current = true
+      guard.allowLeave()
       navigate({ pathname: `/trades/${saved.id}`, search })
     } catch (error) {
       if (error instanceof ApiError && error.status === 422) {
@@ -564,17 +550,7 @@ function TradeFormBody({ trade, accounts, instruments, feeProfiles, setups, defa
         </div>
       </form>
 
-      <ConfirmDialog
-        open={blocker.state === 'blocked'}
-        title="Discard unsaved changes?"
-        confirmLabel="Discard changes"
-        cancelLabel="Keep editing"
-        destructive
-        onConfirm={() => blocker.proceed?.()}
-        onCancel={() => blocker.reset?.()}
-      >
-        <p>This trade has changes that are not saved. If you leave now they are lost.</p>
-      </ConfirmDialog>
+      {guard.dialog}
     </>
   )
 }

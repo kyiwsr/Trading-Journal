@@ -84,7 +84,7 @@ export function AppShell() {
             Command HQ
           </NavLink>
           <NavLink to={{ pathname: '/trades', search }}>Combat Logs</NavLink>
-          <NavLink to={{ pathname: '/playbook', search }}>Skill Playbook</NavLink>
+          <NavLink to={{ pathname: '/setups', search }}>Skill Playbook</NavLink>
         </nav>
       </header>
       {waking ? (

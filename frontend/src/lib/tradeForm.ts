@@ -2,6 +2,7 @@ import Decimal from 'decimal.js'
 
 import type { ApiError } from '../api/client'
 import type { Direction, Setup, TradeDetail, TradePayload } from '../api/types'
+import { newRowKey } from './rowKey'
 import { parseDecimal } from './tradeMath'
 
 export type FillRow = { key: string; price: string; quantity: string; time: string; note: string }
@@ -36,9 +37,6 @@ const MAX_TAGS = 20
 const MAX_TAG_LENGTH = 40
 const MAX_SESSION_LENGTH = 60
 const MAX_NOTE_LENGTH = 300
-
-let rowCounter = 0
-export const newRowKey = () => `row-${++rowCounter}`
 
 export const blankRow = (): FillRow => ({ key: newRowKey(), price: '', quantity: '', time: '', note: '' })
 

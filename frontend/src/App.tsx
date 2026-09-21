@@ -3,9 +3,10 @@ import { Route, Routes } from 'react-router-dom'
 
 import { AppShell } from './layout/AppShell'
 import { RequireAuth } from './layout/RequireAuth'
-import ComingSoon from './pages/ComingSoon'
 import KitchenSink from './pages/KitchenSink'
 import Login from './pages/Login'
+import SetupEditor from './pages/SetupEditor'
+import Setups from './pages/Setups'
 import TradeDetail from './pages/TradeDetail'
 import TradeForm from './pages/TradeForm'
 import TradeLog from './pages/TradeLog'
@@ -25,10 +26,9 @@ export function AppRoutes() {
           <Route path="trades/new" element={<TradeForm />} />
           <Route path="trades/:id" element={<TradeDetail />} />
           <Route path="trades/:id/edit" element={<TradeForm />} />
-          <Route
-            path="playbook"
-            element={<ComingSoon title="Skill Playbook">The setup and checklist editor is not built yet.</ComingSoon>}
-          />
+          <Route path="setups" element={<Setups />} />
+          <Route path="setups/new" element={<SetupEditor />} />
+          <Route path="setups/:id" element={<SetupEditor />} />
         </Route>
       </Route>
     </Routes>
