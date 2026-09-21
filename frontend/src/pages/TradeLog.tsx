@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 
 import { buildUrl } from '../api/client'
-import { useAccounts, useDashboard, useSetups, useTrades } from '../api/queries'
+import { useAccounts, useSetups, useTrades } from '../api/queries'
 import type { Direction, Result, SortField, TradeListItem } from '../api/types'
 import {
   Amount,
@@ -20,7 +20,8 @@ import {
   Stat,
   TableScroll,
 } from '../components'
-import { formatDateTime, money, number, percent, quantity } from '../lib/format'
+import { scopeCurrency } from '../lib/currency'
+import { formatDateTime, formatSeconds, money, number, percent, quantity, ratio } from '../lib/format'
 import { RESULT_LABEL } from '../lib/labels'
 import { pageWindow, rangeLabel } from '../lib/pagination'
 import {
@@ -32,6 +33,7 @@ import {
   scopeSearch,
   tradesQuery,
 } from '../lib/urlState'
+import { useScoring } from '../lib/useScoring'
 
 const SIDE_OPTIONS: { value: Direction | 'all'; label: string }[] = [
   { value: 'all', label: 'All' },
@@ -53,11 +55,11 @@ export default function TradeLog() {
   const ledger = readLedger(params)
   const query = tradesQuery(scope, ledger)
   const trades = useTrades(query)
-  const summary = useDashboard(scope.account, scope.range)
   const setups = useSetups()
   const accounts = useAccounts()
   const search = scopeSearch(scope)
   const chips = activeFilters(scope, ledger)
+  const { bands } = useScoring()
 
   // The box owns what is typed; the URL only overwrites it when the change did not come from the box.
   const [searchText, setSearchText] = useState(ledger.q)
@@ -96,8 +98,8 @@ export default function TradeLog() {
   const csvQuery = { ...query, page: undefined, page_size: undefined }
   const total = trades.data?.total ?? 0
   const totalPages = Math.max(1, Math.ceil(total / ledger.page_size))
-  const currency = summary.data?.currency ?? null
-  const elite = summary.data?.discipline.buckets.find((b) => b.band === 'elite')?.trade_count ?? 0
+  const currency = scopeCurrency(accounts.data, scope.account)
+  const totals = trades.data?.summary
 
   return (
     <>
@@ -118,21 +120,28 @@ export default function TradeLog() {
         </div>
       </div>
 
-      {summary.data && summary.data.summary.trade_count > 0 ? (
-        <Card tone="tint" className="strip" aria-label="Summary for the selected account and range">
-          <Stat label="Net P&L" value={<Amount value={summary.data.summary.net_pnl} currency={currency} />} detail={percent(summary.data.summary.return_pct, 2, true)} />
+      {totals && totals.trades > 0 ? (
+        <Card tone="tint" className="strip" aria-label="Summary of the trades matching the filters">
           <Stat
-            label="Win rate"
-            value={percent(summary.data.summary.win_rate)}
-            detail={`${summary.data.summary.wins} wins, ${summary.data.summary.losses} losses`}
+            label="Net P&L"
+            value={<Amount value={totals.net_pnl} currency={currency} />}
+            detail={`Fees ${money(-Math.abs(Number(totals.fees_total)), { currency })}`}
+          />
+          <Stat label="Win rate" value={percent(totals.win_rate)} detail={`${totals.wins} wins, ${totals.losses} losses`} />
+          <Stat
+            label="Profit factor"
+            value={ratio(totals.profit_factor)}
+            hint="Profits divided by losses, after fees"
           />
           <Stat
             label="Checklist adherence"
-            value={percent(summary.data.summary.avg_execution_score)}
-            detail={`${elite} of ${summary.data.summary.trade_count} at 85% or higher`}
+            value={percent(totals.avg_score)}
+            detail={`${totals.elite_count} of ${totals.scored_count} scored at ${bands.elite_min}% or higher`}
           />
-          <Stat label="Equity" value={money(summary.data.equity.current, { currency })} detail={`Peak ${money(summary.data.equity.peak, { currency })}`} />
-          <p className="strip-note">These figures cover the account and range in the header. They do not change with the filters below.</p>
+          <Stat
+            label="Average hold"
+            value={totals.avg_hold_seconds === null ? 'n/a' : formatSeconds(totals.avg_hold_seconds)}
+          />
         </Card>
       ) : null}
 

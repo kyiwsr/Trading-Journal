@@ -78,3 +78,30 @@ test('typing in the search box filters after a short pause and can be cleared', 
   await waitFor(() => expect(screen.queryByRole('button', { name: /^Remove filter Search/ })).toBeNull())
   expect(box).toHaveValue('')
 })
+
+test('the summary strip shows totals for the whole filtered set, not the header scope', async () => {
+  renderApp('/trades?result=win', routes, { signedIn: true })
+  const strip = await screen.findByLabelText('Summary of the trades matching the filters')
+  expect(within(strip).getByText('+$14,280.50')).toBeInTheDocument()
+  expect(within(strip).getByText('Fees -$1,412.00')).toBeInTheDocument()
+  expect(within(strip).getByText('63.6%')).toBeInTheDocument()
+  expect(within(strip).getByText('2.78')).toBeInTheDocument()
+  expect(within(strip).getByText('42 of 88 scored at 85% or higher')).toBeInTheDocument()
+  expect(within(strip).getByText('14m 28s')).toBeInTheDocument()
+})
+
+test('the strip follows the API elite threshold when it is not 85', async () => {
+  const settings = {
+    compliance_cutoff: 80,
+    bands: { elite_min: 90, solid_min: 75, sub_optimal_min: 60 },
+    low_sample_threshold: 20,
+    elite_setup_min: 90,
+  }
+  renderApp('/trades', { ...routes, '/settings': { body: settings } }, { signedIn: true })
+  expect(await screen.findByText('42 of 88 scored at 90% or higher')).toBeInTheDocument()
+})
+
+test('offers a way to log a trade from the ledger', async () => {
+  renderApp('/trades', routes, { signedIn: true })
+  expect(await screen.findByRole('link', { name: 'Log Trade' })).toHaveAttribute('href', expect.stringContaining('/trades/new'))
+})

@@ -29,7 +29,3 @@ export const RANK_LABEL: Record<SetupRank, string> = {
 }
 
 export const RESULT_LABEL: Record<Result, string> = { win: 'Win', loss: 'Loss', breakeven: 'Breakeven' }
-
-// Kept until the ledger and dashboard read GET /settings.
-export const SCORE_BANDS = scoreBandList(DEFAULT_BANDS)
-export const COMPLIANCE_CUTOFF = DEFAULT_COMPLIANCE_CUTOFF

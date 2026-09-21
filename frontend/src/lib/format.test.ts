@@ -4,6 +4,7 @@ import {
   currencySymbol,
   formatDateTime,
   formatDuration,
+  formatSeconds,
   formatTime,
   money,
   percent,
@@ -118,5 +119,14 @@ describe('dates', () => {
     expect(formatDuration('2026-09-08T09:35:12Z', '2026-09-08T10:14:08Z')).toBe('38m 56s')
     expect(formatDuration('2026-09-08T09:00:00Z', '2026-09-08T10:04:00Z')).toBe('1h 04m')
     expect(formatDuration('2026-09-08T09:00:00Z', '2026-09-08T09:00:12Z')).toBe('12s')
+  })
+})
+
+describe('formatSeconds', () => {
+  it('reads like the ledger footer: seconds, minutes and hours', () => {
+    expect(formatSeconds(45)).toBe('45s')
+    expect(formatSeconds(868)).toBe('14m 28s')
+    expect(formatSeconds(3900)).toBe('1h 05m')
+    expect(formatSeconds(-3)).toBe('0s')
   })
 })

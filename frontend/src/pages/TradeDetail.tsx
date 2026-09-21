@@ -18,8 +18,9 @@ import {
   TableScroll,
 } from '../components'
 import { formatDateTime, formatDuration, formatTime, money, price, priceDecimals, quantity } from '../lib/format'
-import { COMPLIANCE_CUTOFF, RESULT_LABEL } from '../lib/labels'
+import { RESULT_LABEL } from '../lib/labels'
 import { readScope, scopeSearch } from '../lib/urlState'
+import { useScoring } from '../lib/useScoring'
 
 export default function TradeDetail() {
   const { id } = useParams()
@@ -270,7 +271,7 @@ function LedgerPanel({ data, currency, decimals }: { data: TradeDetailData; curr
 function FeesPanel({ data, currency }: { data: TradeDetailData; currency: string | null }) {
   const neg = (value: string) => -Math.abs(Number(value))
   return (
-    <Panel title="Fees and slippage">
+    <Panel title="Fees and slippage" note={data.fee_profile_name ? `Tariff: ${data.fee_profile_name}` : undefined}>
       <dl className="facts facts-rows">
         {data.fees.map((fee) => (
           <Fact key={fee.name} label={fee.name}>
@@ -353,6 +354,7 @@ function ChecklistRow({ item }: { item: CriterionCheck }) {
 }
 
 function ChecklistPanel({ data }: { data: TradeDetailData }) {
+  const { cutoff } = useScoring()
   const total = data.criteria.reduce((sum, item) => sum + Number(item.weight), 0)
   const earned = data.criteria.filter((item) => item.checked).reduce((sum, item) => sum + Number(item.weight), 0)
   const formula = data.criteria.filter((item) => item.checked).map((item) => quantity(item.weight)).join(' + ')
@@ -381,8 +383,7 @@ function ChecklistPanel({ data }: { data: TradeDetailData }) {
             ))}
           </ol>
           <p className="stat-hint">
-            {data.execution_score !== null && data.execution_score >= COMPLIANCE_CUTOFF ? 'Compliant' : 'Below the compliance cutoff'}: {COMPLIANCE_CUTOFF}%
-            or higher is compliant.
+            {data.compliant ? 'Compliant' : 'Below the compliance cutoff'}: {cutoff}% or higher is compliant.
             {data.xp_points ? ` +${data.xp_points} XP earned for this checklist.` : ''}
           </p>
         </>

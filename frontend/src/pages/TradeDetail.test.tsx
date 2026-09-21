@@ -63,3 +63,29 @@ test('explains a missing trade', async () => {
   expect(await screen.findByRole('alert')).toHaveTextContent('Trade not found')
   expect(screen.getByRole('link', { name: 'Back to the ledger' })).toBeInTheDocument()
 })
+
+test('names the fee tariff the trade was priced with', async () => {
+  renderApp('/trades/71', routes, { signedIn: true })
+  expect(await screen.findByText('Tariff: Example tariff')).toBeInTheDocument()
+})
+
+test('states the compliance cutoff from the API settings', async () => {
+  const settings = {
+    compliance_cutoff: 70,
+    bands: { elite_min: 85, solid_min: 70, sub_optimal_min: 60 },
+    low_sample_threshold: 20,
+    elite_setup_min: 90,
+  }
+  renderApp('/trades/71', { ...routes, '/settings': { body: settings } }, { signedIn: true })
+  expect(await screen.findByText(/Compliant: 70% or higher is compliant/)).toBeInTheDocument()
+})
+
+test('falls back to the default cutoff when settings cannot be loaded', async () => {
+  renderApp('/trades/71', routes, { signedIn: true })
+  expect(await screen.findByText(/Compliant: 80% or higher is compliant/)).toBeInTheDocument()
+})
+
+test('offers to edit the trade', async () => {
+  renderApp('/trades/71', routes, { signedIn: true })
+  expect(await screen.findByRole('link', { name: 'Edit trade' })).toHaveAttribute('href', expect.stringContaining('/trades/71/edit'))
+})

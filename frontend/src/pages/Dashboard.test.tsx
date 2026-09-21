@@ -52,3 +52,22 @@ test('reports a failed load and offers a retry', async () => {
   expect(screen.getByRole('alert')).toHaveTextContent('Database is down')
   expect(screen.getByRole('button', { name: 'Try again' })).toBeInTheDocument()
 })
+
+test('shows a setup subtitle under its name in the playbook table', async () => {
+  renderApp('/', routes, { signedIn: true })
+  const region = await screen.findByRole('region', { name: 'Setups playbook table' })
+  expect(within(region).getByText('Liquidity sweep')).toBeInTheDocument()
+})
+
+test('labels the discipline bands from the API settings', async () => {
+  const settings = {
+    compliance_cutoff: 80,
+    bands: { elite_min: 90, solid_min: 75, sub_optimal_min: 65 },
+    low_sample_threshold: 20,
+    elite_setup_min: 90,
+  }
+  renderApp('/', { ...routes, '/settings': { body: settings } }, { signedIn: true })
+  const panel = await screen.findByRole('region', { name: 'Discipline vs win rate' })
+  expect(await within(panel).findByText('90% to 100%')).toBeInTheDocument()
+  expect(within(panel).getByText('Under 65%')).toBeInTheDocument()
+})

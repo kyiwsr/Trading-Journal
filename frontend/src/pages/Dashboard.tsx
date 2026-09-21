@@ -19,8 +19,9 @@ import {
 import { DrawdownStrip } from '../components/charts/DrawdownStrip'
 import { EquityChart } from '../components/charts/EquityChart'
 import { formatDateTime, money, number, percent, ratio, rMultiple } from '../lib/format'
-import { RANK_LABEL, SCORE_BANDS } from '../lib/labels'
+import { RANK_LABEL } from '../lib/labels'
 import { readScope, scopeSearch, type Scope } from '../lib/urlState'
+import { useScoring } from '../lib/useScoring'
 
 const RANGE_PHRASE = { '30D': 'the last 30 days', '90D': 'the last 90 days', YTD: 'this year', ALL: 'all time' } as const
 const RANK_TONE: Record<SetupRank, 'win' | 'solid' | 'loss'> = { elite: 'win', solid: 'solid', negative_edge: 'loss' }
@@ -194,12 +195,13 @@ function Kpi({ label, value, detail, hint }: { label: string; value: ReactNode; 
 }
 
 function DisciplinePanel({ buckets, saved, currency, total }: { buckets: DisciplineBucket[]; saved: string; currency: string | null; total: number }) {
+  const { bandList } = useScoring()
   const byBand = new Map(buckets.map((bucket) => [bucket.band, bucket]))
   const savedAmount = Number(saved)
   return (
     <Panel title="Discipline vs win rate" note={`${number(total)} trades, grouped by checklist score`} className="dash-discipline">
       <ul className="discipline">
-        {SCORE_BANDS.map(({ band, label, range }) => {
+        {bandList.map(({ band, label, range }) => {
           const bucket = byBand.get(band)
           const rate = bucket?.win_rate ?? null
           return (
@@ -385,6 +387,7 @@ function SetupsTable({ rows, currency }: { rows: SetupRow[]; currency: string | 
                         <Badge tone="sub">Low sample</Badge>
                       </>
                     ) : null}
+                    {row.subtitle ? <span className="cell-sub">{row.subtitle}</span> : null}
                   </th>
                   <td className="num mono">{number(row.trade_count)}</td>
                   <td className="num mono">{percent(row.win_rate)}</td>

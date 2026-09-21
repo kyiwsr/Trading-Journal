@@ -53,7 +53,15 @@ Palette stays at three cores (navy, orange, crimson) plus green for wins. Win an
 
 ## Screens in this build
 
-Command HQ (dashboard), Combat Logs (trade ledger and trade detail), Login. "Skill Playbook" and "+ Log Trade" open a labeled "Coming soon" page until Milestone 5.
+Designed in Stitch: Command HQ (dashboard), Combat Logs (trade ledger and trade detail), Login.
+
+Built from these tokens with no Stitch design (Milestone 5): Log and edit trade, Skill Playbook (setups list and editor), Settings (accounts, instruments, fee profiles, preferences). They reuse the same panels, hard shadows, mono figures and 3px navy focus ring.
+
+- Forms: one label above each control in uppercase mono, hint text in `--muted`, errors in `--crimson` as text (never color alone), and a summary at the top that takes focus after a failed save. Invalid inputs get a crimson border in addition to the message.
+- Repeating rows (fills, checklist rules, fee lines) show their labels on the first row only at desktop widths; every row keeps accessible labels and a group name such as "Entry 2".
+- Live result panel on the trade form: `--tint-slate` card, sticky beside the form from 1200px, placed after the fills below that.
+- Unsaved changes: a native dialog with a hard 6px shadow and a navy 20% backdrop, as the design system specifies for L3 overlays.
+- Points that do not add up to 100 use the `--tint-quest` tint with a sentence, not a warning color.
 
 Removed from the mockups for v1 (owner decision): Trade Quests, Vaults and Guilds, live price tickers, "Synced" indicator, Export replay, Bulk edit, Session review button.
 

@@ -122,7 +122,11 @@ export function formatTime(iso: string, timeZone?: string): string {
 }
 
 export function formatDuration(fromIso: string, toIso: string): string {
-  const total = Math.max(0, Math.round((new Date(toIso).getTime() - new Date(fromIso).getTime()) / 1000))
+  return formatSeconds((new Date(toIso).getTime() - new Date(fromIso).getTime()) / 1000)
+}
+
+export function formatSeconds(elapsed: number): string {
+  const total = Math.max(0, Math.round(elapsed))
   const hours = Math.floor(total / 3600)
   const minutes = Math.floor((total % 3600) / 60)
   const seconds = total % 60
