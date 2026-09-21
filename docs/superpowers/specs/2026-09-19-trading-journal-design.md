@@ -65,6 +65,12 @@ narrow screens).
   used, so the API has no dependency on it. Every table is rooted to
   `user_id` (directly or via account/setup) so adding real signup
   later is additive, not a migration.
+  The browser calls `/api/*` on the Vercel site and `frontend/vercel.json`
+  rewrites it to the Render URL, so the cookie is first-party
+  (SameSite=Lax, Secure, no Domain) and no custom domain is needed.
+  Failed logins are limited per IP and per email (5 per 15 minutes,
+  then 429 with Retry-After), counted in memory per instance;
+  X-Forwarded-For is trusted only for `TRUSTED_PROXY_HOPS` proxies.
 - **Access control**: the browser never talks to Supabase's REST/data
   API with a public key; only FastAPI holds the service credentials
   (env vars on Render). Row-level security stays enabled with no
@@ -247,17 +253,21 @@ Target: **$0/month** (domain optional, ~$10-15/year).
 Free-tier constraints and mitigations:
 - **Render cold start (30-60 s after ~15 min idle):** the frontend
   shows a "waking up the server" state on the first request instead of
-  a bare error. Optional: an external uptime pinger (e.g. UptimeRobot,
-  free) hitting a `/health` endpoint every 5 min keeps it awake.
+  a bare error. An external uptime pinger (e.g. UptimeRobot, free)
+  hitting `/health` every 5 min keeps it awake, and avoids a first
+  request outlasting Vercel's proxy timeout (unverified).
 - **Supabase pauses free projects after ~1 week of inactivity:**
   daily use avoids this; a long break needs a manual resume in the
   Supabase dashboard.
-- **No managed backups on the free tier:** a scheduled `pg_dump`
-  (e.g. weekly GitHub Actions job writing to a private location) is
-  part of the v1 scope, since trade history is the whole product.
+- **No managed backups on the free tier:** a weekly GitHub Actions job
+  dumps the `public` schema with `pg_dump`, encrypts it with gpg and
+  keeps it as a private artifact for 30 days. It is part of the v1
+  scope, since trade history is the whole product. Screenshots in
+  Storage are not included.
 - **Upgrade path:** if the cold starts become annoying, moving the API
   to a $5/mo host (Railway/Render paid) changes only the deploy
   target — no code changes.
 
-Verify current free-tier limits on each provider's pricing page
-before go-live; they change.
+The manual setup steps are in `docs/DEPLOY.md`. Verify current
+free-tier limits on each provider's pricing page before go-live; they
+change.

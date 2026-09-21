@@ -238,26 +238,29 @@ trade end to end.
 
 ## Milestone 6 — Deploy
 
-**T6.1 Supabase.** Create the project; run migrations using the
-session-pooler URL; create the private storage bucket; keep RLS on
-with no public policies.
-Verify: `alembic upgrade head` against Supabase; upload and signed
-read work.
+Everything that can be prepared and checked locally is done. The steps that need your Supabase, Render,
+Vercel and GitHub accounts are open; `docs/DEPLOY.md` is the runbook.
 
-**T6.2 Render.** Deploy the backend, set env vars (DB URL, Supabase
-service key, JWT secret, allowed origin), health check on `/health`.
-Verify: production `/health` responds; login works from `curl`.
+**T6.0 Login rate limiting and production checks. Done.** Failed logins are limited per IP and per email
+(5 per 15 minutes, 429 with Retry-After). `TRUSTED_PROXY_HOPS` sets which `X-Forwarded-For` entry counts.
+`DATABASE_URL` accepts `postgres://` and `postgresql://`, and production refuses non-https `ALLOWED_ORIGIN`.
 
-**T6.3 Vercel.** Deploy the frontend with the API base URL; configure
-CORS for the Vercel origin with credentials.
-Verify: full login -> log trade -> dashboard flow on the deployed
-site, including the cold-start state after idling.
+**T6.1 Supabase.** Prepared: bucket settings, migration, `seed_user` and row-level-security SQL in the runbook.
+Open: create the project and bucket, run the steps.
+Verify: `alembic upgrade head` against Supabase; upload and signed read work.
 
-**T6.4 Backups and CI.** `backup.yml` runs `pg_dump` on a schedule to
-a private destination; `ci.yml` runs backend and frontend tests on
-push.
-Verify: trigger the backup manually and restore it into a scratch
-database.
+**T6.2 Render.** Prepared: `render.yaml` (free plan, `/health` check, migrations at start, generated
+`JWT_SECRET`). Open: create the Blueprint, fill the four variables, first deploy.
+Verify: production `/health` responds; login works.
+
+**T6.3 Vercel.** Prepared: `frontend/vercel.json` rewrites `/api/*` to Render, so the cookie stays first-party
+and CORS is not involved. Open: put the Render URL in the file, deploy, set `ALLOWED_ORIGIN` to the Vercel URL.
+Verify: the runbook's smoke test, including the cold-start state and the client-IP check.
+
+**T6.4 Backups and CI.** Prepared: `ci.yml`, `backup.yml` (weekly, `public` schema, gpg-encrypted artifact) and
+`scripts/restore_check.py`, run locally against a dump of the dev database (13 tables matched). The workflows
+have not run on GitHub. Open: add the `DATABASE_URL` and `BACKUP_PASSPHRASE` secrets, run the backup once, restore
+it into a scratch database.
 
 ## Done when
 
@@ -280,3 +283,6 @@ database.
   Confirm against your real broker statements when you have one.
 - **Instruments**: generic tick size/value covers futures, forex and
   crypto; tell me which markets you trade so the seed templates match.
+- **Unverified deploy assumptions**: Render's support for Python 3.14.7, how many `X-Forwarded-For` entries
+  Vercel and Render add, whether a cold start outlasts Vercel's proxy timeout, and Supabase Storage CORS for
+  the Vercel origin. The runbook's smoke test covers each.
