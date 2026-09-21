@@ -1,6 +1,6 @@
 from typing import Literal
 
-from pydantic import model_validator
+from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 DEV_JWT_SECRET = "dev-only-secret-do-not-use-in-production"
@@ -24,6 +24,11 @@ class Settings(BaseSettings):
     cookie_secure: bool = False
     cookie_samesite: Literal["lax", "strict", "none"] = "lax"
     cookie_domain: str | None = None
+
+    login_max_failures: int = Field(default=5, ge=1)
+    login_window_seconds: int = Field(default=15 * 60, ge=1)
+    # Proxies in front of the API that append to X-Forwarded-For (Vercel rewrite + Render edge = 2).
+    trusted_proxy_hops: int = Field(default=0, ge=0)
 
     supabase_url: str | None = None
     supabase_service_key: str | None = None

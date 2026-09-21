@@ -16,6 +16,15 @@ from app.models import User
 ORIGIN = settings.allowed_origins[0]
 
 
+@pytest.fixture(autouse=True)
+def fresh_login_limiter():
+    from app.rate_limit import login_limiter
+
+    login_limiter.clear()
+    yield
+    login_limiter.clear()
+
+
 def _make_engine(url: str) -> Engine:
     if not url.startswith("sqlite"):
         return create_engine(url)
