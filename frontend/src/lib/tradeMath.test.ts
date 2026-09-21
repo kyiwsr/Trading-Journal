@@ -6,6 +6,7 @@ import {
   averagePrice,
   computeTrade,
   executionScore,
+  parseApiDecimal,
   parseDecimal,
   roundHalfUp,
   scoreBand,
@@ -228,5 +229,13 @@ describe('scoreBand', () => {
 
   it('accepts thresholds from the API', () => {
     expect(scoreBand(88, { elite: 90, solid: 75, sub_optimal: 50 })).toBe('solid')
+  })
+})
+
+describe('parseApiDecimal', () => {
+  it('accepts the exponent form the API uses for zero, and rejects text', () => {
+    expect(parseApiDecimal('0E-8')?.isZero()).toBe(true)
+    expect(parseApiDecimal('0.25000000')?.toString()).toBe('0.25')
+    expect(parseApiDecimal('abc')).toBeNull()
   })
 })

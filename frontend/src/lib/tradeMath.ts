@@ -30,6 +30,15 @@ export function parseDecimal(text: string): Dec | null {
   return PLAIN_NUMBER.test(trimmed) ? new D(trimmed) : null
 }
 
+// Values from the API can arrive in exponent form ("0E-8" for a zero); typed input never may.
+export function parseApiDecimal(text: string): Dec | null {
+  try {
+    return new D(text)
+  } catch {
+    return null
+  }
+}
+
 export function roundHalfUp(value: Dec, places: number): Dec {
   const rounded = value.toDecimalPlaces(places, Decimal.ROUND_HALF_UP)
   return rounded.isZero() ? new D(0) : rounded

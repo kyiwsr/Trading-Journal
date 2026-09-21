@@ -40,6 +40,12 @@
   border-radius: var(--radius);
   cursor: pointer;
 }
+/* A date-time field focuses an inner segment, so the input itself never matches :focus-visible. */
+.input[type='datetime-local']:focus-within {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+  box-shadow: var(--shadow-focus);
+}
 .form-summary ul {
   margin: var(--space-xs) 0 0;
   padding-left: var(--space-lg);
@@ -263,6 +269,7 @@
     padding-bottom: var(--space-md);
     border-bottom: 1px solid var(--grid);
   }
+  .fill-row .fill-time,
   .fill-row .fill-note {
     grid-column: 1 / -1;
   }

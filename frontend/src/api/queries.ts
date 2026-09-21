@@ -126,8 +126,9 @@ function useSaving<Vars, Data>(mutationFn: (vars: Vars) => Promise<Data>) {
   const client = useQueryClient()
   return useMutation({
     mutationFn,
+    // Inactive lists are refetched too, so the page we navigate to never flashes a stale copy.
     onSuccess: async () => {
-      await Promise.all(AFFECTED.map((queryKey) => client.invalidateQueries({ queryKey })))
+      await Promise.all(AFFECTED.map((queryKey) => client.invalidateQueries({ queryKey, refetchType: 'all' })))
     },
   })
 }

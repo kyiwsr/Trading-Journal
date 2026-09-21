@@ -42,6 +42,7 @@ import {
   computeTrade,
   DEFAULT_BAND_THRESHOLDS,
   executionScore,
+  parseApiDecimal,
   parseDecimal,
   scoreBand,
   totalFees,
@@ -218,13 +219,13 @@ function TradeFormBody({ trade, accounts, instruments, feeProfiles, setups, defa
         if (price?.greaterThan(0) && quantity?.greaterThan(0)) fills.push({ type, price, quantity })
       }
     }
-    const tickSize = instrument ? parseDecimal(instrument.tick_size) : null
-    const tickValue = instrument ? parseDecimal(instrument.tick_value) : null
+    const tickSize = instrument ? parseApiDecimal(instrument.tick_size) : null
+    const tickValue = instrument ? parseApiDecimal(instrument.tick_value) : null
     const feeLines = profile
       ? applyFees(
           profile.components.map((component) => ({
             name: component.name,
-            amount: parseDecimal(component.amount) ?? new Decimal(0),
+            amount: parseApiDecimal(component.amount) ?? new Decimal(0),
             basis: component.basis,
           })),
           fills,
@@ -246,7 +247,7 @@ function TradeFormBody({ trade, accounts, instruments, feeProfiles, setups, defa
     const score = setup
       ? executionScore(
           setup.criteria.map((criterion) => ({
-            weight: parseDecimal(criterion.weight) ?? new Decimal(0),
+            weight: parseApiDecimal(criterion.weight) ?? new Decimal(0),
             checked: form.checks[criterion.id]?.checked ?? false,
           })),
         )

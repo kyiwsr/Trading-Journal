@@ -197,10 +197,18 @@ export function buildPayload(form: TradeFormState, setup: Setup | null): TradePa
   }
 }
 
-// The API pads decimals to eight places; the form shows what the trader typed.
+// The API pads decimals to eight places, and writes a zero as "0E-8". The form shows what the trader would type.
 export function trimZeros(text: string | null | undefined): string {
   if (!text) return ''
-  return text.includes('.') ? text.replace(/0+$/, '').replace(/\.$/, '') : text
+  let plain = text
+  if (/e/i.test(text)) {
+    try {
+      plain = new Decimal(text).toFixed()
+    } catch {
+      return text
+    }
+  }
+  return plain.includes('.') ? plain.replace(/0+$/, '').replace(/\.$/, '') : plain
 }
 
 const rowFromFill = (fill: TradeDetail['fills'][number]): FillRow => ({

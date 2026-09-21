@@ -11,6 +11,7 @@ import {
   issuesToErrors,
   parseTags,
   toLocalInput,
+  trimZeros,
   validateForm,
   type TradeFormState,
 } from './tradeForm'
@@ -213,5 +214,22 @@ describe('issuesToErrors', () => {
     const { fields, form } = issuesToErrors(new ApiError(422, 'Criterion 9 does not belong to this setup'), entries)
     expect(fields).toEqual({})
     expect(form).toEqual(['Criterion 9 does not belong to this setup'])
+  })
+})
+
+describe('API decimals in exponent form', () => {
+  it('reads a zero written as 0E-8 as empty slippage, so an unchanged trade validates and saves', () => {
+    const trade = { ...trade71, slippage_ticks: '0E-8' } as TradeDetail
+    const form = formFromTrade(trade, null)
+    expect(form.slippageTicks).toBe('')
+    expect(validateForm(form)).toEqual({})
+  })
+
+  it('trims padded and exponent decimals to plain text', () => {
+    expect(trimZeros('0E-8')).toBe('0')
+    expect(trimZeros('1E+3')).toBe('1000')
+    expect(trimZeros('20380.25000000')).toBe('20380.25')
+    expect(trimZeros('2.00')).toBe('2')
+    expect(trimZeros(null)).toBe('')
   })
 })

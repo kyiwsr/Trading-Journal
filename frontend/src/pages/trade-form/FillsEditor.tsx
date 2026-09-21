@@ -44,7 +44,7 @@ function FillGroup({ kind, rows, errors, onChange }: GroupProps) {
                 />
               )}
             </Field>
-            <Field label="Time" error={errors[`${name}.time`]}>
+            <Field label="Time" error={errors[`${name}.time`]} className="fill-time">
               {(control) => (
                 <Input
                   {...control}
