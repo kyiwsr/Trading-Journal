@@ -1,6 +1,6 @@
 {
   "rewrites": [
-    { "source": "/api/:path*", "destination": "https://YOUR-RENDER-SERVICE.onrender.com/:path*" },
+    { "source": "/api/:path*", "destination": "https://trading-journal-api-ebti.onrender.com/:path*" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
