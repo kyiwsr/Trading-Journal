@@ -49,7 +49,7 @@ function EmptyDashboard({ scope, accountName }) {
   return (
     <>
       <h1 className="page-title">Command HQ</h1>
-      <Panel title="No trades yet">
+      <Panel title="No trades yet" data-tour="dashboard-balance dashboard-discipline">
         <EmptyState title={filtered ? `No trades for ${accountName} in ${RANGE_PHRASE[scope.range]}` : 'Nothing logged yet'}>
           <p>
             {filtered

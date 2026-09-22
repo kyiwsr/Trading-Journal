@@ -21,7 +21,9 @@ function useTargetRect(target) {
     }
 
     const measure = () => {
-      const el = document.querySelector(`[data-tour="${target}"]`)
+      // ~= matches one word in a space-separated attribute, so one element
+      // (e.g. an empty state) can stand in for more than one step's target.
+      const el = document.querySelector(`[data-tour~="${target}"]`)
       if (el) setRect(el.getBoundingClientRect())
       return el
     }

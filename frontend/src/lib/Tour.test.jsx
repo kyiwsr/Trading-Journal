@@ -8,7 +8,7 @@ const SETTINGS = { compliance_cutoff: 80, has_seen_tour: true, bands: { elite_mi
 
 // Records every PUT /settings body in `put` and answers GET with `has_seen_tour: false`,
 // so the tour arms itself the way a genuinely fresh account would see it.
-function freshAccountRoutes(put) {
+function freshAccountRoutes(put, overrides = {}) {
   return {
     '/accounts': { body: [account] },
     '/dashboard': { body: dashboard },
@@ -19,6 +19,7 @@ function freshAccountRoutes(put) {
       put.value = JSON.parse(String(init.body))
       return { body: put.value }
     },
+    ...overrides,
   }
 }
 
@@ -104,6 +105,21 @@ test('finds the target after Replay navigates into a page whose data is still lo
   expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   expect(await screen.findByRole('dialog', { name: 'Your running balance' }, { timeout: 6000 })).toBeInTheDocument()
 }, 10000)
+
+test('finds something to highlight on a genuinely empty dashboard (zero trades logged)', async () => {
+  // The real bug report: a fresh account with no trades yet renders Dashboard's
+  // empty state instead of the normal KPI panels, which had no data-tour markers.
+  const put = { value: null }
+  renderApp(
+    '/',
+    freshAccountRoutes(put, { '/dashboard': { body: { ...dashboard, summary: { ...dashboard.summary, trade_count: 0 } } } }),
+    { signedIn: true },
+  )
+
+  const dialog = await screen.findByRole('dialog', { name: 'Your running balance' })
+  expect(dialog).toBeInTheDocument()
+  expect(await screen.findByText('Nothing logged yet')).toBeInTheDocument()
+})
 
 test('a returning account never sees the tour on its own', async () => {
   renderApp('/', routes(), { signedIn: true })
