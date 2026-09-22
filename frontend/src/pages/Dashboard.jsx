@@ -19,8 +19,26 @@ import { DrawdownStrip } from '../components/charts/DrawdownStrip'
 import { EquityChart } from '../components/charts/EquityChart'
 import { formatDateTime, money, number, percent, ratio, rMultiple } from '../lib/format'
 import { RANK_LABEL } from '../lib/labels'
+import { useTour } from '../lib/TourProvider'
 import { readScope, scopeSearch } from '../lib/urlState'
 import { useScoring } from '../lib/useScoring'
+
+// Shown in the real balance/discipline panels only while the tour is pointing
+// at them on an account with nothing logged yet, so there is something for
+// those two steps to highlight. Not tied to any real trade.
+const TOUR_PREVIEW = {
+  currency: 'USD',
+  startingBalance: '150000.00',
+  summary: { net_pnl: '1240.50', gross_pnl: '1310.00', fees_total: '69.50', return_pct: '0.83', profit_factor: '4.20' },
+  disciplineTotal: 3,
+  disciplineBuckets: [
+    { band: 'elite', trade_count: 2, win_rate: '100.0', net_pnl: '900.50', avg_r: '2.10' },
+    { band: 'solid', trade_count: 1, win_rate: '100.0', net_pnl: '340.00', avg_r: '1.20' },
+    { band: 'sub_optimal', trade_count: 0, win_rate: '0', net_pnl: '0', avg_r: '0' },
+    { band: 'rule_breach', trade_count: 0, win_rate: '0', net_pnl: '0', avg_r: '0' },
+  ],
+  disciplineSaved: '0',
+}
 
 const RANGE_PHRASE = { '30D': 'the last 30 days', '90D': 'the last 90 days', YTD: 'this year', ALL: 'all time' }
 const RANK_TONE = { elite: 'win', solid: 'solid', negative_edge: 'loss' }
@@ -45,11 +63,31 @@ export default function Dashboard() {
 }
 
 function EmptyDashboard({ scope, accountName }) {
+  const { step } = useTour()
+  const previewing = step?.target === 'dashboard-balance' || step?.target === 'dashboard-discipline'
   const filtered = scope.range !== 'ALL' || scope.account !== 'all'
+
+  if (previewing) {
+    return (
+      <>
+        <h1 className="page-title">Command HQ</h1>
+        <div className="dash-hero">
+          <DisciplinePanel
+            buckets={TOUR_PREVIEW.disciplineBuckets}
+            saved={TOUR_PREVIEW.disciplineSaved}
+            currency={TOUR_PREVIEW.currency}
+            total={TOUR_PREVIEW.disciplineTotal}
+          />
+          <NetPnlPanel summary={TOUR_PREVIEW.summary} currency={TOUR_PREVIEW.currency} startingBalance={TOUR_PREVIEW.startingBalance} />
+        </div>
+      </>
+    )
+  }
+
   return (
     <>
       <h1 className="page-title">Command HQ</h1>
-      <Panel title="No trades yet" data-tour="dashboard-balance dashboard-discipline">
+      <Panel title="No trades yet">
         <EmptyState title={filtered ? `No trades for ${accountName} in ${RANGE_PHRASE[scope.range]}` : 'Nothing logged yet'}>
           <p>
             {filtered
@@ -90,41 +128,7 @@ function DashboardView({ data, scope, accountName }) {
 
       <div className="dash-hero">
         <DisciplinePanel buckets={discipline.buckets} saved={discipline.saved_capital} currency={currency} total={summary.trade_count} />
-        <Panel title="Net P&L" tone="tint" className="dash-pnl" data-tour="dashboard-balance">
-          <Stat
-            featured
-            label="After fees"
-            value={<Amount value={summary.net_pnl} currency={currency} />}
-            detail={
-              summary.return_pct !== null ? (
-                <>
-                  {percent(summary.return_pct, 2, true)} on {money(data.starting_balance, { currency })}
-                </>
-              ) : null
-            }
-          />
-          <dl className="facts">
-            <div>
-              <dt>Gross</dt>
-              <dd className="mono">
-                <Amount value={summary.gross_pnl} currency={currency} />
-              </dd>
-            </div>
-            <div>
-              <dt>Fees</dt>
-              <dd className="mono">
-                <Amount value={-Math.abs(Number(summary.fees_total))} currency={currency} />
-              </dd>
-            </div>
-            <div className="fact-wide">
-              <dt>Profit factor</dt>
-              <dd className="mono">
-                {ratio(summary.profit_factor)}
-                <span className="cell-sub">Profits divided by losses, after fees</span>
-              </dd>
-            </div>
-          </dl>
-        </Panel>
+        <NetPnlPanel summary={summary} currency={currency} startingBalance={data.starting_balance} />
       </div>
 
       <div className="dash-kpis">
@@ -182,6 +186,46 @@ function DashboardView({ data, scope, accountName }) {
 
       <SetupsTable rows={data.setups} currency={currency} />
     </>
+  )
+}
+
+function NetPnlPanel({ summary, currency, startingBalance }) {
+  return (
+    <Panel title="Net P&L" tone="tint" className="dash-pnl" data-tour="dashboard-balance">
+      <Stat
+        featured
+        label="After fees"
+        value={<Amount value={summary.net_pnl} currency={currency} />}
+        detail={
+          summary.return_pct !== null ? (
+            <>
+              {percent(summary.return_pct, 2, true)} on {money(startingBalance, { currency })}
+            </>
+          ) : null
+        }
+      />
+      <dl className="facts">
+        <div>
+          <dt>Gross</dt>
+          <dd className="mono">
+            <Amount value={summary.gross_pnl} currency={currency} />
+          </dd>
+        </div>
+        <div>
+          <dt>Fees</dt>
+          <dd className="mono">
+            <Amount value={-Math.abs(Number(summary.fees_total))} currency={currency} />
+          </dd>
+        </div>
+        <div className="fact-wide">
+          <dt>Profit factor</dt>
+          <dd className="mono">
+            {ratio(summary.profit_factor)}
+            <span className="cell-sub">Profits divided by losses, after fees</span>
+          </dd>
+        </div>
+      </dl>
+    </Panel>
   )
 }
 

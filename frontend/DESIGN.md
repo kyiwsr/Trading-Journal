@@ -70,3 +70,10 @@ Removed from the mockups for v1 (owner decision): Trade Quests, Vaults and Guild
 - Every number comes from the API. Nothing is invented. Empty views say why they are empty and what fills them.
 - Profit factor is net of fees. Its label reads "Profits divided by losses, after fees".
 - No emoji, no em dashes in UI text.
+- One deliberate exception to "nothing is invented": while the onboarding tour is
+  pointing at the balance or discipline panel on an account with zero trades,
+  Dashboard renders those two real panels with illustrative numbers
+  (`TOUR_PREVIEW` in Dashboard.jsx), with no "example" label, and reverts to the
+  true empty state the instant the tour moves past that step. Owner's explicit
+  call (2026-09-22): a labeled example box was tried first and rejected as
+  unnecessary hedging for a moment this contained to the first-run tour.

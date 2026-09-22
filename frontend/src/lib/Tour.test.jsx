@@ -39,16 +39,12 @@ test('starts on the Dashboard for a fresh account and walks through every step',
 
   expect(await screen.findByRole('dialog', { name: 'Your running balance' })).toBeInTheDocument()
   expect(screen.getByText('Step 1 of 5')).toBeInTheDocument()
-  expect(screen.getByText('Example, not your real data')).toBeInTheDocument()
-  expect(screen.getByText('+$1,240.50')).toBeInTheDocument()
 
   await user.click(screen.getByRole('button', { name: 'Next step' }))
   expect(await screen.findByRole('dialog', { name: 'Discipline vs. win rate' })).toBeInTheDocument()
-  expect(screen.getByText('79% win rate')).toBeInTheDocument()
 
   await user.click(screen.getByRole('button', { name: 'Next step' }))
   expect(await screen.findByRole('dialog', { name: 'Log a trade' })).toBeInTheDocument()
-  expect(screen.queryByText('Example, not your real data')).not.toBeInTheDocument()
 
   await user.click(screen.getByRole('button', { name: 'Next step' }))
   await waitFor(() => expect(router.state.location.pathname).toBe('/trades'))
@@ -110,9 +106,10 @@ test('finds the target after Replay navigates into a page whose data is still lo
   expect(await screen.findByRole('dialog', { name: 'Your running balance' }, { timeout: 6000 })).toBeInTheDocument()
 }, 10000)
 
-test('finds something to highlight on a genuinely empty dashboard (zero trades logged)', async () => {
+test('previews the real balance and discipline panels on a genuinely empty dashboard', async () => {
   // The real bug report: a fresh account with no trades yet renders Dashboard's
-  // empty state instead of the normal KPI panels, which had no data-tour markers.
+  // empty state, which had no data-tour markers, so the first two steps found
+  // nothing. It now shows the real panels with illustrative numbers instead.
   const put = { value: null }
   renderApp(
     '/',
@@ -120,8 +117,11 @@ test('finds something to highlight on a genuinely empty dashboard (zero trades l
     { signedIn: true },
   )
 
-  const dialog = await screen.findByRole('dialog', { name: 'Your running balance' })
-  expect(dialog).toBeInTheDocument()
+  expect(await screen.findByRole('dialog', { name: 'Your running balance' })).toBeInTheDocument()
+  expect(screen.getByRole('heading', { name: 'Net P&L' })).toBeInTheDocument()
+  expect(screen.queryByText('Nothing logged yet')).not.toBeInTheDocument()
+
+  await userEvent.setup().click(screen.getByRole('button', { name: 'Skip tour' }))
   expect(await screen.findByText('Nothing logged yet')).toBeInTheDocument()
 })
 
