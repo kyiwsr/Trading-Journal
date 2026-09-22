@@ -126,6 +126,31 @@
   font-size: 18px;
   line-height: 24px;
 }
+/* Dashed border, unused anywhere else in the app, marks this as an
+   illustration rather than the shipped hard-bordered UI around it. */
+.spotlight-example {
+  margin-top: var(--space-sm);
+  padding: var(--space-sm);
+  border: 2px dashed var(--muted);
+  border-radius: var(--radius);
+}
+.spotlight-example-label {
+  margin: 0 0 var(--space-xs);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.spotlight-example-metric {
+  margin: 0;
+}
+.spotlight-example-detail {
+  margin: var(--space-xs) 0 0;
+  font-size: 12px;
+  color: var(--muted);
+}
 .spotlight-actions {
   display: flex;
   justify-content: flex-end;

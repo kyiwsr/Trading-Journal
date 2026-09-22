@@ -39,12 +39,16 @@ test('starts on the Dashboard for a fresh account and walks through every step',
 
   expect(await screen.findByRole('dialog', { name: 'Your running balance' })).toBeInTheDocument()
   expect(screen.getByText('Step 1 of 5')).toBeInTheDocument()
+  expect(screen.getByText('Example, not your real data')).toBeInTheDocument()
+  expect(screen.getByText('+$1,240.50')).toBeInTheDocument()
 
   await user.click(screen.getByRole('button', { name: 'Next step' }))
   expect(await screen.findByRole('dialog', { name: 'Discipline vs. win rate' })).toBeInTheDocument()
+  expect(screen.getByText('79% win rate')).toBeInTheDocument()
 
   await user.click(screen.getByRole('button', { name: 'Next step' }))
   expect(await screen.findByRole('dialog', { name: 'Log a trade' })).toBeInTheDocument()
+  expect(screen.queryByText('Example, not your real data')).not.toBeInTheDocument()
 
   await user.click(screen.getByRole('button', { name: 'Next step' }))
   await waitFor(() => expect(router.state.location.pathname).toBe('/trades'))

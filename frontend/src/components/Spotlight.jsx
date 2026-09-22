@@ -89,6 +89,15 @@ export function Spotlight() {
         </p>
         <h2 className="spotlight-title">{step.title}</h2>
         <p>{step.body}</p>
+        {step.example ? (
+          <div className="spotlight-example">
+            <p className="spotlight-example-label">Example, not your real data</p>
+            <p className="spotlight-example-metric">
+              {step.example.metric}: <span className="mono">{step.example.value}</span>
+            </p>
+            <p className="spotlight-example-detail">{step.example.detail}</p>
+          </div>
+        ) : null}
         <div className="spotlight-actions">
           <Button onClick={skip}>Skip tour</Button>
           <Button variant="primary" onClick={next}>

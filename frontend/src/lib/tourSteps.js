@@ -7,6 +7,7 @@ export const TOUR_STEPS = [
     target: 'dashboard-balance',
     title: 'Your running balance',
     body: 'Net P&L over the selected date range, starting from each account’s starting balance.',
+    example: { metric: 'Net P&L', value: '+$1,240.50', detail: '+0.8% on $150,000.00' },
   },
   {
     id: 'dashboard-discipline',
@@ -14,6 +15,7 @@ export const TOUR_STEPS = [
     target: 'dashboard-discipline',
     title: 'Discipline vs. win rate',
     body: 'Trades are grouped by how much of their setup’s checklist they followed, not just whether they won.',
+    example: { metric: 'Elite (85-100%)', value: '79% win rate', detail: '34 trades · +0.92R avg' },
   },
   {
     id: 'header-log-trade',
