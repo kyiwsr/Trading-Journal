@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import CheckConstraint, String, text
+from sqlalchemy import Boolean, CheckConstraint, String, text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db import Base
@@ -18,4 +18,5 @@ class User(Base):
     email: Mapped[str] = mapped_column(String(320), unique=True)
     password_hash: Mapped[str] = mapped_column(String(255))
     compliance_cutoff: Mapped[int] = mapped_column(server_default=text(str(DEFAULT_COMPLIANCE_CUTOFF)))
+    has_seen_tour: Mapped[bool] = mapped_column(Boolean, server_default=text("false"))
     created_at: Mapped[datetime] = created_at_column()

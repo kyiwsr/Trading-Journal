@@ -9,14 +9,16 @@ class BandsOut(BaseModel):
 
 class SettingsOut(BaseModel):
     compliance_cutoff: int
+    has_seen_tour: bool
     bands: BandsOut
     low_sample_threshold: int
     elite_setup_min: int
 
 
 class SettingsIn(BaseModel):
-    """Only the cutoff is editable; the bands and thresholds are fixed constants."""
+    """The cutoff and the tour flag are editable; the bands and thresholds are fixed constants."""
 
     model_config = ConfigDict(extra="forbid", strict=True)
 
     compliance_cutoff: int = Field(ge=0, le=100)
+    has_seen_tour: bool | None = None

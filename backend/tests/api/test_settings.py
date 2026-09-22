@@ -4,6 +4,7 @@ from tests.api.conftest import create_world, trade71
 
 DEFAULTS = {
     "compliance_cutoff": 80,
+    "has_seen_tour": False,
     "bands": {"elite_min": 85, "solid_min": 70, "sub_optimal_min": 60},
     "low_sample_threshold": 20,
     "elite_setup_min": 90,
@@ -43,6 +44,21 @@ def test_cutoff_outside_zero_to_hundred_is_rejected(client, cutoff):
 def test_put_rejects_missing_or_read_only_fields(client, body):
     assert client.put("/settings", json=body).status_code == 422
     assert client.get("/settings").json() == DEFAULTS
+
+
+def test_put_can_mark_the_tour_seen(client):
+    response = client.put("/settings", json={"compliance_cutoff": 80, "has_seen_tour": True})
+
+    assert response.json()["has_seen_tour"] is True
+    assert client.get("/settings").json()["has_seen_tour"] is True
+
+
+def test_put_without_has_seen_tour_leaves_it_unchanged(client):
+    client.put("/settings", json={"compliance_cutoff": 80, "has_seen_tour": True})
+
+    response = client.put("/settings", json={"compliance_cutoff": 90})
+
+    assert response.json() == {**DEFAULTS, "compliance_cutoff": 90, "has_seen_tour": True}
 
 
 def test_each_user_has_their_own_cutoff(client, other_client):
