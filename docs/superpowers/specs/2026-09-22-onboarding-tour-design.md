@@ -1,7 +1,8 @@
 # First-Time Tour — Design Spec
 
 Date: 2026-09-22
-Status: Approved shape (2026-09-22 chat); spec written for record and review
+Status: Built and shipped (2026-09-22). See git log from `3967c5a` for the
+backend half and `ebee1ed` for the frontend half.
 
 ## 1. Purpose & Scope
 
