@@ -84,6 +84,55 @@
   margin-top: var(--space-lg);
 }
 
+/* Tour spotlight. Orange marks the one thing to look at right now, the same
+   role it plays on the primary button and the XP fill. */
+.spotlight {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+}
+.spotlight-ring {
+  position: fixed;
+  border: 2px solid var(--orange);
+  border-radius: var(--radius);
+  box-shadow:
+    0 0 0 9999px rgb(0 71 119 / 0.35),
+    var(--shadow-2);
+}
+.spotlight-card {
+  position: fixed;
+  width: 320px;
+  max-width: calc(100vw - 2 * var(--space-md));
+  padding: var(--space-lg);
+  color: var(--navy);
+  background: var(--canvas);
+  border: var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-3);
+  pointer-events: auto;
+}
+.spotlight-step {
+  margin: 0 0 var(--space-xs);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.spotlight-title {
+  margin-bottom: var(--space-sm);
+  font-size: 18px;
+  line-height: 24px;
+}
+.spotlight-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-sm);
+  margin-top: var(--space-lg);
+}
+
 /* Log and edit trade */
 .tf {
   display: grid;

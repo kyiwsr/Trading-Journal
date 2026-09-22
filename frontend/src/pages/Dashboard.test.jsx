@@ -62,6 +62,7 @@ test('shows a setup subtitle under its name in the playbook table', async () => 
 test('labels the discipline bands from the API settings', async () => {
   const settings = {
     compliance_cutoff: 80,
+    has_seen_tour: true,
     bands: { elite_min: 90, solid_min: 75, sub_optimal_min: 65 },
     low_sample_threshold: 20,
     elite_setup_min: 90,

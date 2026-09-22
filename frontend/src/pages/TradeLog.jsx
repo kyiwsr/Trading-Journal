@@ -216,7 +216,7 @@ export default function TradeLog() {
       ) : trades.isError ? (
         <ErrorState what="the trade ledger" error={trades.error} onRetry={() => void trades.refetch()} />
       ) : trades.data.items.length === 0 ? (
-        <Panel title="Ledger">
+        <Panel title="Ledger" data-tour="trade-log">
           <EmptyState title={chips.length > 0 ? 'No trades match these filters' : 'No trades logged yet'}>
             {chips.length > 0 ? (
               <p>Remove a filter above, or clear them all.</p>
@@ -229,7 +229,7 @@ export default function TradeLog() {
           </EmptyState>
         </Panel>
       ) : (
-        <Panel title="Ledger" className="ledger" aria-busy={trades.isPlaceholderData}>
+        <Panel title="Ledger" className="ledger" aria-busy={trades.isPlaceholderData} data-tour="trade-log">
           <TableScroll label="Trade ledger table">
             <table className="data-table ledger-table">
               <thead>

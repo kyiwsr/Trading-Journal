@@ -7,6 +7,7 @@ import { renderApp } from '../test/renderApp'
 
 const settings = {
   compliance_cutoff: 80,
+  has_seen_tour: true,
   bands: { elite_min: 85, solid_min: 70, sub_optimal_min: 60 },
   low_sample_threshold: 20,
   elite_setup_min: 90,
@@ -329,6 +330,13 @@ describe('Preferences tab', () => {
     renderApp('/settings/preferences', routes(), { signedIn: true })
     expect(await screen.findByText('85% to 100%')).toBeInTheDocument()
     expect(screen.getByText('Under 60%')).toBeInTheDocument()
+  })
+
+  it('replays the tour from the start', async () => {
+    const { router } = renderApp('/settings/preferences', routes(), { signedIn: true })
+    await userEvent.click(await screen.findByRole('button', { name: 'Replay tour' }))
+    await waitFor(() => expect(router.state.location.pathname).toBe('/'))
+    expect(await screen.findByRole('dialog', { name: 'Your running balance' })).toBeInTheDocument()
   })
 })
 

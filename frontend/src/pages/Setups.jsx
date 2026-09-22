@@ -68,7 +68,7 @@ export default function Setups() {
     <>
       {head}
       {setups.data.length === 0 ? (
-        <Panel title="Setups">
+        <Panel title="Setups" data-tour="setups">
           <EmptyState title="No setups yet">
             <p>
               A setup is a way you trade, named in your own words, with the checklist you hold yourself to. Once a
@@ -82,6 +82,7 @@ export default function Setups() {
       ) : (
         <Panel
           title="Setups"
+          data-tour="setups"
           note={
             stats.isError
               ? 'Trade statistics could not be loaded, so only the checklists are shown.'

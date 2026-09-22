@@ -90,7 +90,7 @@ function DashboardView({ data, scope, accountName }) {
 
       <div className="dash-hero">
         <DisciplinePanel buckets={discipline.buckets} saved={discipline.saved_capital} currency={currency} total={summary.trade_count} />
-        <Panel title="Net P&L" tone="tint" className="dash-pnl">
+        <Panel title="Net P&L" tone="tint" className="dash-pnl" data-tour="dashboard-balance">
           <Stat
             featured
             label="After fees"
@@ -198,7 +198,12 @@ function DisciplinePanel({ buckets, saved, currency, total }) {
   const byBand = new Map(buckets.map((bucket) => [bucket.band, bucket]))
   const savedAmount = Number(saved)
   return (
-    <Panel title="Discipline vs win rate" note={`${number(total)} trades, grouped by checklist score`} className="dash-discipline">
+    <Panel
+      title="Discipline vs win rate"
+      note={`${number(total)} trades, grouped by checklist score`}
+      className="dash-discipline"
+      data-tour="dashboard-discipline"
+    >
       <ul className="discipline">
         {bandList.map(({ band, label, range }) => {
           const bucket = byBand.get(band)

@@ -5,6 +5,7 @@ import { useSaveSettings, useSettings } from '../../api/queries'
 import { Button, ErrorState, Field, Input, LoadingState, Panel } from '../../components'
 import { scoreBandList } from '../../lib/labels'
 import { validateCutoff } from '../../lib/settingsForms'
+import { useTour } from '../../lib/TourProvider'
 
 export default function PreferencesTab() {
   const settings = useSettings()
@@ -15,6 +16,7 @@ export default function PreferencesTab() {
 
 function PreferencesForm({ settings }) {
   const save = useSaveSettings()
+  const tour = useTour()
   const [cutoff, setCutoff] = useState(String(settings.compliance_cutoff))
   const [attempted, setAttempted] = useState(false)
   const [saved, setSaved] = useState(false)
@@ -85,6 +87,10 @@ function PreferencesForm({ settings }) {
             </li>
           ))}
         </ul>
+      </Panel>
+
+      <Panel title="Tour" note="A short walkthrough of the dashboard, logging a trade, the ledger and setups.">
+        <Button onClick={tour.start}>Replay tour</Button>
       </Panel>
     </>
   )
