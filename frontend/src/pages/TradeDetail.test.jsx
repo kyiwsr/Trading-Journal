@@ -1,4 +1,5 @@
-import { screen, within } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 
 import { account, trade71 } from '../test/fixtures'
 import { renderApp } from '../test/renderApp'
@@ -88,4 +89,17 @@ test('falls back to the default cutoff when settings cannot be loaded', async ()
 test('offers to edit the trade', async () => {
   renderApp('/trades/71', routes, { signedIn: true })
   expect(await screen.findByRole('link', { name: 'Edit trade' })).toHaveAttribute('href', expect.stringContaining('/trades/71/edit'))
+})
+
+test('deletes the trade after confirming, and returns to the ledger', async () => {
+  const { calls, router } = renderApp(
+    '/trades/71',
+    { ...routes, '/trades/71': (_url, init) => (init?.method === 'DELETE' ? { status: 204 } : { body: trade71 }) },
+    { signedIn: true },
+  )
+  await userEvent.click(await screen.findByRole('button', { name: 'Delete trade' }))
+  const dialog = await screen.findByRole('dialog')
+  await userEvent.click(within(dialog).getByRole('button', { name: 'Delete trade' }))
+  await waitFor(() => expect(calls).toContain('DELETE /trades/71'))
+  await waitFor(() => expect(router.state.location.pathname).toBe('/trades'))
 })

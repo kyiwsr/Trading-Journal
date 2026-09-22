@@ -163,6 +163,10 @@ export function useAccountArchive() {
   )
 }
 
+export function useDeleteAccount() {
+  return useSaving((id) => api(`/accounts/${id}`, { method: 'DELETE' }))
+}
+
 export function useSaveInstrument(id) {
   return useSaving((body) =>
     id === undefined

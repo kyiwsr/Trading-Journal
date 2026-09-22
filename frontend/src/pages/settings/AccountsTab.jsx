@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
-import { useAccountArchive, useAccounts, useFeeProfiles, useSaveAccount } from '../../api/queries'
-import { Button, EmptyState, ErrorState, Field, Input, LoadingState, Panel, Select } from '../../components'
+import { useAccountArchive, useAccounts, useDeleteAccount, useFeeProfiles, useSaveAccount } from '../../api/queries'
+import { Button, ConfirmDialog, EmptyState, ErrorState, Field, Input, LoadingState, Panel, Select } from '../../components'
 import { money } from '../../lib/format'
 import {
   accountFormFrom,
@@ -17,7 +17,9 @@ export default function AccountsTab() {
   const accounts = useAccounts(true)
   const profiles = useFeeProfiles(true)
   const archive = useAccountArchive()
+  const deleteAccount = useDeleteAccount()
   const [editing, setEditing] = useState(null)
+  const [pendingDelete, setPendingDelete] = useState(null)
 
   if (accounts.isPending || profiles.isPending) return <LoadingState what="your accounts" />
   if (accounts.isError) return <ErrorState what="your accounts" error={accounts.error} onRetry={() => void accounts.refetch()} />
@@ -70,6 +72,13 @@ export default function AccountsTab() {
                     >
                       {account.archived_at ? 'Unarchive' : 'Archive'}
                     </Button>
+                    <Button
+                      variant="destructive"
+                      aria-label={`Delete ${account.name}`}
+                      onClick={() => setPendingDelete(account.id)}
+                    >
+                      Delete
+                    </Button>
                   </>
                 }
               />
@@ -81,7 +90,23 @@ export default function AccountsTab() {
             {archive.error.message}
           </p>
         ) : null}
+        {deleteAccount.isError ? (
+          <p className="form-error" role="alert">
+            {deleteAccount.error.message}
+          </p>
+        ) : null}
       </Panel>
+      <ConfirmDialog
+        open={pendingDelete !== null}
+        title="Delete this account?"
+        confirmLabel="Delete account"
+        cancelLabel="Cancel"
+        destructive
+        onCancel={() => setPendingDelete(null)}
+        onConfirm={() => deleteAccount.mutate(pendingDelete, { onSuccess: () => setPendingDelete(null) })}
+      >
+        <p>This removes the account itself. It only works while no trade uses it; otherwise archive it instead.</p>
+      </ConfirmDialog>
     </>
   )
 }

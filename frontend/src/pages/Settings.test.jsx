@@ -149,6 +149,42 @@ describe('Accounts tab', () => {
     await userEvent.click(await screen.findByRole('button', { name: 'Archive Test account' }))
     await waitFor(() => expect(calls).toContain('POST /accounts/1/archive'))
   })
+
+  it('deletes an account after confirming', async () => {
+    let deleted = false
+    const { calls } = renderApp(
+      '/settings/accounts',
+      routes({
+        '/accounts': () => ({ body: deleted ? [] : [{ ...account, fee_profile_id: 9 }] }),
+        '/accounts/1': (_url, init) => {
+          if (init?.method === 'DELETE') {
+            deleted = true
+            return { status: 204 }
+          }
+          return { body: { ...account, fee_profile_id: 9 } }
+        },
+      }),
+      { signedIn: true },
+    )
+    await userEvent.click(await screen.findByRole('button', { name: 'Delete Test account' }))
+    await userEvent.click(await screen.findByRole('button', { name: 'Delete account' }))
+    await waitFor(() => expect(calls).toContain('DELETE /accounts/1'))
+    expect(await screen.findByText('No accounts yet')).toBeInTheDocument()
+  })
+
+  it('shows the conflict message when the account still has trades', async () => {
+    renderApp(
+      '/settings/accounts',
+      routes({
+        '/accounts/1': { status: 409, body: { detail: 'This account is used by existing records. Archive it instead.' } },
+      }),
+      { signedIn: true },
+    )
+    await userEvent.click(await screen.findByRole('button', { name: 'Delete Test account' }))
+    await userEvent.click(await screen.findByRole('button', { name: 'Delete account' }))
+    expect(await screen.findByRole('alert')).toHaveTextContent('This account is used by existing records. Archive it instead.')
+    expect(await screen.findByRole('list', { name: 'Accounts' })).toBeInTheDocument()
+  })
 })
 
 describe('Instruments tab', () => {

@@ -1,13 +1,14 @@
 import { useState } from 'react'
-import { Link, useParams, useSearchParams } from 'react-router-dom'
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 
 import { ApiError } from '../api/client'
-import { useAccounts, useTrade } from '../api/queries'
+import { useAccounts, useDeleteTrade, useTrade } from '../api/queries'
 import {
   Amount,
   Badge,
   Button,
   Card,
+  ConfirmDialog,
   EmptyState,
   ErrorState,
   LoadingState,
@@ -52,6 +53,9 @@ function TradeView({ data, currency, accountLabel, route, search }) {
   const decimals = priceDecimals(data.instrument.tick_size)
   const result = Number(data.net_pnl) > 0 ? 'win' : Number(data.net_pnl) < 0 ? 'loss' : 'breakeven'
   const side = data.direction === 'long' ? 'Long' : 'Short'
+  const navigate = useNavigate()
+  const deleteTrade = useDeleteTrade()
+  const [confirmingDelete, setConfirmingDelete] = useState(false)
 
   return (
     <>
@@ -70,8 +74,16 @@ function TradeView({ data, currency, accountLabel, route, search }) {
           <Link className="btn btn-primary" to={{ pathname: `/trades/${data.id}/edit`, search }}>
             Edit trade
           </Link>
+          <Button variant="destructive" onClick={() => setConfirmingDelete(true)}>
+            Delete trade
+          </Button>
         </div>
       </div>
+      {deleteTrade.isError ? (
+        <p className="form-error" role="alert">
+          {deleteTrade.error.message}
+        </p>
+      ) : null}
 
       <Card tone="tint" className="trade-head">
         <p className="trade-meta">
@@ -122,6 +134,19 @@ function TradeView({ data, currency, accountLabel, route, search }) {
           <ChecklistPanel data={data} />
         </div>
       </div>
+      <ConfirmDialog
+        open={confirmingDelete}
+        title="Delete this trade?"
+        confirmLabel="Delete trade"
+        cancelLabel="Cancel"
+        destructive
+        onCancel={() => setConfirmingDelete(false)}
+        onConfirm={() =>
+          deleteTrade.mutate(data.id, { onSuccess: () => navigate({ pathname: '/trades', search }) })
+        }
+      >
+        <p>This permanently removes the trade, its fills, fees, checklist and XP. It cannot be undone.</p>
+      </ConfirmDialog>
     </>
   )
 }
