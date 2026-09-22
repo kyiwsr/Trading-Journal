@@ -335,6 +335,10 @@ describe('Preferences tab', () => {
   it('replays the tour from the start', async () => {
     const { router } = renderApp('/settings/preferences', routes(), { signedIn: true })
     await userEvent.click(await screen.findByRole('button', { name: 'Replay tour' }))
+    expect(await screen.findByRole('dialog', { name: 'Take a quick look around?' })).toBeInTheDocument()
+    expect(router.state.location.pathname).toBe('/settings/preferences')
+
+    await userEvent.click(screen.getByRole('button', { name: 'Let’s go' }))
     await waitFor(() => expect(router.state.location.pathname).toBe('/'))
     expect(await screen.findByRole('dialog', { name: 'Your running balance' })).toBeInTheDocument()
   })

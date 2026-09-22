@@ -92,6 +92,24 @@
   z-index: 50;
   pointer-events: none;
 }
+/* The welcome screen has nothing to spotlight, so it dims the whole page
+   and blocks it, like a real dialog, instead of the per-step ring overlay. */
+.spotlight.is-welcome {
+  display: grid;
+  place-items: center;
+  pointer-events: auto;
+  background: rgb(0 71 119 / 0.2);
+}
+.spotlight-welcome {
+  width: 360px;
+  max-width: calc(100vw - 2 * var(--space-md));
+  padding: var(--space-lg);
+  color: var(--navy);
+  background: var(--canvas);
+  border: var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-3);
+}
 .spotlight-ring {
   position: fixed;
   border: 2px solid var(--orange);

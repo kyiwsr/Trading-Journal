@@ -37,6 +37,9 @@ test('starts on the Dashboard for a fresh account and walks through every step',
   const put = { value: null }
   const { router } = renderApp('/', freshAccountRoutes(put), { signedIn: true })
 
+  expect(await screen.findByRole('dialog', { name: 'Take a quick look around?' })).toBeInTheDocument()
+  await user.click(screen.getByRole('button', { name: 'Let’s go' }))
+
   expect(await screen.findByRole('dialog', { name: 'Your running balance' })).toBeInTheDocument()
   expect(screen.getByText('Step 1 of 5')).toBeInTheDocument()
 
@@ -60,23 +63,35 @@ test('starts on the Dashboard for a fresh account and walks through every step',
   expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
 }, 15000)
 
-test('skipping marks it seen and closes it immediately', async () => {
+test('skipping from the welcome screen marks it seen and closes it immediately', async () => {
   const user = userEvent.setup()
   const put = { value: null }
   renderApp('/', freshAccountRoutes(put), { signedIn: true })
 
-  expect(await screen.findByRole('dialog')).toBeInTheDocument()
+  expect(await screen.findByRole('dialog', { name: 'Take a quick look around?' })).toBeInTheDocument()
   await user.click(screen.getByRole('button', { name: 'Skip tour' }))
   await waitFor(() => expect(put.value).toEqual({ compliance_cutoff: 80, has_seen_tour: true }))
   expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
 })
 
-test('Escape skips the tour', async () => {
+test('skipping mid-tour, after the welcome screen, also marks it seen', async () => {
   const user = userEvent.setup()
   const put = { value: null }
   renderApp('/', freshAccountRoutes(put), { signedIn: true })
 
-  expect(await screen.findByRole('dialog')).toBeInTheDocument()
+  await user.click(await screen.findByRole('button', { name: 'Let’s go' }))
+  expect(await screen.findByRole('dialog', { name: 'Your running balance' })).toBeInTheDocument()
+  await user.click(screen.getByRole('button', { name: 'Skip tour' }))
+  await waitFor(() => expect(put.value).toEqual({ compliance_cutoff: 80, has_seen_tour: true }))
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+})
+
+test('Escape skips the tour from the welcome screen', async () => {
+  const user = userEvent.setup()
+  const put = { value: null }
+  renderApp('/', freshAccountRoutes(put), { signedIn: true })
+
+  expect(await screen.findByRole('dialog', { name: 'Take a quick look around?' })).toBeInTheDocument()
   await user.keyboard('{Escape}')
   await waitFor(() => expect(put.value).toEqual({ compliance_cutoff: 80, has_seen_tour: true }))
   expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
@@ -102,6 +117,7 @@ test('finds the target after Replay navigates into a page whose data is still lo
   )
 
   await user.click(await screen.findByRole('button', { name: 'Replay tour' }))
+  await user.click(await screen.findByRole('button', { name: 'Let’s go' }))
   expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   expect(await screen.findByRole('dialog', { name: 'Your running balance' }, { timeout: 6000 })).toBeInTheDocument()
 }, 10000)
@@ -110,6 +126,7 @@ test('previews the real balance and discipline panels on a genuinely empty dashb
   // The real bug report: a fresh account with no trades yet renders Dashboard's
   // empty state, which had no data-tour markers, so the first two steps found
   // nothing. It now shows the real panels with illustrative numbers instead.
+  const user = userEvent.setup()
   const put = { value: null }
   renderApp(
     '/',
@@ -117,11 +134,12 @@ test('previews the real balance and discipline panels on a genuinely empty dashb
     { signedIn: true },
   )
 
+  await user.click(await screen.findByRole('button', { name: 'Let’s go' }))
   expect(await screen.findByRole('dialog', { name: 'Your running balance' })).toBeInTheDocument()
   expect(screen.getByRole('heading', { name: 'Net P&L' })).toBeInTheDocument()
   expect(screen.queryByText('Nothing logged yet')).not.toBeInTheDocument()
 
-  await userEvent.setup().click(screen.getByRole('button', { name: 'Skip tour' }))
+  await user.click(screen.getByRole('button', { name: 'Skip tour' }))
   expect(await screen.findByText('Nothing logged yet')).toBeInTheDocument()
 })
 

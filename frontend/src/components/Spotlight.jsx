@@ -58,17 +58,34 @@ function tooltipPosition(rect) {
 }
 
 export function Spotlight() {
-  const { step, stepNumber, stepCount, next, skip } = useTour()
+  const { step, showingWelcome, stepNumber, stepCount, next, skip, begin } = useTour()
   const location = useLocation()
   const onThisPage = step && (step.path === null || location.pathname === step.path)
   const rect = useTargetRect(onThisPage ? step.target : null)
 
   useEffect(() => {
-    if (!step) return
+    if (!step && !showingWelcome) return
     const onKeyDown = (event) => event.key === 'Escape' && skip()
     document.addEventListener('keydown', onKeyDown)
     return () => document.removeEventListener('keydown', onKeyDown)
-  }, [step, skip])
+  }, [step, showingWelcome, skip])
+
+  if (showingWelcome) {
+    return (
+      <div className="spotlight is-welcome" role="dialog" aria-label="Take a quick look around?">
+        <div className="spotlight-welcome">
+          <h2 className="spotlight-title">Take a quick look around?</h2>
+          <p>A short tour: the dashboard, logging a trade, the ledger and setups. Five stops, skip anytime.</p>
+          <div className="spotlight-actions">
+            <Button onClick={skip}>Skip tour</Button>
+            <Button variant="primary" onClick={begin}>
+              Let’s go
+            </Button>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   if (!step || !onThisPage || !rect) return null
 
