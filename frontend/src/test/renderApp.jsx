@@ -18,7 +18,9 @@ export function stubApi(routes) {
       calls.push(`${init?.method ?? 'GET'} ${url.pathname.replace(/^\/api/, '')}${url.search}`)
       const handler = routes[url.pathname.replace(/^\/api/, '')]
       if (!handler) return new Response(JSON.stringify({ detail: 'No test route' }), { status: 404 })
-      const reply = typeof handler === 'function' ? handler(url, init) : handler
+      // Awaiting a plain object is a no-op, so a handler may also return a
+      // Promise to simulate a slow response.
+      const reply = await (typeof handler === 'function' ? handler(url, init) : handler)
       const status = reply.status ?? 200
       return new Response(status === 204 ? null : JSON.stringify(reply.body ?? {}), {
         status,

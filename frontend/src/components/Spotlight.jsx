@@ -5,22 +5,20 @@ import { useTour } from '../lib/TourProvider'
 import { Button } from './Button'
 
 const MARGIN = 12
-const MAX_FIND_ATTEMPTS = 20
+// A step's page may still be fetching its own data over the real network when
+// the step starts (e.g. Replay navigating fresh into the Dashboard), so this
+// watches the DOM for the target instead of guessing how long that takes.
+// The timeout is only a safety net against a target that never appears.
+const GIVE_UP_MS = 10_000
 
-// Polls for the target rather than using a MutationObserver: the tour has at
-// most a handful of steps, and a short poll is simpler to reason about than
-// watching the whole DOM for an element that is usually already there.
 function useTargetRect(target) {
   const [rect, setRect] = useState(null)
 
   useEffect(() => {
     if (!target) {
       setRect(null)
-      return
+      return undefined
     }
-    let attempts = 0
-    let raf = null
-    let poll = null
 
     const measure = () => {
       const el = document.querySelector(`[data-tour="${target}"]`)
@@ -28,22 +26,20 @@ function useTargetRect(target) {
       return el
     }
 
-    const tick = () => {
-      if (measure() || ++attempts >= MAX_FIND_ATTEMPTS) return
-      poll = setTimeout(tick, 100)
-    }
-    tick()
+    if (measure()) return undefined
 
-    const onViewportChange = () => {
-      raf = requestAnimationFrame(measure)
-    }
-    window.addEventListener('scroll', onViewportChange, true)
-    window.addEventListener('resize', onViewportChange)
+    const observer = new MutationObserver(() => {
+      if (measure()) observer.disconnect()
+    })
+    observer.observe(document.body, { childList: true, subtree: true })
+    const giveUp = setTimeout(() => observer.disconnect(), GIVE_UP_MS)
+    window.addEventListener('scroll', measure, true)
+    window.addEventListener('resize', measure)
     return () => {
-      clearTimeout(poll)
-      cancelAnimationFrame(raf)
-      window.removeEventListener('scroll', onViewportChange, true)
-      window.removeEventListener('resize', onViewportChange)
+      observer.disconnect()
+      clearTimeout(giveUp)
+      window.removeEventListener('scroll', measure, true)
+      window.removeEventListener('resize', measure)
     }
   }, [target])
 

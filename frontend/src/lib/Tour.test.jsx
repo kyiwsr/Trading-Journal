@@ -81,6 +81,30 @@ test('Escape skips the tour', async () => {
   expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
 })
 
+test('finds the target after Replay navigates into a page whose data is still loading', async () => {
+  // Reproduces the real bug: clicking Replay from Settings sends you to a
+  // freshly-mounted Dashboard whose data has not arrived yet. The spotlight
+  // must wait for it, not give up because the target was not there instantly.
+  const user = userEvent.setup()
+  // Longer than the old fixed poll budget (2s) this bug shipped with, well
+  // inside the new 10s safety net.
+  const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
+  renderApp(
+    '/settings/preferences',
+    routes({
+      '/dashboard': async () => {
+        await delay(2500)
+        return { body: dashboard }
+      },
+    }),
+    { signedIn: true },
+  )
+
+  await user.click(await screen.findByRole('button', { name: 'Replay tour' }))
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  expect(await screen.findByRole('dialog', { name: 'Your running balance' }, { timeout: 6000 })).toBeInTheDocument()
+}, 10000)
+
 test('a returning account never sees the tour on its own', async () => {
   renderApp('/', routes(), { signedIn: true })
   expect(await screen.findByRole('heading', { name: 'Command HQ' })).toBeInTheDocument()
