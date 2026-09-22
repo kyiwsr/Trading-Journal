@@ -24,6 +24,9 @@ Steps 1 to 3 touch Supabase, 4 to 7 the hosts, 8 to 11 checks and safety nets. D
 2. Project Settings, API: copy the Project URL (`SUPABASE_URL`) and the `service_role` key
    (`SUPABASE_SERVICE_KEY`, called the secret key in newer dashboards). Treat the key like a password. It goes
    only into Render, never into the frontend or the repo.
+3. Confirm the bucket exists before moving on (a missing bucket surfaces later as a generic upload failure with
+   no obvious cause): `curl -i -H "Authorization: Bearer $SUPABASE_SERVICE_KEY" -H "apikey: $SUPABASE_SERVICE_KEY" "$SUPABASE_URL/storage/v1/bucket/screenshots"`
+   must return `200` and the bucket's own JSON, not `404 NoSuchBucket`.
 
 ## 3. Migrations, your login, row-level security
 
@@ -68,7 +71,13 @@ In `frontend/vercel.json` replace `YOUR-RENDER-SERVICE.onrender.com` with the ho
 ## 6. Vercel frontend
 
 New Project, import the repo, set **Root Directory** to `frontend`. Vite is detected. No environment variables
-are needed. Deploy, then note the production URL (`https://<project>.vercel.app`, not a per-deployment URL).
+are needed. Deploy, then note the production URL (`https://<project>.vercel.app`, not a per-deployment URL:
+those look like `<project>-<hash>-<username>.vercel.app` and are not accepted in step 7).
+
+Vercel only auto-deploys a commit whose author email is verified on the pushing GitHub account; an unlinked
+email (e.g. a work or school address never added to GitHub) fails silently with "GitHub couldn't verify an
+account for the commit" and nothing appears broken elsewhere. Add the address under GitHub Settings, Emails, or
+set a GitHub-verified email in `git config user.email` for this repo, before relying on push-to-deploy.
 
 ## 7. Allow the Vercel origin
 
