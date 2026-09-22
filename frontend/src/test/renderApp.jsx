@@ -22,7 +22,7 @@ export function stubApi(routes) {
       const status = reply.status ?? 200
       return new Response(status === 204 ? null : JSON.stringify(reply.body ?? {}), {
         status,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...reply.headers },
       })
     }),
   )

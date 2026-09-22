@@ -40,3 +40,27 @@ test('will not submit an empty form', async () => {
   renderApp('/login', { '/auth/me': { status: 401, body: {} } })
   expect(await screen.findByRole('button', { name: 'Sign in' })).toBeDisabled()
 })
+
+test('locks out with a live countdown after too many failed attempts', async () => {
+  const user = userEvent.setup()
+  renderApp('/login', {
+    '/auth/me': { status: 401, body: { detail: 'Not authenticated' } },
+    '/auth/login': {
+      status: 429,
+      body: { detail: 'Too many failed sign-in attempts. Try again later.' },
+      headers: { 'Retry-After': '2' },
+    },
+  })
+  await user.type(await screen.findByLabelText('Email'), 'trader@example.com')
+  await user.type(screen.getByLabelText('Password'), 'wrong')
+  await user.click(screen.getByRole('button', { name: 'Sign in' }))
+
+  const alert = await screen.findByRole('alert')
+  expect(alert).toHaveTextContent('Too many failed sign-in attempts. Try again later.')
+  expect(alert).toHaveTextContent('Try again in 2s.')
+  expect(screen.getByRole('button', { name: 'Sign in' })).toBeDisabled()
+
+  expect(await screen.findByText('Try again in 1s.', {}, { timeout: 1500 })).toBeInTheDocument()
+  expect(await screen.findByText('You can try again now.', {}, { timeout: 1500 })).toBeInTheDocument()
+  expect(screen.getByRole('button', { name: 'Sign in' })).toBeEnabled()
+}, 10000)

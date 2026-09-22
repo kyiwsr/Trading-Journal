@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Navigate, useLocation, useNavigate } from 'react-router-dom'
 
 import { ApiError } from '../api/client'
@@ -8,24 +8,43 @@ import { Button, Card, Input } from '../components'
 export default function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [secondsLeft, setSecondsLeft] = useState(0)
   const login = useLogin()
   const me = useMe()
   const navigate = useNavigate()
   const location = useLocation()
   const from = location.state?.from ?? '/'
 
+  const lockout = login.error instanceof ApiError && login.error.status === 429
+
+  useEffect(() => {
+    if (secondsLeft <= 0) return
+    const timer = setInterval(() => setSecondsLeft((value) => Math.max(0, value - 1)), 1000)
+    return () => clearInterval(timer)
+  }, [secondsLeft])
+
   if (me.data) return <Navigate to={from} replace />
 
   const submit = (event) => {
     event.preventDefault()
-    login.mutate({ email, password }, { onSuccess: () => navigate(from, { replace: true }) })
+    login.mutate(
+      { email, password },
+      {
+        onSuccess: () => navigate(from, { replace: true }),
+        onError: (error) => {
+          if (error instanceof ApiError && error.status === 429) setSecondsLeft(error.retryAfterSeconds ?? 0)
+        },
+      },
+    )
   }
 
   const message =
     login.error instanceof ApiError
-      ? login.error.status === 401
-        ? 'Email or password is wrong.'
-        : login.error.message
+      ? lockout
+        ? null
+        : login.error.status === 401
+          ? 'Email or password is wrong.'
+          : login.error.message
       : login.error
         ? 'Sign in failed. Try again.'
         : null
@@ -58,12 +77,24 @@ export default function Login() {
               onChange={(event) => setPassword(event.target.value)}
             />
           </label>
+          {lockout ? (
+            <div className="form-error form-error-lockout" role="alert">
+              <p className="form-error-lead">{login.error.message}</p>
+              <p className="mono">
+                {secondsLeft > 0 ? `Try again in ${secondsLeft}s.` : 'You can try again now.'}
+              </p>
+            </div>
+          ) : null}
           {message ? (
             <p className="form-error" role="alert">
               {message}
             </p>
           ) : null}
-          <Button type="submit" variant="primary" disabled={login.isPending || !email || !password}>
+          <Button
+            type="submit"
+            variant="primary"
+            disabled={login.isPending || !email || !password || secondsLeft > 0}
+          >
             {login.isPending ? 'Signing in' : 'Sign in'}
           </Button>
         </form>

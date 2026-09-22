@@ -5,12 +5,14 @@ const BASE = (import.meta.env.VITE_API_BASE_URL ?? '/api').replace(/\/$/, '')
 export class ApiError extends Error {
   status
   issues
+  retryAfterSeconds
 
-  constructor(status, message, issues = []) {
+  constructor(status, message, issues = [], retryAfterSeconds) {
     super(message)
     this.name = 'ApiError'
     this.status = status
     this.issues = issues
+    this.retryAfterSeconds = retryAfterSeconds
   }
 }
 
@@ -61,7 +63,8 @@ export async function api(path, { method = 'GET', body, query, signal } = {}) {
     }
     if (!res.ok) {
       const { message, issues } = await readDetail(res)
-      throw new ApiError(res.status, message, issues)
+      const retryAfter = Number(res.headers.get('Retry-After'))
+      throw new ApiError(res.status, message, issues, Number.isFinite(retryAfter) ? retryAfter : undefined)
     }
     if (res.status === 204) return undefined
     return await res.json()
