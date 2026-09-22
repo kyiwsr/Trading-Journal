@@ -30,7 +30,9 @@
   border-bottom: var(--border);
   background: var(--canvas);
 }
-.topbar-row {
+/* Primary row: identity (brand, HUD) and the one action worth reaching from
+   anywhere. Everything page-scoped (nav, range, account, sign out) is secondary. */
+.topbar-primary {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -63,6 +65,27 @@
   font-size: 12px;
   color: var(--muted);
 }
+.topbar-primary-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-left: auto;
+}
+/* Text label, not an icon: matches this app's icon-free button language and
+   antislop-layoutmobile's rule against an unlabeled hamburger. Chrome comes
+   from .btn; this class only controls when the toggle is shown. */
+.menu-toggle {
+  display: none;
+}
+.topbar-secondary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-sm) var(--space-lg);
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 var(--space-lg) var(--space-md);
+}
 .controls {
   display: flex;
   flex-wrap: wrap;
@@ -80,9 +103,6 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-sm);
-  max-width: 1440px;
-  margin: 0 auto;
-  padding: 0 var(--space-lg) var(--space-md);
 }
 .nav a {
   padding: 0.5rem 1rem;
@@ -462,6 +482,23 @@ a {
   border-radius: var(--radius);
   font-weight: 600;
 }
+/* Same hazard family as .form-error; the lead/countdown split and shadow give a
+   lockout more visual weight than a one-line wrong-password message. */
+.form-error-lockout {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  box-shadow: var(--shadow-1);
+}
+.form-error-lead {
+  margin: 0;
+  font-family: var(--font-head);
+  font-weight: 700;
+}
+.form-error-lockout .mono {
+  margin: 0;
+  font-size: 13px;
+}
 
 /* Dashboard */
 .dash-hero {
@@ -804,8 +841,8 @@ a {
 }
 
 @media (max-width: 767px) {
-  .topbar-row,
-  .nav,
+  .topbar-primary,
+  .topbar-secondary,
   .page {
     padding-left: var(--space-md);
     padding-right: var(--space-md);
@@ -835,6 +872,24 @@ a {
     flex: 1;
     width: auto;
   }
+  .menu-toggle {
+    display: inline-flex;
+  }
+  /* Closed by default; JS toggles .is-open. The menu pushes the page down
+     rather than overlaying it, so no backdrop or focus trap is needed. */
+  .topbar-secondary {
+    display: none;
+  }
+  .topbar-secondary.is-open {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-md);
+    padding-top: var(--space-sm);
+  }
+  .nav {
+    flex-direction: column;
+  }
   .controls {
     margin-left: 0;
     width: 100%;
@@ -848,9 +903,8 @@ a {
     min-height: 44px;
   }
   .nav a {
-    display: inline-flex;
+    display: flex;
     align-items: center;
-    flex: 1 1 auto;
     justify-content: center;
   }
   .stat-featured .stat-value {

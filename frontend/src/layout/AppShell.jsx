@@ -1,5 +1,5 @@
-import { Suspense } from 'react'
-import { Link, NavLink, Outlet, useNavigate, useSearchParams } from 'react-router-dom'
+import { useEffect, useState, Suspense } from 'react'
+import { Link, NavLink, Outlet, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 
 import { useAccounts, useDashboard, useLogout } from '../api/queries'
 import { useWaking } from '../api/waking'
@@ -12,6 +12,7 @@ const RANGE_OPTIONS = RANGES.map((value) => ({ value, label: value }))
 export function AppShell() {
   const [params, setParams] = useSearchParams()
   const navigate = useNavigate()
+  const location = useLocation()
   const scope = readScope(params)
   const accounts = useAccounts()
   const dashboard = useDashboard(scope.account, scope.range)
@@ -19,8 +20,19 @@ export function AppShell() {
   const waking = useWaking()
   const search = scopeSearch(scope)
   const xp = dashboard.data?.xp
+  const [menuOpen, setMenuOpen] = useState(false)
 
   const setScope = (patch) => setParams(patchParams(params, patch))
+
+  // A menu left open across navigation would sit over the next page's content.
+  useEffect(() => setMenuOpen(false), [location.pathname])
+
+  useEffect(() => {
+    if (!menuOpen) return
+    const onKeyDown = (event) => event.key === 'Escape' && setMenuOpen(false)
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  }, [menuOpen])
 
   return (
     <div className="shell">
@@ -28,7 +40,7 @@ export function AppShell() {
         Skip to content
       </a>
       <header className="topbar">
-        <div className="topbar-row">
+        <div className="topbar-primary">
           <Link to={{ pathname: '/', search }} className="brand">
             ApexLog
           </Link>
@@ -42,6 +54,29 @@ export function AppShell() {
               {xp.win_streak >= 2 ? <Badge tone="streak">{xp.win_streak}-win streak</Badge> : null}
             </div>
           ) : null}
+          <div className="topbar-primary-actions">
+            <Link className="btn btn-primary" to={{ pathname: '/trades/new', search }}>
+              + Log Trade
+            </Link>
+            <Button
+              className="menu-toggle"
+              aria-expanded={menuOpen}
+              aria-controls="topbar-secondary"
+              onClick={() => setMenuOpen((open) => !open)}
+            >
+              {menuOpen ? 'Close menu' : 'Menu'}
+            </Button>
+          </div>
+        </div>
+        <div id="topbar-secondary" className={`topbar-secondary${menuOpen ? ' is-open' : ''}`}>
+          <nav className="nav" aria-label="Main">
+            <NavLink to={{ pathname: '/', search }} end>
+              Command HQ
+            </NavLink>
+            <NavLink to={{ pathname: '/trades', search }}>Combat Logs</NavLink>
+            <NavLink to={{ pathname: '/setups', search }}>Skill Playbook</NavLink>
+            <NavLink to={{ pathname: '/settings', search }}>Settings</NavLink>
+          </nav>
           <div className="controls">
             <Segmented
               label="Date range"
@@ -67,9 +102,6 @@ export function AppShell() {
                   ))}
               </select>
             </label>
-            <Link className="btn btn-primary" to={{ pathname: '/trades/new', search }}>
-              + Log Trade
-            </Link>
             <Button
               disabled={logout.isPending}
               onClick={() => logout.mutate(undefined, { onSettled: () => navigate('/login', { replace: true }) })}
@@ -78,14 +110,6 @@ export function AppShell() {
             </Button>
           </div>
         </div>
-        <nav className="nav" aria-label="Main">
-          <NavLink to={{ pathname: '/', search }} end>
-            Command HQ
-          </NavLink>
-          <NavLink to={{ pathname: '/trades', search }}>Combat Logs</NavLink>
-          <NavLink to={{ pathname: '/setups', search }}>Skill Playbook</NavLink>
-          <NavLink to={{ pathname: '/settings', search }}>Settings</NavLink>
-        </nav>
       </header>
       {waking ? (
         <div className="waking" role="status">
