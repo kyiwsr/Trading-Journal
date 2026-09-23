@@ -113,9 +113,6 @@ export default function TradeLog() {
           <a className="btn" href={buildUrl('/trades/export.csv', csvQuery)} download>
             Export CSV
           </a>
-          <Link className="btn btn-primary" to={{ pathname: '/trades/new', search: scopeSearch(scope) }}>
-            Log Trade
-          </Link>
         </div>
       </div>
 

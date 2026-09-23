@@ -101,7 +101,9 @@ test('the strip follows the API elite threshold when it is not 85', async () => 
   expect(await screen.findByText('42 of 88 scored at 90% or higher')).toBeInTheDocument()
 })
 
-test('offers a way to log a trade from the ledger', async () => {
+test('relies on the header’s persistent + Log Trade link, not a second page-local one', async () => {
   renderApp('/trades', routes, { signedIn: true })
-  expect(await screen.findByRole('link', { name: 'Log Trade' })).toHaveAttribute('href', expect.stringContaining('/trades/new'))
+  await screen.findByRole('table')
+  expect(screen.getAllByRole('link', { name: '+ Log Trade' })).toHaveLength(1)
+  expect(screen.queryByRole('link', { name: 'Log Trade' })).not.toBeInTheDocument()
 })
