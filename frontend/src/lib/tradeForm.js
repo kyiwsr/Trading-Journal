@@ -11,6 +11,16 @@ const MAX_TAG_LENGTH = 40
 const MAX_SESSION_LENGTH = 60
 const MAX_NOTE_LENGTH = 300
 
+// The 4 standard forex sessions. Ranges are the conventional UTC hours converted to
+// Malaysia time (UTC+8, no DST, so these stay fixed year-round). A per-user timezone
+// preference is planned; for now every range is shown in MYT only.
+export const SESSIONS = [
+  { value: 'Sydney', label: 'Sydney · 06:00–15:00 MYT' },
+  { value: 'Tokyo (Asian)', label: 'Tokyo (Asian) · 08:00–17:00 MYT' },
+  { value: 'London', label: 'London · 16:00–01:00 MYT' },
+  { value: 'New York', label: 'New York · 21:00–06:00 MYT' },
+]
+
 export const blankRow = () => ({ key: newRowKey(), price: '', quantity: '', time: '', note: '' })
 
 export function emptyForm({ accountId = '' } = {}) {

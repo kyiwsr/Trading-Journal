@@ -30,6 +30,7 @@ import {
   emptyForm,
   formFromTrade,
   issuesToErrors,
+  SESSIONS,
   validateForm,
 } from '../lib/tradeForm'
 import {
@@ -396,14 +397,19 @@ function TradeFormBody({ trade, accounts, instruments, feeProfiles, setups, defa
                 </Select>
               )}
             </Field>
-            <Field label="Session" error={errors.session}>
+            <Field label="Session" hint="Malaysia time (UTC+8)." error={errors.session}>
               {(control) => (
-                <Input
-                  {...control}
-                  placeholder="NY open"
-                  value={form.session}
-                  onChange={(event) => set('session', event.target.value)}
-                />
+                <Select {...control} value={form.session} onChange={(event) => set('session', event.target.value)}>
+                  <option value="">No session</option>
+                  {form.session && !SESSIONS.some((item) => item.value === form.session) ? (
+                    <option value={form.session}>{form.session}</option>
+                  ) : null}
+                  {SESSIONS.map((item) => (
+                    <option key={item.value} value={item.value}>
+                      {item.label}
+                    </option>
+                  ))}
+                </Select>
               )}
             </Field>
             <Field label="Tags" hint="Separate with commas." error={errors.tags}>
@@ -416,7 +422,7 @@ function TradeFormBody({ trade, accounts, instruments, feeProfiles, setups, defa
                 />
               )}
             </Field>
-            <Field label="Stop price" hint="Sets 1R for the R multiple." error={errors.stop}>
+            <Field label="Stop price" hint="Stop-loss exit." error={errors.stop}>
               {(control) => (
                 <Input
                   {...control}

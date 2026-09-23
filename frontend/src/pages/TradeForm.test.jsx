@@ -123,6 +123,7 @@ describe('Log a trade', () => {
       },
     })
     await enterTrade71()
+    await userEvent.selectOptions(screen.getByLabelText('Session'), 'London')
     await userEvent.click(screen.getByRole('checkbox', { name: new RegExp(trade71.criteria[0].label) }))
     await userEvent.click(screen.getByRole('button', { name: 'Save trade' }))
 
@@ -132,6 +133,7 @@ describe('Log a trade', () => {
       instrument_id: 1,
       setup_id: 4,
       direction: 'long',
+      session: 'London',
       stop_price: '20372.75',
       slippage_ticks: '0',
     })
@@ -215,7 +217,7 @@ describe('Log a trade', () => {
 
   it('asks before discarding unsaved changes', async () => {
     const { router } = await openNewTrade()
-    await userEvent.type(screen.getByLabelText('Session'), 'NY open')
+    await userEvent.selectOptions(screen.getByLabelText('Session'), 'London')
     await userEvent.click(screen.getByRole('link', { name: 'Cancel' }))
 
     const dialog = await screen.findByRole('dialog', { name: 'Discard unsaved changes?' })
@@ -265,6 +267,7 @@ describe('Edit trade', () => {
       { signedIn: true },
     )
     await screen.findByRole('heading', { name: 'Edit trade' })
+    expect(screen.getByLabelText('Session')).toHaveValue(trade71.session)
     expect(screen.getByLabelText('Stop price')).toHaveValue('20372.75')
     expect(fill('Entry 1').getByLabelText('Price')).toHaveValue('20380.25')
     expect(fill('Exit 2').getByLabelText('Price')).toHaveValue('20397.25')
