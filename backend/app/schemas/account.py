@@ -18,6 +18,7 @@ class AccountCreate(BaseModel):
     starting_balance: Money
     currency: Currency = "USD"
     fee_profile_id: int | None = None
+    minimum_threshold: Money | None = None
 
 
 class AccountUpdate(PatchSchema):
@@ -30,6 +31,7 @@ class AccountUpdate(PatchSchema):
     starting_balance: Money | None = None
     currency: Currency | None = None
     fee_profile_id: int | None = None
+    minimum_threshold: Money | None = None
 
 
 class AccountOut(BaseModel):
@@ -43,6 +45,7 @@ class AccountOut(BaseModel):
     starting_balance: Decimal
     currency: str
     fee_profile_id: int | None
+    minimum_threshold: Decimal | None
     archived_at: datetime | None
     created_at: datetime
 

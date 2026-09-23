@@ -33,6 +33,7 @@ export const emptyAccountForm = () => ({
   startingBalance: '',
   currency: 'USD',
   feeProfileId: '',
+  minimumThreshold: '',
 })
 
 export const accountFormFrom = (account) => ({
@@ -43,6 +44,7 @@ export const accountFormFrom = (account) => ({
   startingBalance: trimZeros(account.starting_balance),
   currency: account.currency,
   feeProfileId: account.fee_profile_id === null ? '' : String(account.fee_profile_id),
+  minimumThreshold: account.minimum_threshold === null ? '' : trimZeros(account.minimum_threshold),
 })
 
 export function validateAccount(form) {
@@ -52,6 +54,13 @@ export function validateAccount(form) {
   const balance = moneyError(form.startingBalance, 'the starting balance')
   if (balance) errors.startingBalance = balance
   if (!/^[A-Za-z]{3}$/.test(form.currency.trim())) errors.currency = 'Use a three-letter code, like USD.'
+  if (!blank(form.minimumThreshold)) {
+    const threshold = moneyError(form.minimumThreshold, 'the minimum threshold')
+    if (threshold) errors.minimumThreshold = threshold
+    else if (!balance && parseDecimal(form.minimumThreshold).greaterThanOrEqualTo(parseDecimal(form.startingBalance))) {
+      errors.minimumThreshold = 'Must be less than the starting balance.'
+    }
+  }
   return errors
 }
 
@@ -63,6 +72,7 @@ export const accountPayload = (form) => ({
   starting_balance: form.startingBalance.trim(),
   currency: form.currency.trim().toUpperCase(),
   fee_profile_id: form.feeProfileId ? Number(form.feeProfileId) : null,
+  minimum_threshold: form.minimumThreshold.trim() ? form.minimumThreshold.trim() : null,
 })
 
 export const emptyInstrumentForm = () => ({ symbol: '', name: '', tickSize: '', tickValue: '' })

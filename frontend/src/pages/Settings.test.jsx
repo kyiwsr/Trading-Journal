@@ -87,6 +87,15 @@ describe('Accounts tab', () => {
     expect(await screen.findByText('No accounts yet')).toBeInTheDocument()
   })
 
+  it('shows the minimum threshold when the account has one', async () => {
+    renderApp('/settings/accounts', routes({ '/accounts': { body: [{ ...account, minimum_threshold: '24000.0000' }] } }), {
+      signedIn: true,
+    })
+    const list = await screen.findByRole('list', { name: 'Accounts' })
+    expect(within(list).getByText(/Minimum threshold/)).toBeInTheDocument()
+    expect(within(list).getByText('$24,000.00')).toBeInTheDocument()
+  })
+
   it('adds an account with its fee profile', async () => {
     let posted = {}
     let accounts = []
@@ -113,6 +122,42 @@ describe('Accounts tab', () => {
     await waitFor(() => expect(posted).toMatchObject({ name: 'Apex 150k', starting_balance: '150000', currency: 'USD', fee_profile_id: 9, label: null }))
     expect(await screen.findByRole('list', { name: 'Accounts' })).toBeInTheDocument()
     expect(screen.queryByRole('heading', { name: 'Add an account' })).not.toBeInTheDocument()
+  })
+
+  it('saves a minimum threshold with the account', async () => {
+    let posted = {}
+    renderApp(
+      '/settings/accounts',
+      routes({
+        '/accounts': (_url, init) => {
+          if (init?.method === 'POST') {
+            posted = jsonBody(init)
+            return { status: 201, body: { ...account, id: 2, minimum_threshold: posted.minimum_threshold } }
+          }
+          return { body: [] }
+        },
+      }),
+      { signedIn: true },
+    )
+    await userEvent.click(await screen.findByRole('button', { name: 'Add account' }))
+    await userEvent.type(screen.getByLabelText('Name'), 'Apex 25k')
+    await userEvent.type(screen.getByLabelText('Starting balance'), '25000')
+    await userEvent.type(screen.getByLabelText('Minimum threshold'), '24000')
+    await userEvent.click(screen.getByRole('button', { name: 'Save' }))
+
+    await waitFor(() => expect(posted).toMatchObject({ minimum_threshold: '24000' }))
+  })
+
+  it('rejects a minimum threshold that is not below the starting balance', async () => {
+    const { calls } = renderApp('/settings/accounts', routes({ '/accounts': { body: [] } }), { signedIn: true })
+    await userEvent.click(await screen.findByRole('button', { name: 'Add account' }))
+    await userEvent.type(screen.getByLabelText('Name'), 'Apex 25k')
+    await userEvent.type(screen.getByLabelText('Starting balance'), '25000')
+    await userEvent.type(screen.getByLabelText('Minimum threshold'), '25000')
+    await userEvent.click(screen.getByRole('button', { name: 'Save' }))
+    const alert = await screen.findByRole('alert')
+    expect(within(alert).getByText('Must be less than the starting balance.')).toBeInTheDocument()
+    expect(calls.some((call) => call.startsWith('POST /accounts'))).toBe(false)
   })
 
   it('lists the problems and does not call the API when the form is incomplete', async () => {
@@ -321,6 +366,42 @@ describe('Fee profiles tab', () => {
     await userEvent.selectOptions(line.getByLabelText('Charged'), 'per_contract')
     await userEvent.click(screen.getByRole('button', { name: 'Save' }))
     await waitFor(() => expect(posted.components).toEqual([{ name: 'Commission', amount: '2.5', basis: 'per_contract' }]))
+  })
+
+  it('deletes a fee profile after confirming', async () => {
+    let deleted = false
+    const { calls } = renderApp(
+      '/settings/fee-profiles',
+      routes({
+        '/fee-profiles': () => ({ body: deleted ? [] : [profile] }),
+        '/fee-profiles/9': (_url, init) => {
+          if (init?.method === 'DELETE') {
+            deleted = true
+            return { status: 204 }
+          }
+          return { body: profile }
+        },
+      }),
+      { signedIn: true },
+    )
+    await userEvent.click(await screen.findByRole('button', { name: `Delete ${profile.name}` }))
+    await userEvent.click(await screen.findByRole('button', { name: 'Delete fee profile' }))
+    await waitFor(() => expect(calls).toContain('DELETE /fee-profiles/9'))
+    expect(await screen.findByText('No fee profiles yet')).toBeInTheDocument()
+  })
+
+  it('shows the conflict message when the fee profile is still used by an account', async () => {
+    renderApp(
+      '/settings/fee-profiles',
+      routes({
+        '/fee-profiles/9': { status: 409, body: { detail: 'This fee profile is used by existing records. Archive it instead.' } },
+      }),
+      { signedIn: true },
+    )
+    await userEvent.click(await screen.findByRole('button', { name: `Delete ${profile.name}` }))
+    await userEvent.click(await screen.findByRole('button', { name: 'Delete fee profile' }))
+    expect(await screen.findByRole('alert')).toHaveTextContent('This fee profile is used by existing records. Archive it instead.')
+    expect(await screen.findByRole('list', { name: 'Fee profiles' })).toBeInTheDocument()
   })
 })
 

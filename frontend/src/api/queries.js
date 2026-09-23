@@ -201,6 +201,10 @@ export function useFeeProfileArchive() {
   )
 }
 
+export function useDeleteFeeProfile() {
+  return useSaving((id) => api(`/fee-profiles/${id}`, { method: 'DELETE' }))
+}
+
 export function useSettings() {
   return useQuery({ queryKey: ['settings'], queryFn: () => api('/settings'), staleTime: 5 * 60_000 })
 }

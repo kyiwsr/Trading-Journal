@@ -119,6 +119,12 @@ function AccountMeta({ account, profiles }) {
       {source ? `${source} · ` : ''}
       Starting balance <span className="mono">{money(account.starting_balance, { currency: account.currency })}</span> ·{' '}
       {profile ? `Fee profile ${profile.name}` : 'No fee profile, so fees count as 0'}
+      {account.minimum_threshold !== null ? (
+        <>
+          {' '}· Minimum threshold{' '}
+          <span className="mono">{money(account.minimum_threshold, { currency: account.currency })}</span>
+        </>
+      ) : null}
     </p>
   )
 }
@@ -190,6 +196,21 @@ function AccountEditor({ account, profiles, onDone }) {
                   </option>
                 ))}
             </Select>
+          )}
+        </Field>
+        <Field
+          label="Minimum threshold"
+          hint="Optional. A prop firm's drawdown floor, the balance at which the account breaches."
+          error={errors.minimumThreshold}
+        >
+          {(control) => (
+            <Input
+              {...control}
+              inputMode="decimal"
+              autoComplete="off"
+              value={form.minimumThreshold}
+              onChange={(event) => patch({ minimumThreshold: event.target.value })}
+            />
           )}
         </Field>
       </div>

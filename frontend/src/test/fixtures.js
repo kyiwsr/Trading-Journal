@@ -8,6 +8,7 @@ export const account = {
   starting_balance: '150000.00',
   currency: 'USD',
   fee_profile_id: null,
+  minimum_threshold: null,
   archived_at: null,
   created_at: '2026-01-01T00:00:00Z',
 }

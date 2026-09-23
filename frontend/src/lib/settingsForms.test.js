@@ -45,6 +45,7 @@ describe('account form', () => {
       starting_balance: '150000',
       currency: 'MYR',
       fee_profile_id: 9,
+      minimum_threshold: null,
     })
   })
 

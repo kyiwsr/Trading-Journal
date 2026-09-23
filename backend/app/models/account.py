@@ -43,7 +43,10 @@ class FeeComponent(Base):
 
 class Account(Base):
     __tablename__ = "accounts"
-    __table_args__ = (CheckConstraint("starting_balance >= 0", name="starting_balance_non_negative"),)
+    __table_args__ = (
+        CheckConstraint("starting_balance >= 0", name="starting_balance_non_negative"),
+        CheckConstraint("minimum_threshold IS NULL OR minimum_threshold >= 0", name="minimum_threshold_non_negative"),
+    )
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
@@ -54,6 +57,8 @@ class Account(Base):
     starting_balance: Mapped[Decimal] = mapped_column(MONEY)
     currency: Mapped[str] = mapped_column(String(3), default="USD")
     fee_profile_id: Mapped[int | None] = mapped_column(ForeignKey("fee_profiles.id", ondelete="SET NULL"))
+    # A prop firm's drawdown floor: the balance at which the account breaches. Not every account has one.
+    minimum_threshold: Mapped[Decimal | None] = mapped_column(MONEY)
     archived_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     created_at: Mapped[datetime] = created_at_column()
 

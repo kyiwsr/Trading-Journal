@@ -65,6 +65,23 @@ def test_create_validates_input(client):
     assert client.post("/accounts", json=missing).status_code == 422
 
 
+def test_minimum_threshold_defaults_to_none(client):
+    account = _create(client)
+    assert account["minimum_threshold"] is None
+
+
+def test_minimum_threshold_can_be_set_and_cleared(client):
+    account = _create(client, minimum_threshold="24000")
+    assert Decimal(account["minimum_threshold"]) == Decimal("24000")
+
+    cleared = client.patch(f"/accounts/{account['id']}", json={"minimum_threshold": None}).json()
+    assert cleared["minimum_threshold"] is None
+
+
+def test_minimum_threshold_rejects_negative(client):
+    assert client.post("/accounts", json={**ACCOUNT, "minimum_threshold": "-1"}).status_code == 422
+
+
 def test_unknown_account_is_404(client):
     assert client.get("/accounts/9999").status_code == 404
 

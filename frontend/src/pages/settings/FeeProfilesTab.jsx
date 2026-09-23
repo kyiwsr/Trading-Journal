@@ -1,6 +1,7 @@
 import { useState } from 'react'
 
 import {
+  useDeleteFeeProfile,
   useFeeProfileArchive,
   useFeeProfileFromTemplate,
   useFeeProfiles,
@@ -8,7 +9,19 @@ import {
   useSaveFeeProfile,
 } from '../../api/queries'
 import { ApiError } from '../../api/client'
-import { Button, Card, EmptyState, ErrorState, Field, Input, LoadingState, Panel, Select, Textarea } from '../../components'
+import {
+  Button,
+  Card,
+  ConfirmDialog,
+  EmptyState,
+  ErrorState,
+  Field,
+  Input,
+  LoadingState,
+  Panel,
+  Select,
+  Textarea,
+} from '../../components'
 import {
   blankFeeRow,
   emptyFeeProfileForm,
@@ -30,9 +43,11 @@ export default function FeeProfilesTab() {
   const profiles = useFeeProfiles(true)
   const templates = useFeeTemplates()
   const archive = useFeeProfileArchive()
+  const deleteProfile = useDeleteFeeProfile()
   const fromTemplate = useFeeProfileFromTemplate()
   const [editing, setEditing] = useState(null)
   const [copyError, setCopyError] = useState(null)
+  const [pendingDelete, setPendingDelete] = useState(null)
 
   if (profiles.isPending) return <LoadingState what="your fee profiles" />
   if (profiles.isError) return <ErrorState what="your fee profiles" error={profiles.error} onRetry={() => void profiles.refetch()} />
@@ -89,6 +104,13 @@ export default function FeeProfilesTab() {
                     >
                       {profile.archived_at ? 'Unarchive' : 'Archive'}
                     </Button>
+                    <Button
+                      variant="destructive"
+                      aria-label={`Delete ${profile.name}`}
+                      onClick={() => setPendingDelete(profile.id)}
+                    >
+                      Delete
+                    </Button>
                   </>
                 }
               />
@@ -100,7 +122,23 @@ export default function FeeProfilesTab() {
             {archive.error.message}
           </p>
         ) : null}
+        {deleteProfile.isError ? (
+          <p className="form-error" role="alert">
+            {deleteProfile.error.message}
+          </p>
+        ) : null}
       </Panel>
+      <ConfirmDialog
+        open={pendingDelete !== null}
+        title="Delete this fee profile?"
+        confirmLabel="Delete fee profile"
+        cancelLabel="Cancel"
+        destructive
+        onCancel={() => setPendingDelete(null)}
+        onConfirm={() => deleteProfile.mutate(pendingDelete, { onSuccess: () => setPendingDelete(null) })}
+      >
+        <p>This removes the fee profile itself. It only works while no account uses it; otherwise archive it instead.</p>
+      </ConfirmDialog>
 
       <Panel title="Start from an example" note="Example templates are illustrations, not any broker's real rates. Copy one, then replace the amounts with your own tariff.">
         {templates.isPending ? (
