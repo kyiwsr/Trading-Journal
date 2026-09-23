@@ -32,7 +32,7 @@ test('lists fills with per-exit points and P&L', async () => {
 
 test('breaks the fees down and nets them from gross', async () => {
   renderApp('/trades/71', routes, { signedIn: true })
-  const panel = await screen.findByRole('region', { name: 'Fees and slippage' })
+  const panel = await screen.findByRole('region', { name: 'Fees' })
   expect(within(panel).getByText('-$14.64')).toBeInTheDocument()
   expect(within(panel).getByText('-$6.40')).toBeInTheDocument()
   expect(within(panel).getByText('+$605.00')).toBeInTheDocument()

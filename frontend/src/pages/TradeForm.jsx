@@ -63,7 +63,6 @@ const FIELD_LABELS = {
   tags: 'Tags',
   stop: 'Stop price',
   target: 'Target price',
-  slippage: 'Slippage',
   fills: 'Fills',
 }
 
@@ -217,7 +216,6 @@ function TradeFormBody({ trade, accounts, instruments, feeProfiles, setups, defa
         )
       : []
     const stop = parseDecimal(form.stop)
-    const slippage = parseDecimal(form.slippageTicks)
     const result =
       tickSize?.greaterThan(0) && tickValue
         ? computeTrade({
@@ -226,7 +224,6 @@ function TradeFormBody({ trade, accounts, instruments, feeProfiles, setups, defa
             instrument: { tickSize, tickValue },
             stopPrice: stop?.greaterThan(0) ? stop : null,
             feesTotal: totalFees(feeLines),
-            slippageTicks: slippage && !slippage.isNegative() ? slippage : new Decimal(0),
           })
         : null
     const score = setup
@@ -441,18 +438,6 @@ function TradeFormBody({ trade, accounts, instruments, feeProfiles, setups, defa
                   autoComplete="off"
                   value={form.target}
                   onChange={(event) => set('target', event.target.value)}
-                />
-              )}
-            </Field>
-            <Field label="Slippage (ticks)" hint="Deducted from net P&L." error={errors.slippage}>
-              {(control) => (
-                <Input
-                  {...control}
-                  inputMode="decimal"
-                  autoComplete="off"
-                  placeholder="0"
-                  value={form.slippageTicks}
-                  onChange={(event) => set('slippageTicks', event.target.value)}
                 />
               )}
             </Field>

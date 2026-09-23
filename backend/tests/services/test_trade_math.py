@@ -8,7 +8,6 @@ from app.services.trade_math import (
     average_price,
     compute_trade,
     exit_realized,
-    slippage_cost,
 )
 
 NQ = Instrument(tick_size=D("0.25"), tick_value=D("5.00"))
@@ -114,12 +113,6 @@ class TestComputeTrade:
         assert result.net_pnl == D("-205.00")
         assert result.r_multiple == D("-1.03")
 
-    def test_slippage_reduces_net(self):
-        fills = [entry("20000", "2"), exit_("20010", "2")]
-        result = compute_trade("long", fills, NQ, slippage_ticks=D("2"))
-        assert result.gross_pnl == D("400.00")
-        assert result.net_pnl == D("380.00")
-
     def test_no_stop_gives_null_risk_and_r(self):
         result = compute_trade("long", [entry("20000"), exit_("20010")], NQ)
         assert result.risk_amount is None
@@ -175,11 +168,3 @@ class TestExitRealized:
         realized = exit_realized("short", D("20020"), exit_("20000"), NQ)
         assert realized.points == D("20")
         assert realized.pnl == D("400.00")
-
-
-class TestSlippageCost:
-    def test_ticks_times_value_times_quantity(self):
-        assert slippage_cost(D("3"), NQ, D("2")) == D("30.00")
-
-    def test_zero_ticks(self):
-        assert slippage_cost(D("0"), NQ, D("2")) == D("0.00")

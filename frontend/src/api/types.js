@@ -172,8 +172,6 @@
  * @property {Dec | null} risk_amount
  * @property {Dec} gross_pnl
  * @property {Dec} fees_total
- * @property {Dec} slippage_ticks
- * @property {Dec} slippage_cost
  * @property {Dec} net_pnl
  * @property {Dec | null} r_multiple
  * @property {number | null} execution_score
@@ -334,7 +332,6 @@
  * @property {string[]} tags
  * @property {string | null} stop_price
  * @property {string | null} target_price
- * @property {string} slippage_ticks
  * @property {{ fill_type: 'entry' | 'exit'; price: string; quantity: string; filled_at: string; note: string | null }[]} fills
  * @property {{ criterion_id: number; checked: boolean; note: string | null }[]} criteria_checks
  * @property {string | null} pre_trade_focus

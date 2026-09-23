@@ -293,19 +293,13 @@ function LedgerPanel({ data, currency, decimals }) {
 function FeesPanel({ data, currency }) {
   const neg = (value) => -Math.abs(Number(value))
   return (
-    <Panel title="Fees and slippage" note={data.fee_profile_name ? `Tariff: ${data.fee_profile_name}` : undefined}>
+    <Panel title="Fees" note={data.fee_profile_name ? `Tariff: ${data.fee_profile_name}` : undefined}>
       <dl className="facts facts-rows">
         {data.fees.map((fee) => (
           <Fact key={fee.name} label={fee.name}>
             <Amount value={neg(fee.amount)} currency={currency} />
           </Fact>
         ))}
-        <Fact label="Slippage estimate">
-          <Amount value={neg(data.slippage_cost)} currency={currency} />{' '}
-          <span className="muted mono">
-            {quantity(data.slippage_ticks)} {Number(data.slippage_ticks) === 1 ? 'tick' : 'ticks'}
-          </span>
-        </Fact>
         <Fact label="Total fees">
           <Amount value={neg(data.fees_total)} currency={currency} />
         </Fact>

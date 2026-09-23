@@ -51,7 +51,6 @@ class Trade(Base):
     risk_amount: Mapped[Decimal | None] = mapped_column(MONEY)
     gross_pnl: Mapped[Decimal] = mapped_column(MONEY)
     fees_total: Mapped[Decimal] = mapped_column(MONEY)
-    slippage_ticks: Mapped[Decimal] = mapped_column(PRICE, default=0)
     net_pnl: Mapped[Decimal] = mapped_column(MONEY)
     r_multiple: Mapped[Decimal | None] = mapped_column(Numeric(10, 4))
     execution_score: Mapped[int | None] = mapped_column(Integer)

@@ -37,8 +37,6 @@ export const trade71 = {
   risk_amount: '250.00',
   gross_pnl: '605.00',
   fees_total: '14.64',
-  slippage_ticks: '0',
-  slippage_cost: '0.00',
   net_pnl: '590.36',
   r_multiple: '2.36',
   execution_score: 85,

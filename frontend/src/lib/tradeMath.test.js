@@ -145,7 +145,7 @@ describe('computeTrade, other shapes', () => {
     expect(result?.grossPnl.toFixed(2)).toBe('50.00')
   })
 
-  it('books a loss net of fees and slippage', () => {
+  it('books a loss net of fees', () => {
     const fills = [fill('entry', '20000', '1'), fill('exit', '19990', '1')]
     const result = computeTrade({
       direction: 'long',
@@ -153,11 +153,10 @@ describe('computeTrade, other shapes', () => {
       instrument: NQ,
       stopPrice: d('19990'),
       feesTotal: d('4.50'),
-      slippageTicks: d('2'),
     })
     expect(result?.grossPnl.toFixed(2)).toBe('-200.00')
-    expect(result?.netPnl.toFixed(2)).toBe('-214.50')
-    expect(result?.rMultiple?.toFixed(2)).toBe('-1.07')
+    expect(result?.netPnl.toFixed(2)).toBe('-204.50')
+    expect(result?.rMultiple?.toFixed(2)).toBe('-1.02')
   })
 
   it('has no risk or R without a stop, or with a stop at the entry', () => {

@@ -105,15 +105,13 @@ describe('validateForm', () => {
     expect(validateForm(form).fills).toMatch(/before the first entry/i)
   })
 
-  it('validates the optional stop, target and slippage', () => {
+  it('validates the optional stop and target', () => {
     const form = filled()
     form.stop = '-3'
     form.target = 'abc'
-    form.slippageTicks = '-1'
     const errors = validateForm(form)
     expect(errors.stop).toBeDefined()
     expect(errors.target).toBeDefined()
-    expect(errors.slippage).toBeDefined()
   })
 
   it('limits tag length', () => {
@@ -132,7 +130,6 @@ describe('buildPayload', () => {
     expect(payload.tags).toEqual(['5m MSS', 'Runner'])
     expect(payload.stop_price).toBe('20372.75')
     expect(payload.target_price).toBeNull()
-    expect(payload.slippage_ticks).toBe('0')
     expect(payload.fills.map((f) => [f.fill_type, f.price])).toEqual([
       ['entry', '20380.25'],
       ['entry', '20377.75'],
@@ -216,13 +213,6 @@ describe('issuesToErrors', () => {
 })
 
 describe('API decimals in exponent form', () => {
-  it('reads a zero written as 0E-8 as empty slippage, so an unchanged trade validates and saves', () => {
-    const trade = { ...trade71, slippage_ticks: '0E-8' }
-    const form = formFromTrade(trade, null)
-    expect(form.slippageTicks).toBe('')
-    expect(validateForm(form)).toEqual({})
-  })
-
   it('trims padded and exponent decimals to plain text', () => {
     expect(trimZeros('0E-8')).toBe('0')
     expect(trimZeros('1E+3')).toBe('1000')

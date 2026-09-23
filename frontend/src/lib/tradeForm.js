@@ -35,7 +35,6 @@ export function emptyForm({ accountId = '' } = {}) {
     exits: [blankRow()],
     stop: '',
     target: '',
-    slippageTicks: '',
     checks: {},
     preTradeFocus: '',
     environment: '',
@@ -84,15 +83,6 @@ function optionalPositiveError(text) {
   return isBlank(text) ? undefined : positiveError(text)
 }
 
-function slippageError(text) {
-  if (isBlank(text)) return undefined
-  const value = parseDecimal(text)
-  if (value === null) return 'Enter a plain number of ticks.'
-  if (value.isNegative()) return 'Must be 0 or more.'
-  if (value.decimalPlaces() > MAX_DECIMALS) return `Use at most ${MAX_DECIMALS} decimal places.`
-  return undefined
-}
-
 export function validateForm(form) {
   const errors = {}
   const set = (key, message) => {
@@ -104,7 +94,6 @@ export function validateForm(form) {
   set('session', form.session.length > MAX_SESSION_LENGTH ? `Session can be at most ${MAX_SESSION_LENGTH} characters.` : undefined)
   set('stop', optionalPositiveError(form.stop))
   set('target', optionalPositiveError(form.target))
-  set('slippage', slippageError(form.slippageTicks))
 
   const tags = parseTags(form.tags)
   if (tags.length > MAX_TAGS) set('tags', `Use at most ${MAX_TAGS} tags.`)
@@ -164,7 +153,6 @@ export function buildPayload(form, setup) {
     tags: parseTags(form.tags),
     stop_price: textOrNull(form.stop),
     target_price: textOrNull(form.target),
-    slippage_ticks: form.slippageTicks.trim() || '0',
     fills: [...fillPayload(form.entries, 'entry'), ...fillPayload(form.exits, 'exit')],
     criteria_checks: setup
       ? setup.criteria.map((criterion) => ({
@@ -209,7 +197,6 @@ export function formFromTrade(trade, setup) {
     const check = saved.get(criterion.id)
     checks[criterion.id] = { checked: check?.checked ?? false, note: check?.note ?? '' }
   }
-  const slippage = trimZeros(trade.slippage_ticks)
   return {
     accountId: String(trade.account_id),
     instrumentId: String(trade.instrument.id),
@@ -221,7 +208,6 @@ export function formFromTrade(trade, setup) {
     exits: trade.fills.filter((fill) => fill.fill_type === 'exit').map(rowFromFill),
     stop: trimZeros(trade.stop_price),
     target: trimZeros(trade.target_price),
-    slippageTicks: slippage === '0' ? '' : slippage,
     checks,
     preTradeFocus: trade.pre_trade_focus ?? '',
     environment: trade.environment ?? '',
@@ -238,7 +224,6 @@ const FIELD_KEYS = {
   tags: 'tags',
   stop_price: 'stop',
   target_price: 'target',
-  slippage_ticks: 'slippage',
 }
 const FILL_KEYS = { price: 'price', quantity: 'quantity', filled_at: 'time', note: 'note' }
 

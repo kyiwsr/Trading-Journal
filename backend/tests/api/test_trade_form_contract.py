@@ -17,7 +17,6 @@ def _put_body(detail):
         "tags": detail["tags"],
         "stop_price": detail["stop_price"],
         "target_price": detail["target_price"],
-        "slippage_ticks": detail["slippage_ticks"],
         "fills": [{k: f[k] for k in ("fill_type", "price", "quantity", "filled_at", "note")} for f in detail["fills"]],
         "criteria_checks": [
             {"criterion_id": c["criterion_id"], "checked": c["checked"], "note": c["note"]} for c in detail["criteria"]

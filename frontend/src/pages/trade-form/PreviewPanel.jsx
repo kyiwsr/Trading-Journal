@@ -24,9 +24,6 @@ export function PreviewPanel({ result, feeLines, currency, decimals, score, band
             {feeLines.map((line) => (
               <Row key={line.name} label={line.name} value={money(line.amount.negated().toFixed(2), { currency })} />
             ))}
-            {result.slippageCost.greaterThan(0) ? (
-              <Row label="Slippage" value={money(result.slippageCost.negated().toFixed(2), { currency })} />
-            ) : null}
             <Row
               label="Risk (1R)"
               value={result.riskAmount === null ? 'No stop set' : money(result.riskAmount.toFixed(2), { currency })}

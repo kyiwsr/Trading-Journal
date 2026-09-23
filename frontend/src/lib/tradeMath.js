@@ -48,7 +48,6 @@ export function computeTrade({
   instrument,
   stopPrice = null,
   feesTotal = new D(0),
-  slippageTicks = new D(0),
 }) {
   const avgEntry = averagePrice(fills, 'entry')
   const avgExit = averagePrice(fills, 'exit')
@@ -58,8 +57,7 @@ export function computeTrade({
 
   const points = avgExit.minus(avgEntry).times(direction === 'long' ? 1 : -1)
   const grossPnl = toCents(money(points, instrument, quantity))
-  const slippageCost = toCents(slippageTicks.times(instrument.tickValue).times(quantity))
-  const netPnl = toCents(grossPnl.minus(feesTotal).minus(slippageCost))
+  const netPnl = toCents(grossPnl.minus(feesTotal))
 
   let riskAmount = null
   let rMultiple = null
@@ -68,7 +66,7 @@ export function computeTrade({
     if (riskAmount.greaterThan(0)) rMultiple = roundHalfUp(netPnl.div(riskAmount), 2)
   }
 
-  return { quantity, avgEntry, avgExit, points, grossPnl, slippageCost, riskAmount, netPnl, rMultiple }
+  return { quantity, avgEntry, avgExit, points, grossPnl, riskAmount, netPnl, rMultiple }
 }
 
 export function applyFees(components, fills) {

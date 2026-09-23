@@ -151,14 +151,6 @@ def test_scale_in_then_one_exit_fill_counts_three_fills_for_per_fill_fees(client
     assert Decimal(trade["risk_amount"]) == Decimal("600.00")
 
 
-def test_slippage_ticks_reduce_net_pnl(client, world):
-    trade = _created(client, trade71(world, slippage_ticks="2"))
-
-    assert Decimal(trade["slippage_ticks"]) == 2
-    assert Decimal(trade["slippage_cost"]) == Decimal("20.00")
-    assert Decimal(trade["net_pnl"]) == Decimal("570.36")
-
-
 def test_fee_override_replaces_a_line_with_the_same_name_and_adds_new_ones(client, world):
     body = trade71(
         world,
@@ -234,7 +226,6 @@ def _bad_fills(*fills):
         ),
         {"direction": "sideways"},
         {"stop_price": "0"},
-        {"slippage_ticks": "-1"},
     ],
     ids=[
         "exit-before-entry",
@@ -249,7 +240,6 @@ def _bad_fills(*fills):
         "unknown-fill-type",
         "bad-direction",
         "zero-stop",
-        "negative-slippage",
     ],
 )
 def test_invalid_trades_are_refused(client, world, overrides):

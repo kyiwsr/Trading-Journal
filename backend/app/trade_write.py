@@ -118,7 +118,6 @@ def save_trade(db: Session, user: User, body: TradeIn, trade: Trade | None = Non
         trade_math.Instrument(instrument.tick_size, instrument.tick_value),
         stop_price=body.stop_price,
         fees_total=fee_service.total_fees(fee_lines),
-        slippage_ticks=body.slippage_ticks,
     )
     score = scoring.execution_score(
         [scoring.CriterionResult(c.weight, checks[c.id].checked) for c in (setup.criteria if setup else [])]
@@ -149,7 +148,6 @@ def save_trade(db: Session, user: User, body: TradeIn, trade: Trade | None = Non
     trade.risk_amount = result.risk_amount
     trade.gross_pnl = result.gross_pnl
     trade.fees_total = fee_service.total_fees(fee_lines)
-    trade.slippage_ticks = body.slippage_ticks
     trade.net_pnl = result.net_pnl
     trade.r_multiple = result.r_multiple
     trade.execution_score = score
@@ -248,8 +246,6 @@ def build_detail(db: Session, trade: Trade, user: User, storage: Storage) -> Tra
         risk_amount=trade.risk_amount,
         gross_pnl=trade.gross_pnl,
         fees_total=trade.fees_total,
-        slippage_ticks=trade.slippage_ticks,
-        slippage_cost=trade_math.slippage_cost(trade.slippage_ticks, tick, trade.quantity),
         net_pnl=trade.net_pnl,
         r_multiple=trade.r_multiple,
         execution_score=trade.execution_score,

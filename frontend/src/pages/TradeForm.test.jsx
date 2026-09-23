@@ -135,7 +135,6 @@ describe('Log a trade', () => {
       direction: 'long',
       session: 'London',
       stop_price: '20372.75',
-      slippage_ticks: '0',
     })
     expect(body.fills.length).toBe(4)
     expect(body.criteria_checks.filter((check) => check.checked)).toHaveLength(1)

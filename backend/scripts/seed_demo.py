@@ -254,7 +254,6 @@ def _trade(rng: random.Random, book: Book, when: date, day_index: int) -> TradeI
         session=session,
         tags=rng.sample(TAGS, rng.choice([0, 0, 1, 2])),
         stop_price=stop_price,
-        slippage_ticks=Decimal(rng.choices([0, 1, 2], weights=[70, 25, 5])[0]),
         fills=fills,
         criteria_checks=checks,
         pre_trade_focus=rng.choice(FOCUS) if rng.random() < 0.5 else None,

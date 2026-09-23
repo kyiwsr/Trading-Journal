@@ -9,7 +9,6 @@ from app.schemas.base import Money, Name, PositivePrice
 Direction = Literal["long", "short"]
 FillType = Literal["entry", "exit"]
 Tag = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=40)]
-Ticks = Annotated[Decimal, Field(ge=0, max_digits=20, decimal_places=8)]
 
 
 class FillIn(BaseModel):
@@ -44,7 +43,6 @@ class TradeIn(BaseModel):
     tags: list[Tag] = Field(default_factory=list, max_length=20)
     stop_price: PositivePrice | None = None
     target_price: PositivePrice | None = None
-    slippage_ticks: Ticks = Decimal(0)
     fills: list[FillIn] = Field(min_length=2, max_length=50)
     criteria_checks: list[CriterionCheckIn] = Field(default_factory=list)
     fees: list[FeeLineIn] = Field(default_factory=list)
@@ -125,8 +123,6 @@ class TradeDetailOut(BaseModel):
     risk_amount: Decimal | None
     gross_pnl: Decimal
     fees_total: Decimal
-    slippage_ticks: Decimal
-    slippage_cost: Decimal
     net_pnl: Decimal
     r_multiple: Decimal | None
     execution_score: int | None

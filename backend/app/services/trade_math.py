@@ -74,17 +74,12 @@ def exit_realized(
     return ExitRealized(points, to_cents(_money(points, instrument, exit_fill.quantity)))
 
 
-def slippage_cost(ticks: Decimal, instrument: Instrument, quantity: Decimal) -> Decimal:
-    return to_cents(ticks * instrument.tick_value * quantity)
-
-
 def compute_trade(
     direction: Direction,
     fills: Sequence[Fill],
     instrument: Instrument,
     stop_price: Decimal | None = None,
     fees_total: Decimal = Decimal(0),
-    slippage_ticks: Decimal = Decimal(0),
 ) -> TradeResult:
     sign = _direction_sign(direction)
     avg_entry = average_price(fills, "entry")
@@ -95,9 +90,7 @@ def compute_trade(
 
     points = sign * (avg_exit - avg_entry)
     gross_pnl = to_cents(_money(points, instrument, quantity))
-    net_pnl = to_cents(
-        gross_pnl - fees_total - slippage_cost(slippage_ticks, instrument, quantity)
-    )
+    net_pnl = to_cents(gross_pnl - fees_total)
 
     risk_amount = None
     r_multiple = None
