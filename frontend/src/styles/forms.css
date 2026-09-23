@@ -168,6 +168,12 @@
   position: sticky;
   top: var(--space-md);
 }
+.template-picker {
+  margin-bottom: var(--space-md);
+}
+.template-picker .chip-list {
+  margin-top: var(--space-xs);
+}
 .tf-fields {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));

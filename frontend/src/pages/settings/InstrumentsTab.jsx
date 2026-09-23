@@ -2,6 +2,7 @@ import { useState } from 'react'
 
 import { useInstrumentArchive, useInstruments, useSaveInstrument } from '../../api/queries'
 import { Button, EmptyState, ErrorState, Field, Input, LoadingState, Panel } from '../../components'
+import { INSTRUMENT_TEMPLATES } from '../../lib/instrumentTemplates'
 import {
   emptyInstrumentForm,
   instrumentFormFrom,
@@ -105,6 +106,27 @@ function InstrumentEditor({ instrument, onDone }) {
       onSubmit={entity.submit}
       onCancel={onDone}
     >
+      {!instrument ? (
+        <div className="template-picker">
+          <p className="field-label">Start from a known contract</p>
+          <ul className="chip-list">
+            {INSTRUMENT_TEMPLATES.map((template) => (
+              <li key={template.symbol}>
+                <button
+                  type="button"
+                  className="chip"
+                  aria-label={`Fill in ${template.symbol}, ${template.name}`}
+                  onClick={() =>
+                    patch({ symbol: template.symbol, name: template.name, tickSize: template.tickSize, tickValue: template.tickValue })
+                  }
+                >
+                  {template.symbol}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
       <div className="tf-fields">
         <Field label="Symbol" error={errors.symbol}>
           {(control) => (

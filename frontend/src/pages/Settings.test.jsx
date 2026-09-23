@@ -227,6 +227,37 @@ describe('Instruments tab', () => {
     expect((await screen.findAllByText(/greater than 0/i)).length).toBeGreaterThan(0)
     expect(calls.some((call) => call.startsWith('POST /instruments'))).toBe(false)
   })
+
+  it('fills the form from a known contract template, still editable before saving', async () => {
+    let posted = {}
+    renderApp(
+      '/settings/instruments',
+      routes({
+        '/instruments': (_url, init) => {
+          if (init?.method !== 'POST') return { body: [] }
+          posted = jsonBody(init)
+          return { status: 201, body: nq }
+        },
+      }),
+      { signedIn: true },
+    )
+    await userEvent.click(await screen.findByRole('button', { name: 'Add instrument' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Fill in ES, E-mini S&P 500' }))
+    expect(screen.getByLabelText('Symbol')).toHaveValue('ES')
+    expect(screen.getByLabelText('Tick size')).toHaveValue('0.25')
+    expect(screen.getByLabelText('Tick value')).toHaveValue('12.50')
+
+    await userEvent.clear(screen.getByLabelText('Tick value'))
+    await userEvent.type(screen.getByLabelText('Tick value'), '12.75')
+    await userEvent.click(screen.getByRole('button', { name: 'Save' }))
+    await waitFor(() => expect(posted).toEqual({ symbol: 'ES', name: 'E-mini S&P 500', tick_size: '0.25', tick_value: '12.75' }))
+  })
+
+  it('does not offer templates when editing an existing instrument', async () => {
+    renderApp('/settings/instruments', routes(), { signedIn: true })
+    await userEvent.click(await screen.findByRole('button', { name: 'Edit NQ' }))
+    expect(screen.queryByText('Start from a known contract')).not.toBeInTheDocument()
+  })
 })
 
 describe('Fee profiles tab', () => {
