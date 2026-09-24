@@ -103,3 +103,60 @@ test('deletes the trade after confirming, and returns to the ledger', async () =
   await waitFor(() => expect(calls).toContain('DELETE /trades/71'))
   await waitFor(() => expect(router.state.location.pathname).toBe('/trades'))
 })
+
+// jsdom's canvas has no real 2D context (the optional `canvas` package isn't installed),
+// so the drawing calls themselves are stubbed here; only the download path is asserted.
+function stub2dContext() {
+  const noop = () => {}
+  return {
+    clearRect: noop, fillRect: noop, fill: noop, stroke: noop,
+    beginPath: noop, closePath: noop, moveTo: noop, lineTo: noop,
+    arcTo: noop, arc: noop, ellipse: noop, quadraticCurveTo: noop,
+    fillText: noop, setLineDash: noop, save: noop, restore: noop,
+    translate: noop, scale: noop,
+  }
+}
+
+function stubCanvasForShare() {
+  vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(stub2dContext())
+  vi.spyOn(HTMLCanvasElement.prototype, 'toDataURL').mockReturnValue('data:image/png;base64,fake')
+  vi.spyOn(HTMLCanvasElement.prototype, 'toBlob').mockImplementation(function (callback) {
+    callback(new Blob(['fake-png']))
+  })
+  vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:mock')
+  vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {})
+}
+
+test('previews the share card before downloading it', async () => {
+  stubCanvasForShare()
+  const downloads = []
+  vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function () {
+    downloads.push(this.download)
+  })
+
+  renderApp('/trades/71', routes, { signedIn: true })
+  await userEvent.click(await screen.findByRole('button', { name: 'Share' }))
+
+  const dialog = await screen.findByRole('dialog', { name: 'Share this trade?' })
+  expect(within(dialog).getByRole('img', { name: 'Preview of the share card for this trade' })).toBeInTheDocument()
+  expect(downloads).toHaveLength(0)
+
+  await userEvent.click(within(dialog).getByRole('button', { name: 'Download' }))
+  await waitFor(() => expect(downloads).toContain('apexlog-trade-71.png'))
+})
+
+test('closes the share preview without downloading when cancelled', async () => {
+  stubCanvasForShare()
+  const downloads = []
+  vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function () {
+    downloads.push(this.download)
+  })
+
+  renderApp('/trades/71', routes, { signedIn: true })
+  await userEvent.click(await screen.findByRole('button', { name: 'Share' }))
+  const dialog = await screen.findByRole('dialog', { name: 'Share this trade?' })
+  await userEvent.click(within(dialog).getByRole('button', { name: 'Cancel' }))
+
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  expect(downloads).toHaveLength(0)
+})

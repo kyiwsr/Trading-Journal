@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 
 import { ApiError } from '../api/client'
@@ -19,6 +19,7 @@ import {
 } from '../components'
 import { formatDateTime, formatDuration, formatTime, money, price, priceDecimals, quantity } from '../lib/format'
 import { RESULT_LABEL } from '../lib/labels'
+import { downloadCanvas, renderShareCardCanvas } from '../lib/shareCard'
 import { readScope, scopeSearch } from '../lib/urlState'
 import { useScoring } from '../lib/useScoring'
 
@@ -56,6 +57,39 @@ function TradeView({ data, currency, accountLabel, route, search }) {
   const navigate = useNavigate()
   const deleteTrade = useDeleteTrade()
   const [confirmingDelete, setConfirmingDelete] = useState(false)
+  const [sharing, setSharing] = useState(false)
+  const [shareError, setShareError] = useState(null)
+  const [previewUrl, setPreviewUrl] = useState(null)
+  const shareCanvas = useRef(null)
+
+  const openSharePreview = async () => {
+    setShareError(null)
+    setSharing(true)
+    try {
+      const canvas = await renderShareCardCanvas(data, currency)
+      shareCanvas.current = canvas
+      setPreviewUrl(canvas.toDataURL('image/png'))
+    } catch {
+      setShareError('Could not create the share image.')
+    } finally {
+      setSharing(false)
+    }
+  }
+
+  const closeSharePreview = () => {
+    setPreviewUrl(null)
+    shareCanvas.current = null
+  }
+
+  const confirmShareDownload = async () => {
+    try {
+      await downloadCanvas(shareCanvas.current, `apexlog-trade-${data.id}.png`)
+    } catch {
+      setShareError('Could not create the share image.')
+    } finally {
+      closeSharePreview()
+    }
+  }
 
   return (
     <>
@@ -71,6 +105,9 @@ function TradeView({ data, currency, accountLabel, route, search }) {
         <div className="pager-pages">
           <TradeLink id={data.prev_trade_id} search={search} label="Older trade" />
           <TradeLink id={data.next_trade_id} search={search} label="Newer trade" />
+          <Button onClick={() => void openSharePreview()} disabled={sharing}>
+            {sharing ? 'Preparing image…' : 'Share'}
+          </Button>
           <Link className="btn btn-primary" to={{ pathname: `/trades/${data.id}/edit`, search }}>
             Edit trade
           </Link>
@@ -82,6 +119,11 @@ function TradeView({ data, currency, accountLabel, route, search }) {
       {deleteTrade.isError ? (
         <p className="form-error" role="alert">
           {deleteTrade.error.message}
+        </p>
+      ) : null}
+      {shareError ? (
+        <p className="form-error" role="alert">
+          {shareError}
         </p>
       ) : null}
 
@@ -146,6 +188,16 @@ function TradeView({ data, currency, accountLabel, route, search }) {
         }
       >
         <p>This permanently removes the trade, its fills, fees, checklist and XP. It cannot be undone.</p>
+      </ConfirmDialog>
+      <ConfirmDialog
+        open={previewUrl !== null}
+        title="Share this trade?"
+        confirmLabel="Download"
+        cancelLabel="Cancel"
+        onCancel={closeSharePreview}
+        onConfirm={() => void confirmShareDownload()}
+      >
+        {previewUrl ? <img className="share-preview" src={previewUrl} alt="Preview of the share card for this trade" /> : null}
       </ConfirmDialog>
     </>
   )

@@ -76,6 +76,12 @@
 .dialog-body p {
   margin: 0;
 }
+.share-preview {
+  display: block;
+  width: 100%;
+  border: var(--border);
+  border-radius: var(--radius);
+}
 .dialog-actions {
   display: flex;
   flex-wrap: wrap;
