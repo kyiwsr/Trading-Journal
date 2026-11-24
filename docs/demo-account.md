@@ -3,7 +3,7 @@
 The live site has a demo login with a generated sample journal, so a reviewer can look around without setting
 anything up.
 
-**Login:** `demo@example.com` / `This1sdem0Acct`
+**Login:** `demo@example.com`. The password is not published here. Ask the repository owner for it.
 
 The data is illustrative: one account (Apex 150k), two instruments (NQ, ES), four setups with weighted checklists,
 and 90 generated trades over about 260 days. It is produced from a fixed random seed by
@@ -17,7 +17,7 @@ separate demo user, not your own login, so the demo never touches your real jour
 
 ```
 $env:DATABASE_URL = "postgresql://postgres.<ref>:<password>@aws-...pooler.supabase.com:5432/postgres"
-$env:SEED_EMAIL = "demo@example.com"; $env:SEED_PASSWORD = "This1sdem0Acct"
+$env:SEED_EMAIL = "demo@example.com"; $env:SEED_PASSWORD = "<choose a password>"
 .venv\Scripts\python -m scripts.seed_user
 .venv\Scripts\python -m scripts.seed_demo
 ```
